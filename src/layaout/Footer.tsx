@@ -2,6 +2,15 @@ import { Typography, Container, Box, Grid2, Divider, Grid } from "@mui/material"
 import Logo from "../assets/LOGO-SIN-FONDO.png";
 import { ContactInfo, ImportantLinks } from "./components/";
 
+const conctactInfo = {
+  title: "Información de contacto",
+  links: [
+    {
+      text: "info@fidelidapp.com",
+      icon: "",
+    },
+  ],
+};
 export const Footer = () => {
   return (
     <Box component='footer' sx={{ backgroundColor: "primary.main", mt: 0, pb: 2, width: "100vw" }}>
