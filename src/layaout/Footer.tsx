@@ -1,6 +1,7 @@
 import { Typography, Container, Box, Grid2, Divider, Grid } from "@mui/material";
 import Logo from "../assets/LOGO-SIN-FONDO.png";
 import { ContactInfo, ImportantLinks } from "./components/";
+import { useLocation } from "react-router";
 
 const conctactInfo = {
   title: "Información de contacto",
@@ -12,6 +13,14 @@ const conctactInfo = {
   ],
 };
 export const Footer = () => {
+  const location = useLocation();
+
+  const allowedRoutes = ["/", "/auth"];
+
+  if (!allowedRoutes.includes(location.pathname)) {
+    return null;
+  }
+
   return (
     <Box component='footer' sx={{ backgroundColor: "primary.main", mt: 0, pb: 2, width: "100vw", marginTop: 20 }}>
       <Container maxWidth='lg' sx={{ px: 3, mt: 2, mb: 2 }}>

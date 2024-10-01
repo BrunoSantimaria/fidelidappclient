@@ -1,12 +1,19 @@
 import React from "react";
 import { Box } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import { useLocation } from "react-router";
 
 const FloatingWhatsAppButton = () => {
   const handleClick = () => {
     window.open("https://wa.me/1234567890", "_blank");
   };
+  const location = useLocation();
 
+  const allowedRoutes = ["/", "/auth"];
+
+  if (!allowedRoutes.includes(location.pathname)) {
+    return null;
+  }
   return (
     <Box
       onClick={handleClick}

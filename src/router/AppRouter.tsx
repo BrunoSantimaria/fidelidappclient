@@ -4,6 +4,7 @@ import { AuthRoutes } from "../auth/routes/AuthRoutes";
 import { NavBar, Footer } from "../layaout";
 import FloatingWhatsAppButton from "../layaout/components/FloatingWhatsAppButton";
 import { Box } from "@mui/material";
+import { DashboardRoutes } from "../dashboard/routes/DashboardRoutes";
 
 export const AppRouter = () => {
   return (
@@ -16,6 +17,7 @@ export const AppRouter = () => {
           {/* Rutas para usuarios no autenticados */}
           <Route path='/' element={<LandingRoutes />} />
           <Route path='/auth/*' element={<AuthRoutes />} />
+          <Route path='/dashboard' element={<DashboardRoutes />} />
           <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
       </div>

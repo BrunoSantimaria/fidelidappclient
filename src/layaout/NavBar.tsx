@@ -2,13 +2,21 @@ import { AppBar, Box, Toolbar, Typography, Drawer, List, ListItem, ListItemText,
 import logo from "../assets/Logo Principal.png"; // Importa tu logo
 import React from "react";
 import { MdOutlineMenu } from "react-icons/md";
+import { useLocation } from "react-router";
 
 export const NavBar = () => {
+  const location = useLocation();
   const [showMenu, setShowMenu] = React.useState(false);
 
   const handleMenuToggle = () => {
     setShowMenu(!showMenu);
   };
+
+  const allowedRoutes = ["/", "/auth"];
+
+  if (!allowedRoutes.includes(location.pathname)) {
+    return null;
+  }
 
   return (
     <Container sx={{ marginBottom: 12 }}>

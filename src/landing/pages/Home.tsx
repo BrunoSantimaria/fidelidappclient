@@ -22,7 +22,10 @@ export const Home = () => {
       }}
     >
       <Box>
-        <Typography variant='h3' sx={{ fontSize: { xs: 32, md: "3em" }, color: "white", position: "relative", zIndex: 1, width: { xs: "100%", md: "60%" } }}>
+        <Typography
+          variant='h3'
+          sx={{ fontWeight: "bold", fontSize: { xs: 32, md: "3em" }, color: "white", position: "relative", zIndex: 1, width: { xs: "100%", md: "60%" } }}
+        >
           Programas de Lealtad y Fidelidad
         </Typography>
         <Typography

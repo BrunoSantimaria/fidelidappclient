@@ -18,3 +18,18 @@ export interface ImportantLinks {
   title: string;
   elements: ImportantLink[];
 }
+
+export interface Section {
+  id: number;
+  title: string;
+  content: string;
+  imgUrl: string;
+}
+
+export interface Testimonial {
+  avatar: string;
+  message: string;
+  name: string;
+  position: string;
+  industry: string;
+}

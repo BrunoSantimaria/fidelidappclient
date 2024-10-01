@@ -1,7 +1,9 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useSnackbar } from "../../hooks";
 
 export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose: () => void }) => {
+  const { openSnackbar, SnackbarComponent } = useSnackbar();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,6 +25,7 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
       });
     };
   }, [handleClose]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -62,54 +65,67 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
     if (!checkErrors()) {
       return;
     }
-    console.log("Formulario enviado con éxito", formData);
+    openSnackbar("¡Formulario enviado con éxito!", "success");
+    try {
+      openSnackbar("¡Formulario enviado con éxito!", "success");
+
+      return handleClose();
+    } catch (error) {
+      console.log(error);
+
+      return openSnackbar("Hubo un error al enviar el formulario.", "error");
+    }
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Déjanos tus datos para que nos contactemos contigo.</DialogTitle>
-      <DialogContent>
-        <TextField
-          margin='dense'
-          label='Nombre'
-          name='name'
-          fullWidth
-          value={formData.name}
-          onChange={handleInputChange}
-          error={Boolean(errors.name)}
-          helperText={errors.name}
-        />
-        <TextField
-          margin='dense'
-          label='Correo Electrónico'
-          name='email'
-          type='email'
-          fullWidth
-          value={formData.email}
-          onChange={handleInputChange}
-          error={Boolean(errors.email)}
-          helperText={errors.email}
-        />
-        <TextField
-          margin='dense'
-          label='Mensaje'
-          name='message'
-          type='text'
-          fullWidth
-          value={formData.message}
-          onChange={handleInputChange}
-          error={Boolean(errors.message)}
-          helperText={errors.message}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color='secondary'>
-          Cancelar
-        </Button>
-        <Button onClick={handleSubmit} color='primary'>
-          Enviar
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Déjanos tus datos para que nos contactemos contigo.</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin='dense'
+            label='Nombre'
+            name='name'
+            fullWidth
+            value={formData.name}
+            onChange={handleInputChange}
+            error={Boolean(errors.name)}
+            helperText={errors.name}
+          />
+          <TextField
+            margin='dense'
+            label='Correo Electrónico'
+            name='email'
+            type='email'
+            fullWidth
+            value={formData.email}
+            onChange={handleInputChange}
+            error={Boolean(errors.email)}
+            helperText={errors.email}
+          />
+          <TextField
+            margin='dense'
+            label='Mensaje'
+            name='message'
+            type='text'
+            fullWidth
+            value={formData.message}
+            onChange={handleInputChange}
+            error={Boolean(errors.message)}
+            helperText={errors.message}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color='secondary'>
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit} color='primary'>
+            Enviar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <SnackbarComponent />
+    </>
   );
 };

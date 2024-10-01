@@ -6,15 +6,18 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 
 export const OurServices = () => {
   return (
-    <Container sx={{ marginTop: "40px", justifyContent: "center", textAlign: "center", display: "flex", minWidth: "100vw" }}>
+    <Container sx={{ marginTop: "80px", justifyContent: "center", textAlign: "center", display: "flex", minWidth: "100vw" }}>
       <Box sx={{ display: "flex", flexDirection: "column", marginTop: "40px", margin: "0 auto", justifyContent: "center", textAlign: "center" }}>
-        <Typography variant='h3' sx={{ fontSize: { xs: 32, md: "3em" }, color: "black", position: "relative", zIndex: 1, width: { xs: "100%", md: "100%" } }}>
+        <Typography
+          variant='h3'
+          sx={{ marginBottom: "20px", fontSize: { xs: 32, md: "3em" }, color: "black", position: "relative", zIndex: 1, width: { xs: "100%", md: "100%" } }}
+        >
           Nuestros Servicios
         </Typography>
-        <Grid container spacing={1} sx={{ marginTop: "20px", justifyContent: "center", gap: 2 }}>
+        <Grid container spacing={1} sx={{ marginTop: "20px", justifyContent: "center", gap: { xs: 2, md: 20 } }}>
           <Grid item xs={12} md={3}>
             <Paper
-              elevation={3}
+              elevation={6}
               sx={{
                 padding: "20px",
                 textAlign: "center",
@@ -39,7 +42,7 @@ export const OurServices = () => {
 
           <Grid item xs={12} md={3}>
             <Paper
-              elevation={3}
+              elevation={6}
               sx={{
                 padding: "20px",
                 textAlign: "center",
@@ -64,7 +67,7 @@ export const OurServices = () => {
 
           <Grid item xs={12} md={3}>
             <Paper
-              elevation={3}
+              elevation={6}
               sx={{
                 padding: "20px",
                 textAlign: "center",
