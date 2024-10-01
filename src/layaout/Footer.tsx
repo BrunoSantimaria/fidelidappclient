@@ -13,7 +13,7 @@ const conctactInfo = {
 };
 export const Footer = () => {
   return (
-    <Box component='footer' sx={{ backgroundColor: "primary.main", mt: 0, pb: 2, width: "100vw" }}>
+    <Box component='footer' sx={{ backgroundColor: "primary.main", mt: 0, pb: 2, width: "100vw", marginTop: 20 }}>
       <Container maxWidth='lg' sx={{ px: 3, mt: 2, mb: 2 }}>
         <Grid2 container spacing={2} justifyContent='space-between' alignItems='flex-start' padding={1}>
           <Grid2 item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", m: { xs: 0, md: 0 } }}>

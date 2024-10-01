@@ -66,3 +66,12 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.transition-text {
+  cursor: pointer;
+  transition: color 0.3s; /* Sin comillas */
+}
+
+.transition-text:hover {
+  color: rgba(253, 253, 253, 0.5); /* Color en formato RGBA */
+}

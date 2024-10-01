@@ -12,6 +12,10 @@ export const ImportantLinksList: ImportantLinks = {
       link: "#",
     },
     {
+      title: "Planes",
+      link: "#",
+    },
+    {
       title: "Contacto",
       link: "#",
     },
