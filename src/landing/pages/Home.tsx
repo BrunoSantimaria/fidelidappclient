@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Container, Typography } from "@mui/material";
 import background from "../../assets/Cover.jpeg";
 import { useState } from "react";
 import { ModalLanding } from "../components/ModalLanding";
@@ -13,37 +13,56 @@ export const Home = () => {
     <Box
       sx={{
         position: "relative",
-        height: "80vh",
-        minWidth: "100vw",
+        height: { xs: "100vh", md: "80vh" },
+        maxWidth: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        overflow: "hidden",
+        top: 60,
       }}
     >
-      <Box>
+      <Box sx={{ paddingX: { xs: 2, md: 6 }, textAlign: { xs: "left", sm: "left", md: "left", lg: "left" } }}>
         <Typography
           variant='h3'
-          sx={{ fontWeight: "bold", fontSize: { xs: 32, md: "3em" }, color: "white", position: "relative", zIndex: 1, width: { xs: "100%", md: "60%" } }}
+          sx={{
+            fontWeight: "bold",
+            fontSize: { xs: 24, sm: 28, md: 32, lg: 32, xl: "3em" }, // Ajustando tamaño de fuente
+            color: "white",
+            position: "relative",
+            bottom: { xs: 80, sm: 120, md: 150, lg: 0 },
+            zIndex: 1,
+            width: { xs: "100%", sm: "90%", md: "70%", lg: "60%" }, // Ajustando ancho
+          }}
         >
           Programas de Lealtad y Fidelidad
         </Typography>
         <Typography
           variant='h5'
-          sx={{ fontSize: { xs: 16, md: "1.5em" }, color: "white", position: "relative", zIndex: 1, width: { xs: "100%", md: "40%" }, marginTop: 4 }}
+          sx={{
+            fontSize: { xs: 12, sm: 14, md: "1.5em" }, // Texto responsivo
+            color: "white",
+            position: "relative",
+            bottom: { xs: 70, sm: 120, md: 150, lg: 0 },
+            zIndex: 1,
+            width: { xs: "100%", sm: "90%", md: "50%", lg: "40%" }, // Ajustando ancho
+            marginTop: { xs: 1, sm: 2, md: 4 },
+          }}
         >
           Descubre cómo Fidelidapp puede ayudarte a generar promociones y tarjetas de fidelidad virtuales ajustadas a las necesidades de tu negocio.
         </Typography>
-        <Box sx={{ marginTop: 4 }}>
+        <Box sx={{ marginTop: { xs: 1, sm: 2, md: 4 }, display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
           <Button
             variant='contained'
             sx={{
               position: "relative",
-              minHeight: "80px",
+              bottom: { xs: 60, sm: 100, md: 100, lg: 0 },
+
+              minHeight: { xs: "50px", md: "60px", lg: "80px" }, // Ajustando altura mínima
               zIndex: 1,
-              width: { xs: "80vw", md: "12vw" },
+              width: { xs: "100%", sm: "70%", md: "16vw", lg: "14vw" }, // Ajustando ancho
               marginRight: { md: 2 },
               marginBottom: { xs: 2, md: 0 },
+              fontSize: { xs: 12, sm: 14, lg: 12, xl: 14 },
             }}
           >
             Agenda tu asesoría gratuita.
@@ -53,11 +72,13 @@ export const Home = () => {
             sx={{
               position: "relative",
               zIndex: 1,
-              width: { xs: "80vw", md: "12vw" },
-              minHeight: "80px",
+              width: { xs: "100%", sm: "70%", md: "14vw", lg: "14vw" }, // Ajustando ancho
+              minHeight: { xs: "50px", md: "60px", lg: "80px" }, // Ajustando altura mínima
               marginBottom: { xs: 2, md: 0 },
+              bottom: { xs: 60, sm: 100, md: 100, lg: 0 },
+              fontSize: { xs: 12, sm: 14, lg: 12, xl: 14 },
             }}
-            onClick={handleOpen} // Abre el modal cuando el botón es clickeado
+            onClick={handleOpen}
           >
             Escríbenos para conocer más.
           </Button>
@@ -67,9 +88,11 @@ export const Home = () => {
             color: "white",
             position: "relative",
             zIndex: 1,
-            width: { xs: "100%", md: "40%" },
-            marginTop: 4,
+            bottom: { xs: 60, md: 60, lg: 0 },
+            width: { xs: "100%", sm: "90%", md: "50%", lg: "40%" }, // Ajustando ancho
+            marginTop: { xs: 1, sm: 2, md: 4 },
             fontStyle: "italic",
+            fontSize: { xs: 10, sm: 12, md: "inherit" }, // Ajustando tamaño de fuente
           }}
         >
           Sin compromiso. Conoce cómo podemos ayudarte a fidelizar a tus clientes.
@@ -84,7 +107,7 @@ export const Home = () => {
           top: 0,
           left: { xs: -400, md: 0 },
           right: 0,
-          bottom: 0,
+          bottom: { xs: "0", sm: "0", md: 300, lg: "0" },
           backgroundImage: `url(${background})`,
           backgroundSize: "cover",
           backgroundPosition: "center",

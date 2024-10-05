@@ -8,15 +8,16 @@ export const Pattern = () => {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   return (
-    <Box sx={{ position: "relative", minHeight: "50vh", marginTop: "80px" }}>
+    <Box sx={{ position: "relative", minHeight: "50vh", marginTop: "80px", width: "100%", textAlign: "center" }}>
       <Box
         sx={{
           position: "absolute",
           top: 0,
           left: 0,
           width: "100%",
-          height: "100%",
+          height: { xs: "90%", md: "100%", lg: "100%" },
           backgroundImage: `url(${pattern})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -24,9 +25,9 @@ export const Pattern = () => {
           zIndex: 0,
         }}
       />
-      <Box sx={{ position: "relative", zIndex: 1 }}>
-        <Container sx={{ marginY: "80px", marginLeft: "60px" }}>
-          <Typography variant='h3' sx={{ fontSize: { xs: 32, md: "3em" }, color: "black", fontWeight: "bold", width: { xs: "100%", md: "80%" } }}>
+      <Box sx={{ position: "relative", zIndex: 1, textAlign: "left" }}>
+        <Container sx={{ marginY: { xs: "25px", md: "120px", lg: "120px" }, marginLeft: { xs: "0", md: "60px", lg: "60px" } }}>
+          <Typography variant='h3' sx={{ fontSize: { xs: 32, md: "3em" }, color: "black", fontWeight: "bold", width: { xs: "100%", md: "80%", lg: "60%" } }}>
             Crea programas de fidelización para tus clientes de manera rápida y sencilla.
           </Typography>
           <Typography

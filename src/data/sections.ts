@@ -9,7 +9,7 @@ export const sections: Section[] = [
   Proponemos promociones estratégicas que incentiven la repetición de compra y aumenten la lealtad del cliente.
   Diseñamos incentivos atractivos para los clientes que completen la promoción, como descuentos o regalos exclusivos.
   Desarrollamos un plan de fidelización personalizado alineado con tus objetivos de negocio.`,
-    imgUrl: "https://images.pexels.com/photos/7755238/pexels-photo-7755238.jpeg",
+    imgUrl: "https://images.pexels.com/photos/9034765/pexels-photo-9034765.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ export const sections: Section[] = [
   Personalizamos las promociones para maximizar su efectividad en tu base de clientes.
   Definimos claramente los incentivos para garantizar una experiencia positiva tanto para el negocio como para el cliente.
   Tu programa de fidelización está listo para funcionar sin contratiempos, optimizando cada aspecto para lograr los mejores resultados.`,
-    imgUrl: "https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=800",
+    imgUrl: "https://images.pexels.com/photos/7688455/pexels-photo-7688455.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ export const sections: Section[] = [
   Lanzamos promociones piloto para probar la efectividad y hacer ajustes según sea necesario.
   Proveemos materiales y recursos adicionales para reforzar el conocimiento adquirido durante la capacitación.
   Tu equipo está preparado y motivado, listo para interactuar con los clientes usando Fidelidapp de manera efectiva.`,
-    imgUrl: "https://images.pexels.com/photos/1319461/pexels-photo-1319461.jpeg",
+    imgUrl: "https://st2.depositphotos.com/1056393/8317/i/450/depositphotos_83170640-stock-photo-business-presentation-on-corporate-meeting.jpg",
   },
   {
     id: 4,
@@ -39,7 +39,8 @@ export const sections: Section[] = [
   Hacemos ajustes en las promociones para asegurar que sigan siendo relevantes y efectivas.
   Adaptamos los incentivos según el comportamiento del cliente y los objetivos del negocio.
   Programas de fidelización efectivos que evolucionan con tu negocio, garantizando resultados sostenibles.`,
-    imgUrl: "https://images.pexels.com/photos/4125659/pexels-photo-4125659.jpeg",
+    imgUrl:
+      "https://media.istockphoto.com/id/950986656/photo/business-finance-accounting-contract-advisor-investment-consulting-marketing-plan-for-the.jpg?s=612x612&w=0&k=20&c=U-y6cADCby4QwENFptPrVcK_MplesqZmnDxUMMkJZvM=",
   },
   {
     id: 5,
@@ -49,6 +50,6 @@ export const sections: Section[] = [
   Incorporamos nuevas promociones y estrategias basadas en las tendencias del mercado y el comportamiento del cliente.
   Ofrecemos soporte continuo y actualizaciones para mantener la plataforma funcionando de manera óptima.
   Un aumento tangible en la retención de clientes y en el valor de vida del cliente (CLV), asegurando un crecimiento sostenido para tu negocio.`,
-    imgUrl: "https://images.pexels.com/photos/4569877/pexels-photo-4569877.jpeg",
+    imgUrl: "https://blog.tipranks.com/wp-content/uploads/2021/03/Growth-0321-750x406.jpg",
   },
 ];

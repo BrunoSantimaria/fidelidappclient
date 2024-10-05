@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Card, CardContent, Typography, Grid, Divider } from "@mui/material";
 import { testimonials } from "../../data/testimonials";
 
@@ -12,10 +11,10 @@ export const Testimonials = () => {
       >
         Lo que dicen nuestros clientes
       </Typography>
-      <Grid container spacing={3} justifyContent='center'>
+      <Grid container spacing={3} justifyContent='center' sx={{ width: "100vw" }}>
         {testimonials.map((testimonial, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card sx={{ boxShadow: 3, borderRadius: 2, minHeight: "250px" }}>
+          <Grid item xs={12} sm={6} md={3} key={index} sx={{ marginRight: { xs: 3, md: 0, lg: 0 } }}>
+            <Card sx={{ boxShadow: 6, borderRadius: 2, minHeight: { xs: "250px", md: "400px", lg: "280px" }, maxWidth: "450px" }}>
               <CardContent>
                 <Box display='flex' alignItems='center' marginBottom={2}>
                   <img

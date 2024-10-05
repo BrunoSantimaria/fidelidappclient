@@ -33,3 +33,10 @@ export interface Testimonial {
   position: string;
   industry: string;
 }
+
+export interface Plan {
+  type: string;
+  price: number;
+  description: string[];
+  button?: string;
+}

@@ -5,9 +5,9 @@ export const contactInfo: ContactInfo = {
   title: "Información de contacto",
   links: [
     {
-      text: "info@fidelidapp.com",
+      text: "contacto@fidelidapp.cl",
       icon: IoIosMail,
-      link: "mailto:info@fidelidapp.com",
+      link: "mailto:contacto@fidelidapp.cl",
     },
     {
       text: "FidelidApp",

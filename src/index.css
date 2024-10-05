@@ -6,7 +6,7 @@
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
-
+  overflow-x: hidden;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,8 +24,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -53,7 +51,11 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
-
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -74,4 +76,13 @@ button:focus-visible {
 
 .transition-text:hover {
   color: rgba(253, 253, 253, 0.5); /* Color en formato RGBA */
+}
+
+.transition-icon {
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.transition-icon:hover {
+  color: #ffb74d;
 }

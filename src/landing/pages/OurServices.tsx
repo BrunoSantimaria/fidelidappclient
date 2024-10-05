@@ -6,7 +6,9 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 
 export const OurServices = () => {
   return (
-    <Container sx={{ marginTop: "80px", justifyContent: "center", textAlign: "center", display: "flex", minWidth: "100vw" }}>
+    <Container
+      sx={{ marginTop: { xs: "120px", md: "-180px", lg: "120px" }, justifyContent: "center", textAlign: "center", display: "flex", minWidth: "100vw" }}
+    >
       <Box sx={{ display: "flex", flexDirection: "column", marginTop: "40px", margin: "0 auto", justifyContent: "center", textAlign: "center" }}>
         <Typography
           variant='h3'
@@ -14,17 +16,18 @@ export const OurServices = () => {
         >
           Nuestros Servicios
         </Typography>
-        <Grid container spacing={1} sx={{ marginTop: "20px", justifyContent: "center", gap: { xs: 2, md: 20 } }}>
-          <Grid item xs={12} md={3}>
+        <Grid container spacing={1} sx={{ marginTop: "20px", justifyContent: "center", gap: { xs: 2, md: 5, lg: 20 } }}>
+          <Grid item xs={12} md={3} lg={3}>
             <Paper
               elevation={6}
               sx={{
-                padding: "20px",
+                padding: "10px",
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-                minHeight: "300px",
+
+                minHeight: { xs: "320px", md: "500px", lg: "320px" },
               }}
             >
               <Divider>
@@ -40,16 +43,16 @@ export const OurServices = () => {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={3} lg={3}>
             <Paper
               elevation={6}
               sx={{
-                padding: "20px",
+                padding: "10px",
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-                minHeight: "300px",
+                minHeight: { xs: "320px", md: "500px", lg: "320px" },
               }}
             >
               <Divider>
@@ -58,23 +61,23 @@ export const OurServices = () => {
               <Typography variant='h5' sx={{ marginTop: "20px" }}>
                 Fidelidapp – La Plataforma
               </Typography>
-              <Typography variant='body1' sx={{ marginTop: "10px" }}>
+              <Typography variant='body1' sx={{ marginTop: "10px", fontSize: 15 }}>
                 Nuestra herramienta intuitiva te permite gestionar promociones, recompensas y programas de lealtad de manera eficiente. Fidelidapp facilita cada
                 paso, permitiéndote enfocarte en ofrecer un excelente servicio.
               </Typography>
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={3} lg={3}>
             <Paper
               elevation={6}
               sx={{
-                padding: "20px",
+                padding: "10px",
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-                minHeight: "300px",
+                minHeight: { xs: "320px", md: "500px", lg: "320px" },
               }}
             >
               <Divider>

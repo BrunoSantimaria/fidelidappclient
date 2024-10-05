@@ -1,10 +1,7 @@
 import { Typography } from "@mui/material";
-
 import { contactInfo } from "../../data/contactInfo";
 
 export const ContactInfo = () => {
-  console.log("hola");
-
   return (
     <>
       <Typography sx={{ fontSize: "24px", marginBottom: "10px" }}>{contactInfo.title}</Typography>

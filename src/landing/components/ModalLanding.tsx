@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSnackbar } from "../../hooks";
+import api from "../../utils/api";
 
 export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose: () => void }) => {
   const { openSnackbar, SnackbarComponent } = useSnackbar();
@@ -65,10 +66,10 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
     if (!checkErrors()) {
       return;
     }
-    openSnackbar("¡Formulario enviado con éxito!", "success");
-    try {
-      openSnackbar("¡Formulario enviado con éxito!", "success");
 
+    try {
+      await api.post("/auth/contact", formData);
+      openSnackbar("¡Formulario enviado con éxito!", "success");
       return handleClose();
     } catch (error) {
       console.log(error);
