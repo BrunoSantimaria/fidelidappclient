@@ -16,7 +16,6 @@ const ContactForm = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    console.log(data);
     setIsSubmitting(true);
     try {
       await api.post("/auth/contact", data);

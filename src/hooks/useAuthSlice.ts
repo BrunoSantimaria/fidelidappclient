@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { onLogin, onLogOut } from "../store/auth/authSlice";
 import api from "../utils/api"; // Ajusta la ruta según la estructura de tu proyecto
 import Cookies from "js-cookie";
-// Asegúrate de que esta ruta sea correcta
 import { useNavigateTo } from "./useNavigateTo"; // Asegúrate de que esta ruta sea correcta
 import { jwtDecode } from "jwt-decode"; // Asegúrate de importar correctamente la función
 import { useSnackbar } from "./useSnackBar";
@@ -17,13 +16,26 @@ export const useAuthSlice = () => {
   const startLogin = async (formData) => {
     try {
       const response = await api.post("/auth/signin", formData);
-      const token = response.data.token;
+      const { token } = response.data;
 
       Cookies.set("token", token, { expires: 7 });
 
       const user = decodeToken(token);
 
-      dispatch(onLogin(user));
+      const currentUserResponse = await api.get("/auth/current");
+      const { accounts, plan } = currentUserResponse.data;
+
+      Cookies.set("accounts", JSON.stringify(accounts), { expires: 7 });
+      Cookies.set("plan", JSON.stringify(plan), { expires: 7 });
+
+      const userWithAccountAndPlan = {
+        ...user,
+        accounts: accounts,
+        plan: plan,
+      };
+
+      dispatch(onLogin(userWithAccountAndPlan));
+
       handleNavigate("/dashboard");
       openSnackbar("Usuario loggeado correctamente, serás redireccionado al home.", "success");
     } catch (error) {
@@ -39,12 +51,25 @@ export const useAuthSlice = () => {
 
     try {
       const apiResponse = await api.post("/auth/google-signin", userData);
-      const token = apiResponse.data.token;
+      const { token } = apiResponse.data;
 
       Cookies.set("token", token, { expires: 7 });
 
       const user = decodeToken(token);
-      dispatch(onLogin(user));
+
+      const currentUserResponse = await api.get("/auth/current");
+      const { accounts, plan } = currentUserResponse.data;
+
+      Cookies.set("accounts", JSON.stringify(accounts), { expires: 7 });
+      Cookies.set("plan", JSON.stringify(plan), { expires: 7 });
+
+      const userWithAccountAndPlan = {
+        ...user,
+        accounts: accounts,
+        plan: plan,
+      };
+
+      dispatch(onLogin(userWithAccountAndPlan));
 
       openSnackbar("Usuario logueado correctamente, serás redireccionado al home.", "success");
 
@@ -73,8 +98,9 @@ export const useAuthSlice = () => {
   };
 
   const startLoggingOut = () => {
-    Cookies.remove("authToken");
     Cookies.remove("token");
+    Cookies.remove("accounts");
+    Cookies.remove("plan");
 
     dispatch(onLogOut(""));
   };

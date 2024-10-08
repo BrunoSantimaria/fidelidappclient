@@ -1,10 +1,28 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie"; // Asegúrate de que has instalado js-cookie
 
 export interface User {
   id: string;
   email: string;
   name: string;
+  accounts?: {
+    _id: string;
+    owner: string;
+    userEmails: string[];
+    planStatus: string;
+    activeQr: boolean;
+    createdAt: string;
+  };
+  plan?: {
+    _id: string;
+    planStatus: string;
+    promotionLimit: number;
+    clientLimit: number;
+    sendEmail: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 export interface AuthState {
@@ -30,13 +48,22 @@ const getTokenFromCookies = () => {
   );
 };
 
+// Obtiene el token y otros datos de las cookies
 const token = getTokenFromCookies();
 let initialUser = null;
 
 if (token) {
   try {
     const decodedToken = jwtDecode<DecodedToken>(token);
-    initialUser = { id: decodedToken.id, email: decodedToken.email, name: decodedToken.name };
+    const accounts = JSON.parse(Cookies.get("accounts") || "{}"); // Obteniendo cuentas desde las cookies
+    const plan = JSON.parse(Cookies.get("plan") || "{}"); // Obteniendo plan desde las cookies
+    initialUser = {
+      id: decodedToken.id,
+      email: decodedToken.email,
+      name: decodedToken.name,
+      accounts: accounts, // Incluyendo cuentas
+      plan: plan, // Incluyendo plan
+    };
   } catch (error) {
     console.error("Error decoding token:", error);
   }
