@@ -8,6 +8,8 @@ import { DashboardRoutes } from "../dashboard/routes/DashboardRoutes";
 import { useAuthSlice } from "../hooks/useAuthSlice";
 import { useRef } from "react";
 import { Landing } from "../landing/pages";
+import { Promotion } from "../dashboard/pages/Promotions/Promotion"; // Importa el componente Promotion
+import { PromotionClient } from "../promotion-client/pages";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
@@ -30,6 +32,9 @@ export const AppRouter = () => {
       <NavBar refs={refs} />
       <Box sx={{ flexGrow: 1 }}>
         <Routes>
+          {/* Ruta de promoción accesible para todos */}
+          <Route path='/promotion/:id' element={<PromotionClient />} />
+
           {status === "non-authenticated" ? (
             <>
               <Route path='/' element={<Landing refs={refs} />} />

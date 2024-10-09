@@ -73,9 +73,14 @@ export const NavBar = ({ refs }) => {
               Contacto
             </Typography>
             {user ? (
-              <Typography className='transition-text' onClick={startLoggingOut}>
-                Salir
-              </Typography>
+              <>
+                <Typography className='transition-text' onClick={() => handleNavigate("/dashboard")}>
+                  Dashboard
+                </Typography>
+                <Typography className='transition-text' onClick={startLoggingOut}>
+                  Salir
+                </Typography>
+              </>
             ) : (
               <Typography onClick={() => handleNavigate("/auth/login")} className='transition-text'>
                 Iniciar Sesión

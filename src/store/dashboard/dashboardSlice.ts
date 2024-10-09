@@ -32,6 +32,7 @@ const initialState: DashboardState = {
   promotions: [],
   metrics: null,
   loading: false,
+  activePromotion: [],
   errorMessage: null,
 };
 
@@ -54,15 +55,23 @@ export const dashboardSlice = createSlice({
     setErrorMessage: (state, action: PayloadAction<string | null>) => {
       state.errorMessage = action.payload;
     },
+    setActivePromotion: (state, action) => {
+      state.activePromotion = action.payload;
+    },
+    cleanActivePromotion: (state) => {
+      state.activePromotion = [];
+    },
+
     cleanUser: (state, action) => {
       state.promotions = [];
       state.metrics = null;
       state.errorMessage = "";
       state.loading = false;
+      state.activePromotion = [];
     },
   },
 });
 
-export const { setPromotions, setMetrics, setLoading, setErrorMessage } = dashboardSlice.actions;
+export const { setPromotions, setMetrics, setLoading, setErrorMessage, setActivePromotion, cleanActivePromotion } = dashboardSlice.actions;
 
 export default dashboardSlice.reducer;

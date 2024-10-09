@@ -20,7 +20,7 @@ const FloatingWhatsAppButton = () => {
       sx={{
         zIndex: 10,
         position: "fixed",
-        bottom: 16,
+        bottom: 20,
         right: 50,
         backgroundColor: "green",
         borderRadius: "50%",
@@ -32,7 +32,7 @@ const FloatingWhatsAppButton = () => {
         },
       }}
     >
-      <WhatsAppIcon sx={{ color: "white", fontSize: 50, paddingTop: 0.7 }} />
+      <WhatsAppIcon sx={{ color: "white", fontSize: 55 }} />
     </Box>
   );
 };

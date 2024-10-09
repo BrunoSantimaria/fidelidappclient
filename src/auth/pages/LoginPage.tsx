@@ -106,7 +106,7 @@ export const LoginPage = () => {
 
             <GoogleLogin
               size='large'
-              width={120}
+              width={140}
               useOneTap={true}
               onSuccess={handleGoogleSignInSuccess}
               onError={() => openSnackbar("No se ha podido iniciar sesión", "error")}

@@ -5,6 +5,7 @@ import { CreatePromotion } from "../pages/Promotions/CreatePromotion";
 import { Navigation } from "../components/sidebar/Navigation";
 import { useDashboard } from "../../hooks";
 import { useEffect } from "react";
+import { Promotion } from "../pages/Promotions/Promotion";
 
 const pageTransition = {
   hidden: { opacity: 0, y: 50 }, // Estado inicial: invisible y desplazado hacia abajo
@@ -26,6 +27,8 @@ export const DashboardRoutes = () => {
     <>
       <Navigation />
       <Routes>
+        {/* Permitir acceso a la promoción sin autenticación */}
+
         <Route
           path='/'
           element={
@@ -44,11 +47,11 @@ export const DashboardRoutes = () => {
                 <CreatePromotion />
               </motion.div>
             ) : (
-              <Navigate to='/' replace />
+              <Navigate to='/dashboard' replace />
             )
           }
         />
-
+        <Route path='/promotion/:id' element={<Promotion />} />
         {/* Redirigir cualquier otra ruta al Dashboard */}
         <Route path='/*' element={<Navigate to='/' replace />} />
       </Routes>

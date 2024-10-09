@@ -1,13 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Divider } from "@mui/material";
+import { PromotionForm } from "../../components/PromotionForm";
 
 const pageTransition = {
-  hidden: { opacity: 0, y: 50 }, // Estado inicial: invisible y desplazado hacia abajo
+  hidden: { opacity: 0, y: 50 },
   visible: {
     opacity: 1,
-    y: 0, // Posición final: visible y en su lugar original
-    transition: { duration: 0.5, ease: "easeOut" }, // Duración y tipo de transición
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
   },
 };
 
@@ -37,7 +38,7 @@ export const CreatePromotion = () => {
           </div>
         </section>
         <Divider />
-        <div>asd</div>
+        <PromotionForm />
       </section>
     </motion.main>
   );
