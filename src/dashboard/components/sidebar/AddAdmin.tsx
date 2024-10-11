@@ -6,11 +6,18 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import api from "../../../utils/api";
+import { useDashboard } from "../../../hooks";
+import { useAuthSlice } from "../../../hooks/useAuthSlice";
+import { toast } from "react-toastify";
 interface Props {
   open: boolean;
   handleClose: () => void;
 }
 export const AddAdmin = ({ open, handleClose }: Props) => {
+  const { user } = useAuthSlice();
+  console.log(user.accounts._id);
+
   return (
     <React.Fragment>
       <Dialog
@@ -18,11 +25,17 @@ export const AddAdmin = ({ open, handleClose }: Props) => {
         onClose={handleClose}
         PaperProps={{
           component: "form",
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+          onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries((formData as any).entries());
             const email = formJson.email;
+            try {
+              await api.post(`/accounts/add/${user.accounts._id}`, { email: email });
+              toast.success("Usuario agregado con éxito.");
+            } catch (error) {
+              toast.error("Hubo un problema al agregar el administrador.");
+            }
             console.log(email);
             handleClose();
           },

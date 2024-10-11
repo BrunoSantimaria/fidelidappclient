@@ -6,7 +6,7 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DirectionsWalkRoundedIcon from "@mui/icons-material/DirectionsWalkRounded";
 
 export const PromotionMetrics = ({ metrics }) => {
-  console.log(metrics.statistics.ExpiredCLients);
+  console.log(metrics.statistics.ExpiredClients);
 
   return (
     <section className='flex flex-col md:flex-row lg:flex-row justify-between xs:flex-col w-[95%] gap-6'>
@@ -19,7 +19,7 @@ export const PromotionMetrics = ({ metrics }) => {
       <div className='w-full  md:max-w-[20%] lg:max-w-[20%]  flex flex-col shadow-md shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 space-y-4 p-6 rounded-md m-0 text-left'>
         <PersonOffRoundedIcon style={{ color: "#FF5722" }} />
         <span>Clientes Expirados</span>
-        <span>{metrics?.statistics.ExpiredCLients}</span>
+        <span>{metrics?.statistics.ExpiredClients}</span>
       </div>
 
       <div className='w-full  md:max-w-[20%] lg:max-w-[20%] flex flex-col shadow-md shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 space-y-4 p-6 rounded-md m-0 text-left'>

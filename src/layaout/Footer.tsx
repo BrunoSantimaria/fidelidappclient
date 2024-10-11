@@ -1,49 +1,44 @@
-import { Typography, Container, Box, Grid2, Divider } from "@mui/material";
+import React from "react";
 import Logo from "../assets/LOGO-SIN-FONDO.png";
-import { ContactInfo, ImportantLinks } from "./components/";
-import { useLocation } from "react-router";
+import { ContactInfo } from "./components/ContactInfo";
+import { ImportantLinks } from "./components/ImportantLinks";
+import { useLocation } from "react-router-dom";
 
 export const Footer = ({ refs }) => {
   const location = useLocation();
 
   const allowedRoutes = ["/", "/auth/login"];
 
-  if (!allowedRoutes.includes(location.pathname)) {
+  // Verifica si la ruta actual empieza con "/agendas/"
+  const isAgendasRoute = location.pathname.startsWith("/agendas/");
+
+  // Si la ruta actual no está en allowedRoutes o no empieza con "/agendas/", retorna null
+  if (!allowedRoutes.includes(location.pathname) && !isAgendasRoute) {
     return null;
   }
 
   return (
-    <Box
-      component='footer'
-      sx={{
-        backgroundColor: "primary.main",
-        mt: 0,
-        pb: 2,
-        width: "100%", // Asegúrate de que el footer ocupe todo el ancho
-        boxSizing: "border-box",
-        overflowX: "hidden", // Incluye padding y border en el ancho total
-      }}
-    >
-      <Container maxWidth='xxl' sx={{ px: 2, mt: 2, mb: 2 }}>
-        <Grid2 container spacing={2} justifyContent='space-around' alignItems='flex-start' padding={1}>
-          <Grid2 item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", m: { xs: 0, md: 0 } }}>
-            <img src={Logo} alt='Logo' width={150} />
-          </Grid2>
-          <Grid2 item xs={12} md={3} sx={{ color: "white", mb: { xs: 0, md: 0 } }}>
+    <footer className='bg-main mt-0 pb-4 w-full'>
+      <div className='max-w-6xl mx-auto px-4 md:px-6 lg:px-8'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4'>
+          {/* Logo */}
+          <div className='flex items-center justify-center md:justify-start'>
+            <img src={Logo} alt='Logo' className='w-40' />
+          </div>
+          {/* Información de contacto */}
+          <div className='text-white'>
             <ContactInfo />
-          </Grid2>
-          <Grid2 item xs={12} md={3} sx={{ color: "white", mb: { xs: 0, md: 0 } }}>
+          </div>
+          {/* Enlaces importantes */}
+          <div className='text-white'>
             <ImportantLinks refs={refs} />
-          </Grid2>
-        </Grid2>
-        <Divider />
-        <Grid2 item xs={12} sx={{ textAlign: "center" }}>
-          <Typography variant='body2' sx={{ color: "white" }}>
-            &copy; {new Date().getFullYear()} FidelidApp. Todos los derechos reservados.
-          </Typography>
-        </Grid2>
-      </Container>
-    </Box>
+          </div>
+        </div>
+        <div className='border-t border-gray-700 mt-4 pt-4 text-center mb-6'>
+          <p className='text-sm text-gray-300'>&copy; {new Date().getFullYear()} FidelidApp. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    </footer>
   );
 };
 

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { Backdrop, Button, CircularProgress, TextField, Snackbar } from "@mui/material";
+import { Backdrop, Button, CircularProgress, TextField } from "@mui/material";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import background from "../../assets/fondocandado2.png";
+import { toast } from "react-toastify";
 
 export const PromotionClient = () => {
   const { id } = useParams();
@@ -13,13 +14,12 @@ export const PromotionClient = () => {
   const [loading, setLoading] = useState(true);
   const [promotion, setPromotion] = useState(null);
   const [clientEmail, setClientEmail] = useState("");
+  const [clientName, setClientName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   console.log(promotion);
 
-  if (status && status === "authenticated") handleNavigate(`/dashboard/promotion/${id}`);
+  // if (status && status === "authenticated") handleNavigate(`/dashboard/promotion/${id}`);
 
   useEffect(() => {
     const fetchPromotion = async () => {
@@ -39,40 +39,39 @@ export const PromotionClient = () => {
   const handleEmailChange = (event) => {
     setClientEmail(event.target.value);
   };
+  const handleNameChange = (event) => {
+    setClientName(event.target.value);
+  };
 
   const handleSubmit = async () => {
     if (!clientEmail) {
-      setSnackbarMessage("Por favor, ingresa un email válido.");
-      setSnackbarOpen(true);
+      toast.info("Por favor, ingresa un email válido.");
+
       return;
     }
 
-    // Regex para validar el formato del email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(clientEmail)) {
-      setSnackbarMessage("Por favor, ingresa un email válido.");
-      setSnackbarOpen(true);
-      return;
+    if (!emailRegex.test(clientEmail)) toast.info("Por favor, ingresa un email válido.");
+    if (!clientName || clientName.trim().length < 2) {
+      toast.info("Debes ingresar un nombre.");
     }
-
     setIsSubmitting(true);
     try {
-      const response = await api.post("/api/promotions/client", {
+      await api.post("/api/promotions/client", {
         promotionId: id,
         clientEmail: clientEmail,
+        clientName: clientName,
       });
-      setSnackbarMessage("Te has sumado exitosamente a la promoción.");
-      setClientEmail(""); // Limpiar el input de email
+      toast.success("Te has sumado exitosamente a la promoción.");
+      setClientEmail("");
+      setClientName("");
     } catch (error) {
-      setSnackbarMessage("Error al sumarte a la promoción. Inténtalo de nuevo.");
+      console.log(error);
+
+      toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
     } finally {
       setIsSubmitting(false);
-      setSnackbarOpen(true);
     }
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
   };
 
   if (loading) {
@@ -86,7 +85,6 @@ export const PromotionClient = () => {
   if (!promotion) {
     return (
       <div className='relative flex flex-col m-0 text-center justify-center w-screen h-screen'>
-        {/* Fondo con opacidad */}
         <div
           className='absolute inset-0 bg-cover bg-center'
           style={{
@@ -108,25 +106,10 @@ export const PromotionClient = () => {
   }
 
   return (
-    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-screen'>
-      {/* Fondo con opacidad */}
-      <div className='space-y-2 flex flex-col mb-6'>
-        <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu email a continuación:</p>
-        <TextField label='Email' variant='filled' sx={{ width: "100%" }} value={clientEmail} onChange={handleEmailChange} />
-        <Button
-          variant='contained'
-          onClick={handleSubmit}
-          disabled={isSubmitting} // Deshabilitar el botón mientras se envía
-        >
-          {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
-        </Button>
-      </div>
-
-      {/* Contenido de la promoción */}
-      <div className='flex flex-row justify-between w-full max-w-6xl mx-auto'>
-        {/* Contenedor de la promoción */}
-        <div className='relative z-10 w-[60%] space-y-6 shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/50 m-0 text-left p-6 rounded-md shadow-md'>
-          <h1 className='font-poppins font-bold'>{promotion.title}</h1>
+    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen  bg-gradient-to-br from-gray-50 to-main/50'>
+      <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
+        <div className='relative z-10  w-[95%] md:w-[60%] space-y-6  m-0 text-left p-6 rounded-md '>
+          <h1 className='font-poppins font-bold text-5xl'>{promotion.title}</h1>
           <p className='font-medium'>{promotion.description}</p>
           <div>
             <p className='italic'>
@@ -134,26 +117,24 @@ export const PromotionClient = () => {
             </p>
             <p className='italic'>Términos y condiciones aplican, serán enviados a tu correo una vez inscrito a la promoción</p>
           </div>
+          <div className='space-y-2 flex flex-col mb-6'>
+            <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p>
+            <TextField label='Nombre' variant='filled' sx={{ width: "100%" }} value={clientName} onChange={handleNameChange} />
+
+            <TextField label='Email' variant='filled' sx={{ width: "100%" }} value={clientEmail} onChange={handleEmailChange} />
+            <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
+            </Button>
+          </div>
         </div>
 
-        {/* Imagen de la promoción */}
-        <div className='relative z-10 w-[35%] flex justify-center'>
-          <div className='w-full h-80 rounded-md overflow-hidden bg-gray-200 shadow-md'>
+        <div className='relative z-10 w-[95%] md:w-[40%] flex justify-center'>
+          <div className='w-full h-120 ml-6 rounded-md overflow-hidden bg-gray-200 shadow-md'>
             <img src={promotion.imageUrl} alt='Promotion' className='object-cover w-full h-full' />
           </div>
         </div>
       </div>
 
-      {/* Snackbar para mostrar mensajes */}
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        message={snackbarMessage}
-      />
-
-      {/* Backdrop con CircularProgress */}
       <Backdrop open={isSubmitting} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <CircularProgress color='inherit' />
         <div className='mt-2 text-white'>Sumándose a la promoción...</div>

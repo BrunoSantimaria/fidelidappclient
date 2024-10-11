@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Button, TextField, Typography, Link, Grid, Box, Container } from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
-import { useSnackbar } from "../../hooks";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { validateEmail, validatePassword, validateName } from "../../utils/validations";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export const LoginPage = () => {
   const fadeIn = {
@@ -12,7 +12,6 @@ export const LoginPage = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  const { openSnackbar, SnackbarComponent } = useSnackbar();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -109,7 +108,7 @@ export const LoginPage = () => {
               width={140}
               useOneTap={true}
               onSuccess={handleGoogleSignInSuccess}
-              onError={() => openSnackbar("No se ha podido iniciar sesión", "error")}
+              onError={() => toast.error("No se ha podido iniciar sesión")}
             />
 
             <Grid container sx={{ mt: 3, justifyContent: "center" }}>
@@ -121,7 +120,6 @@ export const LoginPage = () => {
             </Grid>
           </Box>
         </Box>
-        <SnackbarComponent />
       </Container>
     </motion.div>
   );

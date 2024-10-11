@@ -8,16 +8,20 @@ import { AppRouter } from "./router/AppRouter.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Provider } from "react-redux";
 import { store } from "./store/store.ts";
+import { HelmetProvider } from "react-helmet-async";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <BrowserRouter>
-      <GoogleOAuthProvider clientId='833746654519-bu68dd7uhn7bsgcvsjrrmnucl0nobta3.apps.googleusercontent.com'>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <AppRouter />
-        </ThemeProvider>
-      </GoogleOAuthProvider>
+      <HelmetProvider>
+        <GoogleOAuthProvider clientId='833746654519-bu68dd7uhn7bsgcvsjrrmnucl0nobta3.apps.googleusercontent.com'>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+
+            <AppRouter />
+          </ThemeProvider>
+        </GoogleOAuthProvider>
+      </HelmetProvider>
     </BrowserRouter>
   </Provider>
 );

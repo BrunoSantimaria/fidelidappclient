@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { ImportantLinksList } from "../../data/importantLinks";
-import { handleScrollTo } from "../../utils/handleScrollTo"; // Usa la función que ya tienes para el scroll
+import { handleScrollTo } from "../../utils/handleScrollTo";
 import { useLocation } from "react-router";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 
@@ -10,11 +10,10 @@ export const ImportantLinks = ({ refs }) => {
 
   const handleLinkClick = (title) => {
     if (location.pathname !== "/") {
-      handleNavigate("/"); // Si no estamos en "/", navegamos allí primero
-      // Puedes usar un setTimeout para asegurarte de que el desplazamiento ocurra después de la navegación
+      handleNavigate("/");
       setTimeout(() => scrollToSection(title), 500);
     } else {
-      scrollToSection(title); // Si estamos en "/", simplemente desplazamos
+      scrollToSection(title);
     }
   };
 
@@ -42,19 +41,17 @@ export const ImportantLinks = ({ refs }) => {
 
   return (
     <>
-      <Typography sx={{ fontSize: "24px", marginBottom: "10px" }}>{ImportantLinksList.title}</Typography>
-      {ImportantLinksList.elements.map(({ title }) => {
-        return (
-          <Typography
-            className='transition-text'
-            key={title}
-            onClick={() => handleLinkClick(title)} // Maneja el clic en los enlaces
-            sx={{ marginBottom: "8px", cursor: "pointer" }}
-          >
-            {title}
-          </Typography>
-        );
-      })}
+      <Typography sx={{ fontSize: "24px", marginBottom: "10px", color: "white" }}>{ImportantLinksList.title}</Typography>
+      {ImportantLinksList.elements.map(({ title }) => (
+        <Typography
+          className='cursor-pointer hover:underline transition-colors'
+          key={title}
+          onClick={() => handleLinkClick(title)}
+          sx={{ marginBottom: "8px", color: "white" }}
+        >
+          {title}
+        </Typography>
+      ))}
     </>
   );
 };

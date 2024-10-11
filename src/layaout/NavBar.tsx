@@ -1,4 +1,4 @@
-import { AppBar, Box, Toolbar, Typography, Drawer, List, ListItem, ListItemText, IconButton } from "@mui/material";
+import { AppBar, Box, Toolbar, Typography, Drawer, List, ListItem, ListItemText, IconButton, ListItemButton } from "@mui/material";
 import logo from "../assets/Logo Principal.png"; // Importa tu logo
 import React from "react";
 import { MdOutlineMenu } from "react-icons/md";
@@ -6,6 +6,7 @@ import { useLocation } from "react-router";
 import { useAuthSlice } from "../hooks/useAuthSlice";
 import { useNavigateTo } from "../hooks/useNavigateTo";
 import { handleScrollTo } from "../utils/handleScrollTo";
+import theme from "../theme";
 
 export const NavBar = ({ refs }) => {
   const location = useLocation();
@@ -19,7 +20,11 @@ export const NavBar = ({ refs }) => {
 
   const allowedRoutes = ["/", "/auth/login"];
 
-  if (!allowedRoutes.includes(location.pathname)) {
+  // Verifica si la ruta actual empieza con "/agendas/"
+  const isAgendasRoute = location.pathname.startsWith("/agendas/");
+
+  // Si la ruta actual no está en allowedRoutes o no empieza con "/agendas/", retorna null
+  if (!allowedRoutes.includes(location.pathname) && !isAgendasRoute) {
     return null;
   }
 
@@ -93,11 +98,25 @@ export const NavBar = ({ refs }) => {
       <Drawer anchor='right' open={showMenu} onClose={handleMenuToggle}>
         <Box sx={{ width: 250 }} role='presentation' onClick={handleMenuToggle} onKeyDown={handleMenuToggle}>
           <List>
-            {["Home", "Cómo Funciona", "Planes", "Iniciar Sesión"].map((text) => (
-              <ListItem button key={text}>
-                <ListItemText primary={text} />
-              </ListItem>
-            ))}
+            <ListItemButton
+              onClick={() => {
+                location.pathname !== "/" ? handleNavigate("/") : handleScrollTo(refs.homeRef);
+              }}
+              sx={{ fontWeight: "lg" }}
+            >
+              Home
+            </ListItemButton>
+            <ListItemButton onClick={() => handleScrollTo(refs.servicesRef)}>Cómo Funciona</ListItemButton>
+            <ListItemButton onClick={() => handleScrollTo(refs.plansRef)}>Planes</ListItemButton>
+            <ListItemButton onClick={() => handleScrollTo(refs.contactRef)}>Contacto</ListItemButton>
+            {user ? (
+              <>
+                <ListItemButton onClick={() => handleNavigate("/dashboard")}>Dashboard</ListItemButton>
+                <ListItemButton onClick={startLoggingOut}>Salir</ListItemButton>
+              </>
+            ) : (
+              <ListItemButton onClick={() => handleNavigate("/auth/login")}>Iniciar Sesión</ListItemButton>
+            )}
           </List>
         </Box>
       </Drawer>

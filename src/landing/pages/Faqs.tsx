@@ -1,12 +1,12 @@
 import React from "react";
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import { Box, Typography, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import { motion, AnimatePresence } from "framer-motion";
 export const Faqs = () => {
   const [expanded, setExpanded] = React.useState<string | false>(false);
 
-  const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-    setExpanded(newExpanded ? panel : false);
+  const handleToggle = (index: number) => {
+    setExpanded(expanded === index ? null : index);
   };
 
   interface Faq {
@@ -58,25 +58,38 @@ export const Faqs = () => {
   ];
 
   return (
-    <Box sx={{ marginTop: "60px", padding: "0 20px" }}>
-      <Typography variant='h4' sx={{ textAlign: "center", marginBottom: "30px" }}>
-        Preguntas Frecuentes
-      </Typography>
+    <div className='mt-10 px-6 md:w-[80%] md:justify-center md:m-auto'>
+      <h2 className='text-3xl font-bold text-center mb-6'>Preguntas Frecuentes</h2>
       {faqList.map((faq, index) => (
-        <Accordion
-          sx={{ width: "100%", margin: "0 auto", marginBottom: "10px" }}
-          key={index}
-          expanded={expanded === `panel${index}`}
-          onChange={handleChange(`panel${index}`)}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls={`panel${index}-content`} id={`panel${index}-header`}>
-            <Typography sx={{ fontWeight: "bold" }}>{faq.title}</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ width: "100%", textAlign: "left" }}>
-            <Typography sx={{ maxWidth: "80%" }}>{faq.description}</Typography>
-          </AccordionDetails>
-        </Accordion>
+        <div key={index} className='mb-4 border-b border-gray-300'>
+          <div onClick={() => handleToggle(index)} className='cursor-pointer flex justify-between items-center py-3'>
+            <h3 className='text-lg font-semibold'>{faq.title}</h3>
+            <motion.div initial={false} animate={{ rotate: expanded === index ? 180 : 0 }} transition={{ duration: 0.3 }}>
+              <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' className='w-6 h-6'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M19 9l-7 7-7-7' />
+              </svg>
+            </motion.div>
+          </div>
+
+          <AnimatePresence>
+            {expanded === index && (
+              <motion.div
+                initial='collapsed'
+                animate='open'
+                exit='collapsed'
+                variants={{
+                  open: { opacity: 1, height: "auto" },
+                  collapsed: { opacity: 0, height: 0 },
+                }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                className='overflow-hidden'
+              >
+                <p className='text-gray-700 py-3'>{faq.description}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 };

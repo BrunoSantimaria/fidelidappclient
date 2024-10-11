@@ -6,6 +6,8 @@ import { Navigation } from "../components/sidebar/Navigation";
 import { useDashboard } from "../../hooks";
 import { useEffect } from "react";
 import { Promotion } from "../pages/Promotions/Promotion";
+import { EmailSender } from "../pages/email/EmailSender";
+import { CreateAgenda } from "../pages/Agenda/CreateAgenda";
 
 const pageTransition = {
   hidden: { opacity: 0, y: 50 }, // Estado inicial: invisible y desplazado hacia abajo
@@ -38,6 +40,14 @@ export const DashboardRoutes = () => {
           }
         />
 
+        <Route
+          path='/email-sender'
+          element={
+            <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
+              <EmailSender />
+            </motion.div>
+          }
+        />
         {/* Proteger ruta de creación de promociones */}
         <Route
           path='/promotions/create'
@@ -52,6 +62,7 @@ export const DashboardRoutes = () => {
           }
         />
         <Route path='/promotion/:id' element={<Promotion />} />
+        <Route path='/agenda/create' element={<CreateAgenda />} />
         {/* Redirigir cualquier otra ruta al Dashboard */}
         <Route path='/*' element={<Navigate to='/' replace />} />
       </Routes>

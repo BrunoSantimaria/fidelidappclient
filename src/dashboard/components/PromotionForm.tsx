@@ -10,8 +10,6 @@ import {
   Box,
   Grid,
   CircularProgress,
-  Snackbar,
-  Alert,
   Backdrop,
   Typography,
 } from "@mui/material";
@@ -20,6 +18,7 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/api";
 import { useDashboard } from "../../hooks";
+import { toast } from "react-toastify";
 
 const validationSchema = yup.object({
   title: yup.string("Ingresa el título de la promoción").min(5, "El título debe tener al menos 5 caracteres").required("El título es obligatorio"),
@@ -37,7 +36,6 @@ const validationSchema = yup.object({
 
 export const PromotionForm = () => {
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "" });
   const navigate = useNavigate(); // Para la redirección
   const { getPromotionsAndMetrics } = useDashboard();
   const formik = useFormik({
@@ -70,11 +68,11 @@ export const PromotionForm = () => {
         setLoading(true);
         await api.post("/api/promotions/create", formData);
         await getPromotionsAndMetrics();
-        setSnackbar({ open: true, message: "Promoción creada con éxito", severity: "success" });
+        toast.success("Promoción creada con éxito");
         navigate("/dashboard");
       } catch (error) {
         console.log(error);
-        setSnackbar({ open: true, message: "Error al crear la promoción", severity: "error" });
+        toast.error("Error al crear la promoción");
       } finally {
         setLoading(false);
       }
@@ -86,10 +84,6 @@ export const PromotionForm = () => {
     if (file) {
       formik.setFieldValue("image", file);
     }
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -204,7 +198,6 @@ export const PromotionForm = () => {
         </Grid>
       </form>
 
-      {/* Backdrop with Circular Progress and Text */}
       <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
         <Box textAlign='center'>
           <CircularProgress color='inherit' />
@@ -213,12 +206,6 @@ export const PromotionForm = () => {
           </Typography>
         </Box>
       </Backdrop>
-
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

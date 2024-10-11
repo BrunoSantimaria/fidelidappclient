@@ -12,8 +12,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import { AddAdmin } from "./AddAdmin";
 import { useDashboard } from "../../../hooks";
-import { Snackbar } from "@mui/material";
-
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import MailRoundedIcon from "@mui/icons-material/MailRounded";
+import { toast } from "react-toastify";
 const containerVariants = {
   close: {
     width: "5rem",
@@ -45,15 +46,11 @@ export const Navigation = () => {
   const { startLoggingOut } = useAuthSlice();
   const [isOpen, setIsOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+
   const containerControls = useAnimationControls();
   const iconControl = useAnimationControls();
   const { plan, metrics } = useDashboard();
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
-    setSnackbarMessage("");
-  };
+
   useEffect(() => {
     if (isOpen) {
       containerControls.start("open");
@@ -111,23 +108,26 @@ export const Navigation = () => {
             <>
               <div
                 onClick={() => {
-                  setSnackbarOpen(true);
-                  setSnackbarMessage("Limite de programas activos superado.");
+                  toast.info("Limite de programas activos superado.");
                 }}
               >
                 <NavigationLink name='Nueva Promoción'>
                   <LoyaltyRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
                 </NavigationLink>
               </div>
-              <Snackbar
-                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                open={snackbarOpen}
-                autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
-                message={snackbarMessage}
-              />
             </>
           )}
+          <div onClick={handleModal}>
+            <NavigationLink name='Clientes'>
+              <GroupsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+            </NavigationLink>
+          </div>
+
+          <div>
+            <NavigationLink name='Correos' link='/dashboard/email-sender'>
+              <MailRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+            </NavigationLink>
+          </div>
           <div onClick={handleModal}>
             <NavigationLink name='Agregar administradores'>
               <PersonAddAlt1RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />

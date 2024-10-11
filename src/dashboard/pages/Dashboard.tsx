@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Stats, TablePromotions, Welcome } from "../components";
+import { TableAgenda } from "./Agenda/TableAgenda";
 
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
@@ -18,6 +19,7 @@ export const Dashboard = () => {
         <Welcome />
         <Stats />
         <TablePromotions />
+        <TableAgenda />
       </section>
     </motion.main>
   );

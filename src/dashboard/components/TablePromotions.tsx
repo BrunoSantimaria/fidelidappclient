@@ -9,7 +9,6 @@ import {
   Paper,
   IconButton,
   Button,
-  Snackbar,
   Tooltip,
   Dialog,
   DialogActions,
@@ -21,13 +20,11 @@ import { Delete, Share } from "@mui/icons-material";
 import { useDashboard } from "../../hooks";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export const TablePromotions = () => {
   const { metrics, plan, promotions, deletePromotion } = useDashboard();
   const { handleNavigate } = useNavigateTo();
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   // Estado para controlar el diálogo
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -36,8 +33,7 @@ export const TablePromotions = () => {
   const handleShare = (promotionId: string) => {
     const promotionLink = `${window.location.origin}/promotion/${promotionId}`;
     navigator.clipboard.writeText(promotionLink);
-    setSnackbarMessage("Enlace de promoción copiado al portapapeles.");
-    setSnackbarOpen(true);
+    toast.info("Enlace de promoción copiado al portapapeles.");
   };
 
   const handleDelete = (promotionId: string) => {
@@ -48,16 +44,11 @@ export const TablePromotions = () => {
   const handleDialogClose = () => {
     setDialogOpen(false);
   };
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
-    setSnackbarMessage("");
-  };
 
   const handleDeleteConfirmed = async () => {
     if (promotionToDelete) {
       await deletePromotion(promotionToDelete);
-      setSnackbarMessage("Promoción eliminada.");
-      setSnackbarOpen(true);
+      toast.info("Promoción eliminada.");
       setDialogOpen(false);
     }
   };
@@ -150,14 +141,6 @@ export const TablePromotions = () => {
           </div>
         </section>
       )}
-
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        message={snackbarMessage}
-      />
     </>
   );
 };

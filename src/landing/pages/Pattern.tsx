@@ -1,7 +1,7 @@
-import { Box, Button, Container, Typography } from "@mui/material";
-import pattern from "../../assets/fondocandado2.png";
 import { useState } from "react";
 import { ModalLanding } from "../components/ModalLanding";
+import pattern from "../../assets/fondocandado2.png";
+import { Button } from "@mui/material";
 
 export const Pattern = () => {
   const [open, setOpen] = useState(false);
@@ -10,56 +10,24 @@ export const Pattern = () => {
   const handleClose = () => setOpen(false);
 
   return (
-    <Box sx={{ position: "relative", minHeight: "50vh", marginTop: "80px", width: "100%", textAlign: "center" }}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: { xs: "90%", md: "100%", lg: "100%" },
-          backgroundImage: `url(${pattern})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "opacity(10%)",
-          zIndex: 0,
-        }}
-      />
-      <Box sx={{ position: "relative", zIndex: 1, textAlign: "left" }}>
-        <Container sx={{ marginY: { xs: "25px", md: "120px", lg: "120px" }, marginLeft: { xs: "0", md: "60px", lg: "60px" } }}>
-          <Typography variant='h3' sx={{ fontSize: { xs: 32, md: "3em" }, color: "black", fontWeight: "bold", width: { xs: "100%", md: "80%", lg: "60%" } }}>
+    <div className='relative min-h-[50vh] mt-20 w-full text-center items-center flex'>
+      <div className='absolute inset-0 bg-cover bg-center opacity-10 z-0' style={{ backgroundImage: `url(${pattern})` }}></div>
+      <div className='relative z-10 text-left'>
+        <div className='my-6 mx-6 md:my-28 lg:my-28 md:ml-16 lg:ml-36'>
+          <h3 className='text-2xl md:text-5xl font-bold text-black w-full md:w-2/3 lg:w-4/5'>
             Crea programas de fidelización para tus clientes de manera rápida y sencilla.
-          </Typography>
-          <Typography
-            variant='h5'
-            sx={{
-              marginTop: "4px",
-              fontSize: { xs: 16, md: "1.5em" },
-              color: "black",
-              position: "relative",
-              zIndex: 1,
-              width: { xs: "100%", md: "80%" },
-            }}
-          >
-            Con Fidelidapp te ayudamos a entender y mejorar la experiencia del cliente.
-          </Typography>
+          </h3>
+          <p className='mt-1 text-sm md:text-2xl text-black w-full md:w-4/5'>Con Fidelidapp te ayudamos a entender y mejorar la experiencia del cliente.</p>
           <Button
             variant='contained'
             onClick={handleOpen}
-            sx={{
-              position: "relative",
-              zIndex: 1,
-              width: { xs: "80vw", md: "20vw" },
-              minHeight: "60px",
-              marginBottom: { xs: 2, md: 0 },
-              marginTop: { xs: 2, md: 2 },
-            }}
+            className='relative z-10 w-[80vw] md:w-[20vw] min-h-[60px] mt-2 mb-4 md:mb-0 md:mt-2 bg-blue-500 text-white font-semibold py-3 rounded-lg'
           >
             SOLICITA TU DEMO Y CONOCE LOS BENEFICIOS
           </Button>
-        </Container>
+        </div>
         <ModalLanding open={open} handleClose={handleClose} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

@@ -26,12 +26,12 @@ export const Home = () => {
           variant='h3'
           sx={{
             fontWeight: "bold",
-            fontSize: { xs: 24, sm: 28, md: 32, lg: 32, xl: "3em" }, // Ajustando tamaño de fuente
+            fontSize: { xs: 24, sm: 28, md: 32, lg: 32, xl: "3em" },
             color: "white",
             position: "relative",
             bottom: { xs: 80, sm: 120, md: 150, lg: 0 },
             zIndex: 1,
-            width: { xs: "100%", sm: "90%", md: "70%", lg: "60%" }, // Ajustando ancho
+            width: { xs: "100%", sm: "90%", md: "70%", lg: "60%" },
           }}
         >
           Programas de Lealtad y Fidelidad
@@ -48,7 +48,9 @@ export const Home = () => {
             marginTop: { xs: 1, sm: 2, md: 4 },
           }}
         >
-          Descubre cómo Fidelidapp puede ayudarte a generar promociones y tarjetas de fidelidad virtuales ajustadas a las necesidades de tu negocio.
+          <span className=''>
+            Descubre cómo Fidelidapp puede ayudarte a generar promociones y tarjetas de fidelidad virtuales ajustadas a las necesidades de tu negocio.
+          </span>
         </Typography>
         <Box sx={{ marginTop: { xs: 1, sm: 2, md: 4 }, display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
           <Button

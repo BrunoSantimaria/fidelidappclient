@@ -1,10 +1,9 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useSnackbar } from "../../hooks";
 import api from "../../utils/api";
+import { toast } from "react-toastify";
 
 export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose: () => void }) => {
-  const { openSnackbar, SnackbarComponent } = useSnackbar();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -69,12 +68,12 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
 
     try {
       await api.post("/auth/contact", formData);
-      openSnackbar("¡Formulario enviado con éxito!", "success");
+      toast.success("¡Formulario enviado con éxito!");
       return handleClose();
     } catch (error) {
       console.log(error);
 
-      return openSnackbar("Hubo un error al enviar el formulario.", "error");
+      return toast.error("Hubo un error al enviar el formulario.");
     }
   };
 
@@ -125,8 +124,6 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
           </Button>
         </DialogActions>
       </Dialog>
-
-      <SnackbarComponent />
     </>
   );
 };

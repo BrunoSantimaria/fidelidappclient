@@ -5,6 +5,8 @@ export default {
     extend: {
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
+        lora: ["Lora", "serif"],
+        lato: ["Lato", "sans-serif"],
       },
 
       colors: {

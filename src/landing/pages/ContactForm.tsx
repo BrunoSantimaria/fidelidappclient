@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { TextField, Button, Typography, Container, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import api from "../../utils/api";
-import { useSnackbar } from "../../hooks";
+import { toast } from "react-toastify";
 
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { openSnackbar, SnackbarComponent } = useSnackbar();
   const {
     register,
     handleSubmit,
@@ -19,11 +18,11 @@ const ContactForm = () => {
     setIsSubmitting(true);
     try {
       await api.post("/auth/contact", data);
-      openSnackbar("¡Formulario enviado con éxito!", "success");
+      toast.success("¡Formulario enviado con éxito!");
       reset();
     } catch (error) {
       console.log(error);
-      openSnackbar("Hubo un error al enviar el formulario.", "error");
+      toast.error("Hubo un error al enviar el formulario.");
     } finally {
       setTimeout(() => {
         setIsSubmitting(false);
@@ -65,7 +64,6 @@ const ContactForm = () => {
           ENVIAR CONSULTA
         </Button>
       </Box>
-      <SnackbarComponent />
     </Container>
   );
 };

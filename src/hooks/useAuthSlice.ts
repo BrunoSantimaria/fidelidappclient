@@ -1,15 +1,15 @@
 // hooks/useAuth.ts
 import { useDispatch, useSelector } from "react-redux";
 import { onLogin, onLogOut } from "../store/auth/authSlice";
-import api from "../utils/api"; // Ajusta la ruta según la estructura de tu proyecto
+import api from "../utils/api";
 import Cookies from "js-cookie";
-import { useNavigateTo } from "./useNavigateTo"; // Asegúrate de que esta ruta sea correcta
-import { jwtDecode } from "jwt-decode"; // Asegúrate de importar correctamente la función
-import { useSnackbar } from "./useSnackBar";
+import { useNavigateTo } from "./useNavigateTo";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 
 export const useAuthSlice = () => {
   const dispatch = useDispatch();
-  const { openSnackbar } = useSnackbar();
+
   const { handleNavigate } = useNavigateTo();
   const { user, status } = useSelector((state) => state.auth);
 
@@ -37,10 +37,10 @@ export const useAuthSlice = () => {
       dispatch(onLogin(userWithAccountAndPlan));
 
       handleNavigate("/dashboard");
-      openSnackbar("Usuario loggeado correctamente, serás redireccionado al home.", "success");
+      toast.success("Login exitoso, serás redireccionado al dashboard.");
     } catch (error) {
       console.error("Error signing in:", error);
-      openSnackbar("No se ha podido iniciar sesión", "error");
+      toast.error("No se ha podido iniciar sesión");
     }
   };
 
@@ -71,25 +71,25 @@ export const useAuthSlice = () => {
 
       dispatch(onLogin(userWithAccountAndPlan));
 
-      openSnackbar("Usuario logueado correctamente, serás redireccionado al home.", "success");
+      toast.success("Login exitoso, serás redireccionado al dashboard.");
 
       setTimeout(() => {
         handleNavigate("/dashboard");
       }, 2000);
     } catch (error) {
       console.error("Error signing in with Google:", error);
-      openSnackbar("No se ha podido iniciar sesión", "error");
+      toast.error("No se ha podido iniciar sesión");
     }
   };
 
   const startRegister = async (formData) => {
     try {
       await api.post("/auth/signup", formData);
-      openSnackbar("Usuario creado correctamente", "success");
+      toast.success("Usuario creado correctamente");
       handleNavigate("/auth/login");
     } catch (error) {
       console.error("Error signing up:", error);
-      openSnackbar("No se ha podido crear el usuario", "error");
+      toast.error("No se ha podido crear el usuario");
     }
   };
 
