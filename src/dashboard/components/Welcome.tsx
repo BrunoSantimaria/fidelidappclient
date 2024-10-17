@@ -22,9 +22,9 @@ export const Welcome = () => {
             <li>Acceder rápidamente a tus agendas y planificar eventos promocionales.</li>
           </ul>
         </div>
-        <div className='bg-main w-fit p-2 rounded-md text-white'>
-          Plan activo: <span className='text-green-500'>{`${plan?.planStatus.charAt(0).toUpperCase()}${plan.planStatus.slice(1)}`}</span>
-        </div>
+        {/* <div className='bg-main w-fit p-2 rounded-md text-white'>
+      Plan activo: <span className='text-green-500'>{`${plan?.planStatus.charAt(0).toUpperCase()}${plan.planStatus.slice(1)}`}</span>
+        </div> */}
       </section>
       <Divider />
     </>
