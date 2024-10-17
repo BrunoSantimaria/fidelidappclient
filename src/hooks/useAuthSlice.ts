@@ -18,16 +18,15 @@ export const useAuthSlice = () => {
       const response = await api.post("/auth/signin", formData);
       const { token } = response.data;
 
-      Cookies.set("authToken", token, { expires: 7 });
+      Cookies.set("authToken", token, { expires: 7, secure: true, sameSite: "None" });
 
       const user = decodeToken(token);
 
       const currentUserResponse = await api.get("/auth/current");
       const { accounts, plan } = currentUserResponse.data;
 
-      Cookies.set("accounts", JSON.stringify(accounts), { expires: 7 });
-      Cookies.set("plan", JSON.stringify(plan), { expires: 7 });
-
+      Cookies.set("accounts", JSON.stringify(accounts), { expires: 7, secure: true, sameSite: "None" });
+      Cookies.set("plan", JSON.stringify(plan), { expires: 7, secure: true, sameSite: "None" });
       const userWithAccountAndPlan = {
         ...user,
         accounts: accounts,
