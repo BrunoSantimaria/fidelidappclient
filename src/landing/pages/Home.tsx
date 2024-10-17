@@ -27,7 +27,7 @@ export const Home = () => {
           variant='h3'
           sx={{
             fontWeight: "bold",
-            fontSize: { xs: 24, sm: 28, md: 32, lg: 32, xl: "3em" },
+            fontSize: { xs: 40, sm: 28, md: 32, lg: 32, xl: "3em" },
             color: "white",
             position: "relative",
             bottom: { xs: 80, sm: 120, md: 150, lg: 0 },
@@ -40,7 +40,7 @@ export const Home = () => {
         <Typography
           variant='h5'
           sx={{
-            fontSize: { xs: 12, sm: 14, md: "1.5em" }, // Texto responsivo
+            fontSize: { xs: 16, sm: 14, md: "1.5em" }, // Texto responsivo
             color: "white",
             position: "relative",
             bottom: { xs: 70, sm: 120, md: 150, lg: 0 },
@@ -60,26 +60,26 @@ export const Home = () => {
               position: "relative",
               bottom: { xs: 60, sm: 100, md: 100, lg: 0 },
 
-              minHeight: { xs: "50px", md: "60px", lg: "80px" }, // Ajustando altura mínima
+              minHeight: { xs: "50px", md: "60px", lg: "80px" },
               zIndex: 1,
-              width: { xs: "100%", sm: "70%", md: "16vw", lg: "14vw" }, // Ajustando ancho
+              width: { xs: "100%", sm: "70%", md: "16vw", lg: "14vw" },
               marginRight: { md: 2 },
               marginBottom: { xs: 2, md: 0 },
-              fontSize: { xs: 12, sm: 14, lg: 12, xl: 14 },
+              fontSize: { xs: 14, sm: 14, lg: 12, xl: 14 },
             }}
           >
-            Agenda tu asesoría gratuita.
+            Agenda una demo.
           </Button>
           <Button
             variant='contained'
             sx={{
               position: "relative",
               zIndex: 1,
-              width: { xs: "100%", sm: "70%", md: "14vw", lg: "14vw" }, // Ajustando ancho
-              minHeight: { xs: "50px", md: "60px", lg: "80px" }, // Ajustando altura mínima
+              width: { xs: "100%", sm: "70%", md: "16vw", lg: "14vw" },
+              minHeight: { xs: "50px", md: "60px", lg: "80px" },
               marginBottom: { xs: 2, md: 0 },
               bottom: { xs: 60, sm: 100, md: 100, lg: 0 },
-              fontSize: { xs: 12, sm: 14, lg: 12, xl: 14 },
+              fontSize: { xs: 14, sm: 14, lg: 12, xl: 14 },
             }}
             onClick={handleOpen}
           >
@@ -95,7 +95,7 @@ export const Home = () => {
             width: { xs: "100%", sm: "90%", md: "50%", lg: "40%" }, // Ajustando ancho
             marginTop: { xs: 1, sm: 2, md: 4 },
             fontStyle: "italic",
-            fontSize: { xs: 10, sm: 12, md: "inherit" }, // Ajustando tamaño de fuente
+            fontSize: { xs: 14, sm: 12, md: "inherit" }, // Ajustando tamaño de fuente
           }}
         >
           Sin compromiso. Conoce cómo podemos ayudarte a fidelizar a tus clientes.
@@ -105,7 +105,7 @@ export const Home = () => {
       <ModalLanding open={open} handleClose={handleClose} />
 
       <Box
-        className='absolute top-0 left-[-600px] md:left-0 right-0 bottom-0 md:bottom-[300px] lg:bottom-0 bg-cover bg-left filter blur-sm brightness-[50%] z-0'
+        className='absolute top-0 left-[-600px] md:left-0  md:h-[100px] lg:h-full right-0 bottom-0 md:bottom-[300px] lg:bottom-0 bg-cover bg-left filter blur-sm brightness-[50%] z-0'
         style={{ backgroundImage: `url(${background2})` }}
       />
     </Box>

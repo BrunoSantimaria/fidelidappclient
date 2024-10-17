@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { Backdrop, Button, CircularProgress, TextField } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Input, InputLabel, TextField } from "@mui/material";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import background from "../../assets/fondocandado2.png";
@@ -60,8 +60,12 @@ export const PromotionClient = () => {
     try {
       await api.post("/api/promotions/client", {
         promotionId: id,
-        clientEmail: clientEmail.trim(),
-        clientName: clientName.trim(),
+        clientEmail: clientEmail.trim().toLowerCase(),
+        clientName: clientName
+          .trim()
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(" "),
         accountId: accountId,
       });
       // await api.post("/api/clients/addClient/", { accountId, clientData: { name: clientName, email: clientEmail }, promotionId: id });
@@ -120,11 +124,29 @@ export const PromotionClient = () => {
             </p>
             <p className='italic'>Términos y condiciones aplican, serán enviados a tu correo una vez inscrito a la promoción</p>
           </div>
+          <section></section>
+
           <div className='space-y-2 flex flex-col mb-6'>
             <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p>
-            <TextField label='Nombre' variant='filled' sx={{ width: "100%" }} value={clientName} onChange={handleNameChange} />
-
-            <TextField label='Email' variant='filled' sx={{ width: "100%" }} value={clientEmail} onChange={handleEmailChange} />
+            {/* <TextField label='Nombre' variant='filled' sx={{ width: "100%" }} value={clientName} onChange={handleNameChange} /> */}
+            <Input
+              id='name'
+              type='name'
+              value={clientName}
+              onChange={handleNameChange}
+              autoComplete='name'
+              sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
+              placeholder='Nombre'
+            />
+            <Input
+              id='email'
+              type='email'
+              value={clientEmail}
+              onChange={handleEmailChange}
+              autoComplete='email'
+              sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
+              placeholder='Email'
+            />
             <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
             </Button>

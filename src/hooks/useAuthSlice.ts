@@ -57,7 +57,7 @@ export const useAuthSlice = () => {
         return toast.error("Credenciales inválidas.");
       }
       console.error("Error signing in:", error);
-      toast.error("No se ha podido iniciar sesión");
+      toast.error("No se ha podido iniciar sesión", error);
     }
   };
 
