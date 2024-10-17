@@ -39,7 +39,7 @@ interface DecodedToken {
   name: string;
 }
 
-const token = Cookies.get("authToken");
+const token = Cookies.get("token");
 
 console.log(token); // Imprime el valor del token si existe
 

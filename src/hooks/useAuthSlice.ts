@@ -17,8 +17,9 @@ export const useAuthSlice = () => {
     try {
       const response = await api.post("/auth/signin", formData);
       const { token } = response.data;
+      console.log(response);
 
-      Cookies.set("authToken", token, { expires: 7, secure: true, sameSite: "None" });
+      Cookies.set("token", token, { expires: 7, secure: true, sameSite: "None" });
 
       const user = decodeToken(token);
 
@@ -55,7 +56,7 @@ export const useAuthSlice = () => {
       const apiResponse = await api.post("/auth/google-signin", userData);
       const { token } = apiResponse.data;
 
-      Cookies.set("authToken", token, { expires: 7 });
+      Cookies.set("token", token, { expires: 7 });
 
       const user = decodeToken(token);
 
@@ -99,8 +100,8 @@ export const useAuthSlice = () => {
   };
 
   const startLoggingOut = () => {
-    Cookies.remove("authToken");
     Cookies.remove("token");
+
     Cookies.remove("accounts");
     Cookies.remove("plan");
 
