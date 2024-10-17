@@ -12,53 +12,49 @@ export const useAuthSlice = () => {
 
   const { handleNavigate } = useNavigateTo();
   const { user, status } = useSelector((state) => state.auth);
-  const isMobileDevice = () => {
-    return /Mobi|Android/i.test(navigator.userAgent);
-  };
+
   const startLogin = async (formData) => {
+    let token;
     try {
       const response = await api.post("/auth/signin", formData);
-      const { token } = response.data;
+      token = response.data.token;
 
-      if (isMobileDevice()) {
-        // Almacena el token en localStorage para móviles
-        localStorage.setItem("token", token);
-      } else {
-        // Almacena el token en cookies para ordenadores
-        Cookies.set("token", token, { expires: 7, secure: true, sameSite: "None" });
-      }
+      localStorage.setItem("token", token);
 
       const user = decodeToken(token);
-
-      const currentUserResponse = await api.get("/auth/current");
-      const { accounts, plan } = currentUserResponse.data;
-
-      // Almacena también accounts y plan
-      if (isMobileDevice()) {
-        localStorage.setItem("accounts", JSON.stringify(accounts));
-        localStorage.setItem("plan", JSON.stringify(plan));
-      } else {
-        Cookies.set("accounts", JSON.stringify(accounts), { expires: 7, secure: true, sameSite: "None" });
-        Cookies.set("plan", JSON.stringify(plan), { expires: 7, secure: true, sameSite: "None" });
-      }
-
-      const userWithAccountAndPlan = {
-        ...user,
-        accounts: accounts,
-        plan: plan,
-      };
-
-      dispatch(onLogin(userWithAccountAndPlan));
+      dispatch(onLogin(user));
 
       handleNavigate("/dashboard");
       toast.success("Login exitoso, serás redireccionado al dashboard.");
     } catch (error) {
-      const localToken = localStorage.getItem("token");
       if (error.message === "Request failed with status code 401") {
-        return toast.error("Credenciales inválidas.", localToken);
+        console.log(error);
+        return toast.error("Credenciales inválidas.");
       }
       console.error("Error signing in:", error);
-      toast.error("No se ha podido iniciar sesión", error, localToken);
+      toast.error("No se ha podido iniciar sesión");
+    } finally {
+      if (token) {
+        try {
+          const currentUserResponse = await api.get("/auth/current");
+          const { accounts, plan } = currentUserResponse.data;
+
+          localStorage.setItem("accounts", JSON.stringify(accounts));
+          localStorage.setItem("plan", JSON.stringify(plan));
+
+          const user = decodeToken(token);
+          const userWithAccountAndPlan = {
+            ...user,
+            accounts: accounts,
+            plan: plan,
+          };
+
+          dispatch(onLogin(userWithAccountAndPlan));
+        } catch (error) {
+          console.error("Error fetching current user details:", error);
+          toast.error("No se han podido obtener las cuentas y el plan.");
+        }
+      }
     }
   };
 
@@ -71,15 +67,14 @@ export const useAuthSlice = () => {
       const apiResponse = await api.post("/auth/google-signin", userData);
       const { token } = apiResponse.data;
 
-      Cookies.set("token", token, { expires: 7 });
-
+      localStorage.setItem("token", token);
       const user = decodeToken(token);
 
       const currentUserResponse = await api.get("/auth/current");
       const { accounts, plan } = currentUserResponse.data;
 
-      Cookies.set("accounts", JSON.stringify(accounts), { expires: 7 });
-      Cookies.set("plan", JSON.stringify(plan), { expires: 7 });
+      localStorage.setItem("accounts", JSON.stringify(accounts));
+      localStorage.setItem("plan", JSON.stringify(plan));
 
       const userWithAccountAndPlan = {
         ...user,
@@ -115,10 +110,7 @@ export const useAuthSlice = () => {
   };
 
   const startLoggingOut = () => {
-    Cookies.remove("token");
-
-    Cookies.remove("accounts");
-    Cookies.remove("plan");
+    localStorage.clear();
 
     dispatch(onLogOut(""));
   };

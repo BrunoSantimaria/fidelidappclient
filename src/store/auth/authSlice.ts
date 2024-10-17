@@ -39,7 +39,7 @@ interface DecodedToken {
   name: string;
 }
 
-const token = Cookies.get("token");
+const token = localStorage.getItem("token");
 
 console.log(token); // Imprime el valor del token si existe
 
@@ -48,8 +48,8 @@ let initialUser = null;
 if (token) {
   try {
     const decodedToken = jwtDecode<DecodedToken>(token);
-    const accounts = JSON.parse(Cookies.get("accounts") || "{}"); // Obteniendo cuentas desde las cookies
-    const plan = JSON.parse(Cookies.get("plan") || "{}"); // Obteniendo plan desde las cookies
+    const accounts = JSON.parse(localStorage.getItem("accounts") || "{}"); // Obteniendo cuentas desde las cookies
+    const plan = JSON.parse(localStorage.getItem("plan") || "{}"); // Obteniendo plan desde las cookies
     initialUser = {
       id: decodedToken.id,
       email: decodedToken.email,

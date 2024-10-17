@@ -1,8 +1,9 @@
 import axios from "axios";
+
 const API_URL = import.meta.env.VITE_API_URL;
 export const baseURL = API_URL;
 
-axios.defaults.withCredentials = true; // Con esto, las cookies se enviarán automáticamente
+axios.defaults.withCredentials = true; // Para enviar cookies automáticamente
 
 const api = axios.create({
   baseURL: API_URL,
@@ -12,8 +13,14 @@ const api = axios.create({
 // Interceptor de solicitudes
 api.interceptors.request.use(
   (config) => {
-    // No necesitas agregar manualmente las cookies aquí. Las cookies
-    // se enviarán automáticamente si están configuradas con withCredentials.
+    // Obtener el token del localStorage
+    const token = localStorage.getItem("token");
+
+    // Si el token existe, lo agregamos al encabezado Authorization
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => {
@@ -27,7 +34,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Manejar errores aquí
+    // Manejar errores aquí, por ejemplo, refrescar el token o redirigir al login
     return Promise.reject(error);
   }
 );
