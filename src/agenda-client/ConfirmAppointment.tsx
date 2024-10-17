@@ -23,7 +23,7 @@ const ConfirmAppointment = () => {
       const response = await api.post("/api/agenda/confirmAppointment/" + appointmentId);
       if (response.status === 200) {
         toast.success("Cita confirmada con éxito.");
-        navigate("/thank-you"); // Redirige a una página de agradecimiento o a la página principal
+        navigate("/thank-you");
       } else {
         toast.error("Error al confirmar la cita.");
       }

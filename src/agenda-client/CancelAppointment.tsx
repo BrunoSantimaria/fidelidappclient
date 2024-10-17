@@ -15,7 +15,7 @@ const CancelAppointment = () => {
         const response = await api.post("/api/agenda/cancelAppointment/" + appointmentId);
         if (response.status === 200) {
           toast.success("Cita cancelada con éxito.");
-          navigate("/thank-you"); // Redirect to a thank-you page or homepage
+          navigate("/thank-you");
         } else {
           alert("Error al cancelar la cita.");
         }

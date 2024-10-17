@@ -31,6 +31,7 @@ export interface DashboardState {
 const initialState: DashboardState = {
   promotions: [],
   agendas: [],
+  clients: [],
   metrics: null,
   loading: false,
   activePromotion: [],
@@ -62,6 +63,9 @@ export const dashboardSlice = createSlice({
     setAgendas: (state, action) => {
       state.agendas = action.payload;
     },
+    setClients: (state, action) => {
+      state.clients = action.payload;
+    },
     cleanActivePromotion: (state) => {
       state.activePromotion = [];
     },
@@ -73,10 +77,12 @@ export const dashboardSlice = createSlice({
       state.loading = false;
       state.activePromotion = [];
       state.agendas = [];
+      state.clients = [];
     },
   },
 });
 
-export const { setPromotions, setMetrics, setLoading, setErrorMessage, setActivePromotion, cleanActivePromotion, setAgendas } = dashboardSlice.actions;
+export const { setPromotions, setMetrics, setLoading, setErrorMessage, setClients, setActivePromotion, cleanActivePromotion, setAgendas } =
+  dashboardSlice.actions;
 
 export default dashboardSlice.reducer;

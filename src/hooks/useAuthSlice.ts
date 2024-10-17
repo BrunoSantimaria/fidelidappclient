@@ -18,7 +18,7 @@ export const useAuthSlice = () => {
       const response = await api.post("/auth/signin", formData);
       const { token } = response.data;
 
-      Cookies.set("token", token, { expires: 7 });
+      Cookies.set("authToken", token, { expires: 7 });
 
       const user = decodeToken(token);
 
@@ -39,6 +39,9 @@ export const useAuthSlice = () => {
       handleNavigate("/dashboard");
       toast.success("Login exitoso, serás redireccionado al dashboard.");
     } catch (error) {
+      if (error.message === "Request failed with status code 401") {
+        return toast.error("Credenciales invalidas.");
+      }
       console.error("Error signing in:", error);
       toast.error("No se ha podido iniciar sesión");
     }
@@ -53,7 +56,7 @@ export const useAuthSlice = () => {
       const apiResponse = await api.post("/auth/google-signin", userData);
       const { token } = apiResponse.data;
 
-      Cookies.set("token", token, { expires: 7 });
+      Cookies.set("authToken", token, { expires: 7 });
 
       const user = decodeToken(token);
 
@@ -86,9 +89,8 @@ export const useAuthSlice = () => {
     try {
       await api.post("/auth/signup", formData);
       toast.success("Usuario creado correctamente");
-      handleNavigate("/auth/login");
+      handleNavigate("/auth/login#");
     } catch (error) {
-      console.error("Error signing up:", error);
       toast.error("No se ha podido crear el usuario");
     }
   };
@@ -98,6 +100,7 @@ export const useAuthSlice = () => {
   };
 
   const startLoggingOut = () => {
+    Cookies.remove("authToken");
     Cookies.remove("token");
     Cookies.remove("accounts");
     Cookies.remove("plan");

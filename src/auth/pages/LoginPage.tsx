@@ -5,8 +5,10 @@ import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { validateEmail, validatePassword, validateName } from "../../utils/validations";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { useNavigateTo } from "../../hooks/useNavigateTo";
 
 export const LoginPage = () => {
+  const { handleNavigate } = useNavigateTo();
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -20,11 +22,19 @@ export const LoginPage = () => {
 
   const { startLogin, startRegister, startGoogleSignIn } = useAuthSlice();
 
+  // Función para limpiar el formulario
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setName("");
+    setErrors({ email: "", password: "", name: "" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const emailError = validateEmail(email) ? "" : "Email no válido";
-    const passwordError = validatePassword(password) ? "" : "Contraseña debe tener al menos 6 caracteres";
+    const passwordError = validatePassword(password) ? "" : "La contraseña debe tener al menos 6 caracteres";
     const nameError = validateName(isRegister, name);
 
     setErrors({ email: emailError, password: passwordError, name: nameError });
@@ -34,6 +44,10 @@ export const LoginPage = () => {
 
       if (isRegister) {
         await startRegister(formData);
+        resetForm();
+        setTimeout(() => {
+          location.reload();
+        }, 3000);
       } else {
         await startLogin(formData);
       }
@@ -42,6 +56,11 @@ export const LoginPage = () => {
 
   const handleGoogleSignInSuccess = async (response) => {
     await startGoogleSignIn(response);
+  };
+
+  const toggleFormMode = () => {
+    resetForm();
+    setIsRegister((prev) => !prev);
   };
 
   return (
@@ -113,7 +132,7 @@ export const LoginPage = () => {
 
             <Grid container sx={{ mt: 3, justifyContent: "center" }}>
               <Grid item>
-                <Link href='#' variant='body2' onClick={() => setIsRegister(!isRegister)}>
+                <Link href='#' variant='body2' onClick={toggleFormMode}>
                   {isRegister ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
                 </Link>
               </Grid>

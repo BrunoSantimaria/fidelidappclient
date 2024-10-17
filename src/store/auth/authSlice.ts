@@ -39,17 +39,10 @@ interface DecodedToken {
   name: string;
 }
 
-const getTokenFromCookies = () => {
-  return (
-    document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1] || null
-  );
-};
+const token = Cookies.get("authToken");
 
-// Obtiene el token y otros datos de las cookies
-const token = getTokenFromCookies();
+console.log(token); // Imprime el valor del token si existe
+
 let initialUser = null;
 
 if (token) {

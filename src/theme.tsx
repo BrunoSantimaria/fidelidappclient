@@ -3,35 +3,35 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#5b7898", // Color primario
+      main: "#5b7898",
     },
     secondary: {
-      main: "#dc004e", // Color secundario
+      main: "#dc004e",
     },
   },
   typography: {
     fontFamily: "Poppins, Roboto, sans-serif",
   },
-  spacing: 8, // Este es el tamaño base para el espaciado, puedes ajustarlo según sea necesario
+  spacing: 8,
   components: {
     MuiContainer: {
       defaultProps: {
-        maxWidth: false, // Evitar la limitación de ancho máximo
+        maxWidth: false,
       },
       styleOverrides: {
         root: {
-          paddingLeft: "16px", // Asegura un padding en el eje X
+          paddingLeft: "16px",
           paddingRight: "16px",
-          margin: "0 auto", // Centra el contenedor
-          width: "100vw", // Asegura que el ancho sea siempre 100vw
-          boxSizing: "border-box", // Incluye padding en el ancho total
+          margin: "0 auto",
+          width: "100vw",
+          boxSizing: "border-box",
         },
       },
     },
     MuiBox: {
       styleOverrides: {
         root: {
-          overflowX: "hidden", // Evita el desbordamiento horizontal
+          overflowX: "hidden",
         },
       },
     },

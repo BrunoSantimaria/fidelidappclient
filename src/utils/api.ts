@@ -1,19 +1,27 @@
 import axios from "axios";
+const API_URL = import.meta.env.VITE_API_URL;
+export const baseURL = API_URL;
 
-// Configurar axios para incluir cookies en las solicitudes entre diferentes dominios
 axios.defaults.withCredentials = true;
 
-// Crear una instancia de axios con configuraciones por defecto
 const api = axios.create({
-  baseURL: "http://localhost:8080", // Cambia esta URL por la base URL de tu API
-  timeout: 10000, // Tiempo de espera de 10 segundos
+  baseURL: API_URL,
 });
 
 // Interceptor de solicitudes
 api.interceptors.request.use(
   (config) => {
-    // Puedes añadir aquí headers por defecto si es necesario
-    // config.headers['Authorization'] = `Bearer ${tuToken}`;
+    // Asegúrate de que la cookie se envía en las solicitudes
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("authToken="))
+      ?.split("=")[1];
+
+    if (token) {
+      // Agregar la cookie manualmente si es necesario
+      config.headers["Cookie"] = `token=${token}`;
+    }
+
     return config;
   },
   (error) => {
@@ -28,10 +36,10 @@ api.interceptors.response.use(
   },
   (error) => {
     // Manejar errores aquí
-    if (error.response && error.response.status === 401) {
-      // Por ejemplo, redireccionar al login si el token expira
-      // window.location.href = '/login';
-    }
+    // if (error.response && error.response.status === 401) {
+    //   // Por ejemplo, redireccionar al login si el token expira
+    //   // window.location.href = '/login';
+    // }
     return Promise.reject(error);
   }
 );

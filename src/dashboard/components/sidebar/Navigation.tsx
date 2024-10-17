@@ -117,11 +117,10 @@ export const Navigation = () => {
               </div>
             </>
           )}
-          <div onClick={handleModal}>
-            <NavigationLink name='Clientes'>
-              <GroupsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-            </NavigationLink>
-          </div>
+
+          <NavigationLink name='Clientes' link='/dashboard/clients/list'>
+            <GroupsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
 
           <div>
             <NavigationLink name='Correos' link='/dashboard/email-sender'>

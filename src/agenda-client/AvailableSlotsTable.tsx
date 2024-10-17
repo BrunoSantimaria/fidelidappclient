@@ -16,7 +16,7 @@ const AvailableSlotsTable = ({ name, description, availableSlotsByDay, agendaId 
   const handleClose = () => {
     setOpen(false);
     setSelectedSlot(null);
-    //Reload component
+
     window.location.reload();
   };
 

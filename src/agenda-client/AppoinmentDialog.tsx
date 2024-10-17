@@ -6,14 +6,14 @@ import api from "../utils/api";
 const AppointmentDialog = ({ open, handleClose, selectedSlot, selectedDate, agendaId }) => {
   const [clientEmail, setClientEmail] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // State variable to track loading state
+  const [loading, setLoading] = useState(false);
 
   const handleConfirm = async () => {
     if (!clientEmail) {
       setError("Email del cliente es obligatorio");
       return;
     }
-    //Validate email format
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(clientEmail)) {
       setError("Formato de correo electrónico inválido");

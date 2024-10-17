@@ -16,7 +16,6 @@ interface Props {
 }
 export const AddAdmin = ({ open, handleClose }: Props) => {
   const { user } = useAuthSlice();
-  console.log(user.accounts._id);
 
   return (
     <React.Fragment>

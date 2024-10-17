@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Button,
   TextField,
@@ -14,12 +14,22 @@ import {
   Paper,
   Select,
   MenuItem,
-  Checkbox,
-  TableFooter,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import api from "../../../utils/api";
 import { motion } from "framer-motion";
-import Papa from "papaparse"; // Importar PapaParse para manejar el CSV
+import Papa from "papaparse";
+import { useDashboard } from "../../../hooks";
+import { toast } from "react-toastify";
+import { EmailEditor } from "react-email-editor"; // Importar ReactEmailEditor
+import { useDropzone } from "react-dropzone"; // Importa el hook de Dropzone
+import { UploadFile } from "@mui/icons-material";
 
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
@@ -30,81 +40,116 @@ const pageTransition = {
   },
 };
 
-const dummyUserList = [
-  { id: 1, name: "Juan Pérez", email: "juan.perez@example.com" },
-  { id: 2, name: "María López", email: "maria.lopez@example.com" },
-  { id: 3, name: "Carlos García", email: "carlos.garcia@example.com" },
-  { id: 4, name: "Ana Martínez", email: "ana.martinez@example.com" },
-  { id: 5, name: "Luis Rodríguez", email: "luis.rodriguez@example.com" },
-  { id: 6, name: "Laura Torres", email: "laura.torres@example.com" },
-];
-
 export const EmailSender = () => {
-  const [contactSource, setContactSource] = useState("csv"); // Fuente de contacto (csv o lista)
-  const [csvFile, setCsvFile] = useState(null);
-  const [subject, setSubject] = useState("Mensaje Personalizado");
-  const [template, setTemplate] = useState("Hola [Nombre],\n\nEste es tu [Detalle].");
-  const [csvData, setCsvData] = useState([]); // Almacenar los datos CSV
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [userList, setUserList] = useState(dummyUserList); // Lista de usuarios ficticia
-  const [selectedUsers, setSelectedUsers] = useState([]); // Usuarios seleccionados
+  const [contactSource, setContactSource] = useState("csv"); // Estado para la fuente de contactos (CSV o Clientes)
+  const [csvFile, setCsvFile] = useState(null); // Archivo CSV seleccionado
+  const [subject, setSubject] = useState(""); // Asunto del correo
+  const [csvData, setCsvData] = useState([]); // Datos del CSV cargado
+  const [page, setPage] = useState(0); // Página actual para paginación
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Número de filas por página
+  const [openDialog, setOpenDialog] = useState(false); // Control del diálogo de confirmación
+  const [emailCount, setEmailCount] = useState(0); // Cantidad de correos a enviar
+  const [loading, setLoading] = useState(false); // Estado de carga para enviar correos
+  const [openWarningDialog, setOpenWarningDialog] = useState(false); // Diálogo de advertencia para más de 500 contactos
+  const { clients } = useDashboard(); // Clientes desde el hook de dashboard
 
+  const emailEditorRef = useRef(); // Referencia al editor de email
+
+  // Deshabilitar el botón de enviar si el asunto está vacío
+  const isSendDisabled = !subject || subject === "";
+
+  // Manejo del cambio de fuente de contacto (CSV o Clientes)
   const handleContactSourceChange = (event) => {
     setContactSource(event.target.value);
+    if (event.target.value === "clients") {
+      setCsvFile(null); // Limpiar CSV si seleccionamos "Clientes"
+      setCsvData([]); // Limpiar datos del CSV
+    }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setCsvFile(file);
-
-    // Leer y analizar el CSV
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        setCsvData(results.data); // Guardar datos CSV en el estado
-      },
-    });
-  };
-
+  // Manejo de cambio de asunto
   const handleSubjectChange = (e) => {
     setSubject(e.target.value);
   };
 
-  const handleTemplateChange = (e) => {
-    setTemplate(e.target.value);
+  // Enviar correos (abre el diálogo de confirmación)
+  const handleSendEmails = () => {
+    const totalEmails = contactSource === "csv" ? csvData.length : clients.length;
+    setEmailCount(totalEmails);
+
+    if (totalEmails > 500) {
+      setOpenWarningDialog(true); // Mostrar diálogo de advertencia si hay más de 500 contactos
+    } else {
+      setOpenDialog(true); // Abrir el diálogo de confirmación
+    }
   };
 
-  const handleSendEmails = async () => {
-    if (contactSource === "csv" && !csvFile) {
-      alert("Por favor, sube un archivo CSV primero.");
+  // Confirmar el envío de correos
+  const handleConfirmSend = async () => {
+    setLoading(true);
+
+    let recipients = [];
+
+    // Seleccionar destinatarios según la fuente de contactos
+    if (contactSource === "csv") {
+      recipients = csvData.filter((row) => row.email && /\S+@\S+\.\S+/.test(row.email));
+    } else if (contactSource === "clients") {
+      recipients = clients.filter((client) => client.email && /\S+@\S+\.\S+/.test(client.email));
+    }
+
+    // Validar si hay destinatarios válidos
+    if (recipients.length === 0) {
+      toast.error("No hay destinatarios válidos.");
+      setLoading(false);
+      setOpenDialog(false);
       return;
     }
 
-    const formData = new FormData();
-    formData.append("subject", subject);
-    formData.append("template", template);
-
-    if (contactSource === "csv") {
-      formData.append("file", csvFile);
-    } else if (contactSource === "list") {
-      formData.append("users", JSON.stringify(selectedUsers)); // Convertir a JSON si es necesario
-    }
-
     try {
-      const response = await api.post("/api/email", formData);
-      if (response.status === 200) {
-        alert("Emails enviados con éxito!");
-      } else {
-        alert("Error al enviar emails.");
-      }
+      // Exportar el contenido del editor de emails
+      const templateHtml = await new Promise((resolve, reject) => {
+        if (emailEditorRef.current) {
+          emailEditorRef.current.editor.exportHtml((data) => {
+            const { html } = data;
+            if (html && html.trim() !== "") {
+              resolve(html);
+            } else {
+              reject("El contenido del email está vacío.");
+            }
+          });
+        } else {
+          reject("Editor no disponible.");
+        }
+      });
+
+      const formData = {
+        subject: subject,
+        template: templateHtml,
+        clients: recipients,
+      };
+
+      // Enviar los datos del formulario (asunto, template, y lista de clientes)
+      await api.post("/api/email/send", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Correo enviado correctamente.");
+      setSubject("");
+      setCsvFile(null);
+      emailEditorRef.current.editor.loadDesign({ body: { rows: [] } }); // Limpiar el editor
     } catch (error) {
-      alert("Error enviando emails: " + error.message);
+      console.error("Error al enviar el correo:", error);
+      toast.error("Hubo un problema enviando el correo.");
+    } finally {
+      setLoading(false);
+      setOpenDialog(false);
     }
   };
 
-  const handleChangePage = (event, newPage) => {
+  // Funciones para manejar la paginación de los datos
+  const handleChangePage = (newPage) => {
     setPage(newPage);
   };
 
@@ -113,30 +158,73 @@ export const EmailSender = () => {
     setPage(0);
   };
 
-  const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      setSelectedUsers(userList.map((user) => ({ name: user.name, email: user.email })));
-    } else {
-      setSelectedUsers([]);
+  // Función para manejar el archivo CSV con react-dropzone
+  const onDrop = (acceptedFiles) => {
+    const file = acceptedFiles[0];
+
+    // Validar que el archivo sea CSV
+    if (!file.name.endsWith(".csv")) {
+      toast.error("El archivo debe ser un archivo CSV.");
+      return;
     }
+
+    setCsvFile(file);
+
+    // Parsear el archivo CSV usando papaparse
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const filteredData = results.data
+          .map((row) => ({
+            name: row.nombre || row.Name || row.name || row.Nombre,
+            email: row.email || row.Email || row.correo || row.Correo,
+          }))
+          .filter((row) => row.name || row.email); // Filtrar filas sin nombre ni email
+
+        if (filteredData.length > 500) {
+          toast.error("El archivo CSV contiene más de 500 contactos, no se puede cargar.");
+        } else {
+          setCsvData(filteredData); // Si es menor a 500, cargar los datos
+        }
+      },
+    });
   };
+
+  // Configurar el hook de react-dropzone
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "text/csv": [".csv"] },
+    multiple: false,
+  });
 
   return (
     <motion.main initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='w-full h-full flex flex-row relative'>
       <div className='flex flex-col p-10 ml-0 md:ml-20 lg:ml-20 w-full gap-5'>
         <Box>
-          <Typography variant='h6'>A continuación podrás crear emails y enviarlos masivamente.</Typography>
-          <br />
-          <Typography variant='body2'>Usa [Nombre] y [Detalle] para personalizar el mensaje.</Typography>
-          <br />
+          <span className='font-bold text-3xl pb-6 flex'>A continuación podrás crear emails y enviarlos masivamente.</span>
+
+          {/* Selección de fuente de contacto (CSV o Clientes) */}
           <Select value={contactSource} onChange={handleContactSourceChange} fullWidth margin='normal'>
             <MenuItem value='csv'>Cargar CSV</MenuItem>
-            <MenuItem value='list'>Seleccionar de lista</MenuItem>
+            <MenuItem value='clients'>Clientes</MenuItem>
           </Select>
 
+          {/* Cargar archivo CSV usando react-dropzone */}
           {contactSource === "csv" && (
             <>
-              <input type='file' accept='.csv' onChange={handleFileChange} />
+              <div {...getRootProps()} style={{ border: "2px dashed #007BFF", padding: "20px", textAlign: "center", marginTop: "20px" }}>
+                <input {...getInputProps()} />
+                <div>
+                  <UploadFile fontSize='large' color='action' />
+                  <Typography variant='h6'>Arrastra y suelta tu archivo CSV aquí, o haz clic para seleccionar</Typography>
+                  <Button variant='contained' color='primary' sx={{ marginTop: 2 }}>
+                    Subir archivo
+                  </Button>
+                  <span className='flex m-auto justify-center mt-2'>(Maximo 500 clientes por csv.)</span>
+                </div>{" "}
+              </div>
+
               {csvData.length > 0 && (
                 <Box mt={4}>
                   <Typography variant='h6'>Vista previa del CSV:</Typography>
@@ -147,102 +235,116 @@ export const EmailSender = () => {
                           <TableRow>
                             <TableCell>Nombre</TableCell>
                             <TableCell>Correo Electrónico</TableCell>
-                            <TableCell>Detalle</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {csvData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                             <TableRow key={index}>
-                              <TableCell>{row.Name || "No disponible"}</TableCell>
-                              <TableCell>{row.Email || "No disponible"}</TableCell>
-                              <TableCell>{row.Detail || "No disponible"}</TableCell>
+                              <TableCell>{row.name}</TableCell>
+                              <TableCell>{row.email}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
                     </TableContainer>
-                    <TablePagination
-                      rowsPerPageOptions={[5, 10, 25]}
-                      component='div'
-                      count={csvData.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
                   </Paper>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component='div'
+                    count={csvData.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
                 </Box>
               )}
             </>
           )}
-
-          {contactSource === "list" && (
+          {contactSource === "clients" && (
             <>
-              <Typography variant='h6'>Selecciona los usuarios:</Typography>
+              <Typography variant='h6'>Lista de clientes:</Typography>
               <Box mt={2}>
                 <TableContainer component={Paper}>
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell padding='checkbox'>
-                          <Checkbox
-                            indeterminate={selectedUsers.length > 0 && selectedUsers.length < userList.length}
-                            checked={userList.length > 0 && selectedUsers.length === userList.length}
-                            onChange={handleSelectAll}
-                            inputProps={{ "aria-label": "select all users" }}
-                          />
-                        </TableCell>
                         <TableCell>Nombre</TableCell>
                         <TableCell>Correo Electrónico</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {userList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell padding='checkbox'>
-                            <Checkbox
-                              checked={selectedUsers.some((selectedUser) => selectedUser.email === user.email)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedUsers((prev) => [...prev, { name: user.name, email: user.email }]);
-                                } else {
-                                  setSelectedUsers((prev) => prev.filter((u) => u.email !== user.email));
-                                }
-                              }}
-                              inputProps={{ "aria-label": user.name }}
-                            />
-                          </TableCell>
-                          <TableCell>{user.name}</TableCell>
-                          <TableCell>{user.email}</TableCell>
+                      {clients.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((client, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{client.name}</TableCell>
+                          <TableCell>{client.email}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
-                    <TableFooter>
-                      <TableRow>
-                        <TablePagination
-                          rowsPerPageOptions={[5, 10, 25]}
-                          count={userList.length}
-                          rowsPerPage={rowsPerPage}
-                          page={page}
-                          onPageChange={handleChangePage}
-                          onRowsPerPageChange={handleChangeRowsPerPage}
-                        />
-                      </TableRow>
-                    </TableFooter>
                   </Table>
                 </TableContainer>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component='div'
+                  count={clients.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
               </Box>
             </>
           )}
+          {/* Editor de Email */}
+          <TextField label='Asunto del Email' variant='outlined' fullWidth margin='normal' value={subject} onChange={handleSubjectChange} />
 
-          <TextField label='Asunto del Email' value={subject} onChange={handleSubjectChange} fullWidth margin='normal' />
-          <TextField label='Plantilla del Email' multiline rows={8} value={template} onChange={handleTemplateChange} fullWidth margin='normal' />
+          <div className='my-4'>
+            <Typography variant='h6'>Editor de Email</Typography>
+            <EmailEditor ref={emailEditorRef} />
+          </div>
 
-          <Button variant='contained' color='primary' onClick={handleSendEmails}>
-            Enviar Emails
+          {/* Asunto del Email */}
+
+          {/* Botón para enviar el correo */}
+          <Button variant='contained' color='primary' fullWidth disabled={isSendDisabled} onClick={handleSendEmails}>
+            Enviar Correos
           </Button>
         </Box>
       </div>
+
+      {/* Diálogos */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Confirmar Envío</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Estás a punto de enviar correos a {emailCount} destinatarios. ¿Estás seguro?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color='secondary'>
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmSend} color='primary'>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Advertencia cuando hay más de 500 contactos */}
+      <Dialog open={openWarningDialog} onClose={() => setOpenWarningDialog(false)}>
+        <DialogTitle>Advertencia</DialogTitle>
+        <DialogContent>
+          <DialogContentText>El archivo CSV contiene más de 500 contactos. No se puede cargar el archivo.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenWarningDialog(false)} color='primary'>
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Cargando */}
+      <Backdrop open={loading} style={{ color: "#fff" }}>
+        <CircularProgress color='inherit' />
+      </Backdrop>
     </motion.main>
   );
 };

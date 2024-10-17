@@ -8,13 +8,14 @@ import { useEffect } from "react";
 import { Promotion } from "../pages/Promotions/Promotion";
 import { EmailSender } from "../pages/email/EmailSender";
 import { CreateAgenda } from "../pages/Agenda/CreateAgenda";
+import { Clients } from "../pages/Clients/Clients";
 
 const pageTransition = {
-  hidden: { opacity: 0, y: 50 }, // Estado inicial: invisible y desplazado hacia abajo
+  hidden: { opacity: 0, y: 50 },
   visible: {
     opacity: 1,
-    y: 0, // Posición final: completamente visible y en su lugar original
-    transition: { duration: 0.5, ease: "easeOut" }, // Duración y tipo de transición
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
   },
 };
 
@@ -63,6 +64,7 @@ export const DashboardRoutes = () => {
         />
         <Route path='/promotion/:id' element={<Promotion />} />
         <Route path='/agenda/create' element={<CreateAgenda />} />
+        <Route path='/clients/list' element={<Clients />} />
         {/* Redirigir cualquier otra ruta al Dashboard */}
         <Route path='/*' element={<Navigate to='/' replace />} />
       </Routes>

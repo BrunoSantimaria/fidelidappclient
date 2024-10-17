@@ -1,5 +1,6 @@
 import { Box, Button, Container, Typography } from "@mui/material";
 import background from "../../assets/Cover.jpeg";
+import background2 from "../../assets/Cover3.jpeg";
 import { useState } from "react";
 import { ModalLanding } from "../components/ModalLanding";
 
@@ -104,18 +105,8 @@ export const Home = () => {
       <ModalLanding open={open} handleClose={handleClose} />
 
       <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: { xs: -400, md: 0 },
-          right: 0,
-          bottom: { xs: "0", sm: "0", md: 300, lg: "0" },
-          backgroundImage: `url(${background})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "blur(4px) brightness(50%)",
-          zIndex: 0,
-        }}
+        className='absolute top-0 left-[-600px] md:left-0 right-0 bottom-0 md:bottom-[300px] lg:bottom-0 bg-cover bg-left filter blur-sm brightness-[50%] z-0'
+        style={{ backgroundImage: `url(${background2})` }}
       />
     </Box>
   );

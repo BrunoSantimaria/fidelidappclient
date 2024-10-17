@@ -157,6 +157,9 @@ export const Promotion = () => {
               <Button variant='contained' color='primary' onClick={() => handleNavigate(`/promotion/${id}`)}>
                 Ver Promoción
               </Button>
+              <Button variant='contained' color='primary' disabled>
+                ENVIAR PROMOCÍON.
+              </Button>
             </div>
           </div>
 
