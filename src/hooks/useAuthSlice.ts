@@ -53,11 +53,12 @@ export const useAuthSlice = () => {
       handleNavigate("/dashboard");
       toast.success("Login exitoso, serás redireccionado al dashboard.");
     } catch (error) {
+      const localToken = localStorage.getItem("token");
       if (error.message === "Request failed with status code 401") {
-        return toast.error("Credenciales inválidas.");
+        return toast.error("Credenciales inválidas.", localToken);
       }
       console.error("Error signing in:", error);
-      toast.error("No se ha podido iniciar sesión", error);
+      toast.error("No se ha podido iniciar sesión", error, localToken);
     }
   };
 
