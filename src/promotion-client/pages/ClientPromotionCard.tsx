@@ -164,7 +164,7 @@ export const ClientPromotionCard = () => {
             </div>
           </div>
         </div>
-        <section className='flex mx-40 '>
+        <section className='flex flex-col md:flex md:flex-row mx-6 md:mx-40 '>
           <div className='mt-4 w-full md:w-1/2 space-y-6'>
             <h1 className='mt-4  font-bold text-left font-poppins text-4xl w-full md:w-2/3 md:text-5xl'>{promotionDetails.title}</h1>
             <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
@@ -191,7 +191,9 @@ export const ClientPromotionCard = () => {
             <>
               <DialogTitle>Escáner de Código QR</DialogTitle>
               <DialogContent>
-                <Scanner onScan={handleScan} style={{ width: "100%" }} />
+                <div className='w-full h-[500px] max-w-md mx-auto bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800'>
+                  <Scanner onScan={handleScan} className='w-full h-full' />
+                </div>
               </DialogContent>
             </>
           )}
