@@ -23,7 +23,7 @@ export const Welcome = () => {
           </ul>
         </div>
         <div className='bg-main w-fit p-2 rounded-md text-white'>
-          Plan activo: <span className='text-green-500'>{`${plan.planStatus.charAt(0).toUpperCase()}${plan.planStatus.slice(1)}`}</span>
+          Plan activo: <span className='text-green-500'>{`${plan?.planStatus.charAt(0).toUpperCase()}${plan.planStatus.slice(1)}`}</span>
         </div>
       </section>
       <Divider />
