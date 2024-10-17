@@ -59,13 +59,6 @@ export const EmailSender = () => {
   const isSendDisabled = !subject || subject === "";
 
   // Manejo del cambio de fuente de contacto (CSV o Clientes)
-  const handleContactSourceChange = (event) => {
-    setContactSource(event.target.value);
-    if (event.target.value === "clients") {
-      setCsvFile(null); // Limpiar CSV si seleccionamos "Clientes"
-      setCsvData([]); // Limpiar datos del CSV
-    }
-  };
 
   // Manejo de cambio de asunto
   const handleSubjectChange = (e) => {
@@ -147,7 +140,13 @@ export const EmailSender = () => {
       setOpenDialog(false);
     }
   };
-
+  const handleContactSourceChange = (event) => {
+    setContactSource(event.target.value);
+    if (event.target.value === "clients") {
+      setCsvFile(null); // Limpiar CSV si seleccionamos "Clientes"
+      setCsvData([]); // Limpiar datos del CSV
+    }
+  };
   // Funciones para manejar la paginación de los datos
   const handleChangePage = (newPage) => {
     setPage(newPage);

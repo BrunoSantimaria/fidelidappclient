@@ -12,22 +12,36 @@ export const useAuthSlice = () => {
 
   const { handleNavigate } = useNavigateTo();
   const { user, status } = useSelector((state) => state.auth);
-
+  const isMobileDevice = () => {
+    return /Mobi|Android/i.test(navigator.userAgent);
+  };
   const startLogin = async (formData) => {
     try {
       const response = await api.post("/auth/signin", formData);
       const { token } = response.data;
-      console.log(response);
 
-      Cookies.set("token", token, { expires: 7, secure: true, sameSite: "None" });
+      if (isMobileDevice()) {
+        // Almacena el token en localStorage para móviles
+        localStorage.setItem("token", token);
+      } else {
+        // Almacena el token en cookies para ordenadores
+        Cookies.set("token", token, { expires: 7, secure: true, sameSite: "None" });
+      }
 
       const user = decodeToken(token);
 
       const currentUserResponse = await api.get("/auth/current");
       const { accounts, plan } = currentUserResponse.data;
 
-      Cookies.set("accounts", JSON.stringify(accounts), { expires: 7, secure: true, sameSite: "None" });
-      Cookies.set("plan", JSON.stringify(plan), { expires: 7, secure: true, sameSite: "None" });
+      // Almacena también accounts y plan
+      if (isMobileDevice()) {
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+        localStorage.setItem("plan", JSON.stringify(plan));
+      } else {
+        Cookies.set("accounts", JSON.stringify(accounts), { expires: 7, secure: true, sameSite: "None" });
+        Cookies.set("plan", JSON.stringify(plan), { expires: 7, secure: true, sameSite: "None" });
+      }
+
       const userWithAccountAndPlan = {
         ...user,
         accounts: accounts,
@@ -40,7 +54,7 @@ export const useAuthSlice = () => {
       toast.success("Login exitoso, serás redireccionado al dashboard.");
     } catch (error) {
       if (error.message === "Request failed with status code 401") {
-        return toast.error("Credenciales invalidas.");
+        return toast.error("Credenciales inválidas.");
       }
       console.error("Error signing in:", error);
       toast.error("No se ha podido iniciar sesión");
