@@ -9,15 +9,18 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Provider } from "react-redux";
 import { store } from "./store/store.ts";
 import { HelmetProvider } from "react-helmet-async";
+import ReactGA from "react-ga4";
 
-createRoot(document.getElementById("root")!).render(
+ReactGA.initialize("G-Q91RG51PRW");
+
+const rootElement = document.getElementById("root")!;
+createRoot(rootElement).render(
   <Provider store={store}>
     <BrowserRouter>
       <HelmetProvider>
         <GoogleOAuthProvider clientId='833746654519-bu68dd7uhn7bsgcvsjrrmnucl0nobta3.apps.googleusercontent.com'>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-
             <AppRouter />
           </ThemeProvider>
         </GoogleOAuthProvider>
@@ -25,3 +28,12 @@ createRoot(document.getElementById("root")!).render(
     </BrowserRouter>
   </Provider>
 );
+
+// Escucha los cambios en la ruta para enviar los datos a Google Analytics
+const sendPageView = (location: any) => {
+  ReactGA.send({ hitType: "pageview", page: location.pathname + location.search });
+};
+
+window.addEventListener("popstate", () => {
+  sendPageView(window.location);
+});
