@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "npx http-server ./dist -o -p $PORT",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -54,7 +53,6 @@
     "react-toastify": "^10.0.5",
     "recharts": "^2.13.0",
     "save": "^2.9.0",
-    "serve": "^14.2.4",
     "tailwindcss": "^3.4.13",
     "yup": "^1.4.0"
   },
