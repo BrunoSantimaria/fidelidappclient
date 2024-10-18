@@ -22,15 +22,6 @@ export const PromotionClient = () => {
   const [emailError, setEmailError] = useState(false);
   const [nameError, setNameError] = useState(false);
 
-  // Lista de países con códigos de país
-
-  useEffect(() => {
-    const defaultCountry = countries.find((country) => country.code === "CL");
-    if (defaultCountry) {
-      setPhoneNumber(defaultCountry.dialCode + " ");
-    }
-  }, []);
-
   const handlePhoneNumberChange = (event) => {
     setPhoneNumber(event.target.value);
   };
