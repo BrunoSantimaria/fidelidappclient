@@ -1,5 +1,5 @@
 localhost {
-    root * /dist
+    root * /usr/share/caddy
     file_server
 
     # Si la ruta solicitada no existe, redirige a index.html para manejar el enrutamiento con react-router
