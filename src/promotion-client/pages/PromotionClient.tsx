@@ -18,29 +18,11 @@ export const PromotionClient = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accountId, setAccountId] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("CL");
 
-  // Manejo de errores de los inputs
   const [emailError, setEmailError] = useState(false);
   const [nameError, setNameError] = useState(false);
 
   // Lista de países con códigos de país
-  const countries = [
-    { code: "CL", name: "Chile", flag: "🇨🇱", dialCode: "+56" },
-    { code: "AR", name: "Argentina", flag: "🇦🇷", dialCode: "+54" },
-    { code: "MX", name: "México", flag: "🇲🇽", dialCode: "+52" },
-    { code: "CO", name: "Colombia", flag: "🇨🇴", dialCode: "+57" },
-    { code: "PE", name: "Perú", flag: "🇵🇪", dialCode: "+51" },
-    { code: "BO", name: "Bolivia", flag: "🇧🇴", dialCode: "+591" },
-    { code: "EC", name: "Ecuador", flag: "🇪🇨", dialCode: "+593" },
-    { code: "UY", name: "Uruguay", flag: "🇺🇾", dialCode: "+598" },
-    { code: "PY", name: "Paraguay", flag: "🇵🇾", dialCode: "+595" },
-    { code: "DO", name: "República Dominicana", flag: "🇩🇴", dialCode: "+1" },
-    { code: "SV", name: "El Salvador", flag: "🇸🇻", dialCode: "+503" },
-    { code: "GT", name: "Guatemala", flag: "🇬🇹", dialCode: "+502" },
-    { code: "HN", name: "Honduras", flag: "🇭🇳", dialCode: "+504" },
-    { code: "CR", name: "Costa Rica", flag: "🇨🇷", dialCode: "+506" },
-  ];
 
   useEffect(() => {
     const defaultCountry = countries.find((country) => country.code === "CL");
@@ -51,15 +33,6 @@ export const PromotionClient = () => {
 
   const handlePhoneNumberChange = (event) => {
     setPhoneNumber(event.target.value);
-  };
-
-  const handleCountryChange = (event) => {
-    const selectedCountryCode = event.target.value;
-    setSelectedCountry(selectedCountryCode);
-    const country = countries.find((country) => country.code === selectedCountryCode);
-    if (country) {
-      setPhoneNumber(country.dialCode + " ");
-    }
   };
 
   useEffect(() => {
@@ -114,7 +87,6 @@ export const PromotionClient = () => {
       setClientEmail("");
       setClientName("");
       setPhoneNumber("");
-      setSelectedCountry("CL");
     } catch (error) {
       console.log(error.response.data.error);
       if (error.response.data.error === "Client already has this promotion") {
@@ -187,13 +159,6 @@ export const PromotionClient = () => {
             />
 
             <div className='flex space-x-2'>
-              <select value={selectedCountry} onChange={handleCountryChange} className='p-2 border border-gray-300 rounded-l-md bg-white'>
-                {countries.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.flag} {country.name}
-                  </option>
-                ))}
-              </select>
               <input
                 id='phone'
                 type='tel'

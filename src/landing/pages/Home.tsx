@@ -6,6 +6,12 @@ import { ModalLanding } from "../components/ModalLanding";
 
 export const Home = () => {
   const [open, setOpen] = useState(false);
+  const whatsappNumber = "56996706983"; // Reemplaza con tu número de WhatsApp
+  const message = "¡Hola! Me gustaría obtener más información sobre Fidelizarte y sus servicios de programas de fidelización. ¡Gracias!";
+
+  const handleClick = () => {
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -55,6 +61,7 @@ export const Home = () => {
         </Typography>
         <Box sx={{ marginTop: { xs: 1, sm: 2, md: 4 }, display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
           <Button
+            onClick={handleClick}
             variant='contained'
             sx={{
               position: "relative",
