@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "npx http-server ./dist -o -p 8080",
+    "start": "npx http-server ./dist -o -p $PORT",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
