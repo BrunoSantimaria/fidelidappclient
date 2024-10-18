@@ -30,7 +30,7 @@ const Agenda = () => {
       setDescription(description);
       setAvailableSlotsByDay(availableSlotsByDay);
     };
-
+    //asd
     getAvailableSlots();
   }, [agendaId]);
   const refs = {
