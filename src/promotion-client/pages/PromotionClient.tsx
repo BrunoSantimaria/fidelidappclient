@@ -149,16 +149,14 @@ export const PromotionClient = () => {
               placeholder='Email'
             />
 
-            <div className='flex space-x-2'>
-              <input
-                id='phone'
-                type='tel'
-                value={phoneNumber}
-                onChange={handlePhoneNumberChange}
-                placeholder='Número de teléfono (opcional)'
-                className='p-2 border border-gray-300 rounded-r-md bg-white w-full'
-              />
-            </div>
+            <Input
+              id='phone'
+              type='tel'
+              value={phoneNumber}
+              onChange={handlePhoneNumberChange}
+              placeholder='Número de teléfono (opcional)'
+              sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
+            />
 
             <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting || nameError || emailError}>
               {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
