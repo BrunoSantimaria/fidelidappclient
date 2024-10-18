@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { onLogOut } from "../store/auth/authSlice";
 import { useNavigateTo } from "./useNavigateTo";
 import { useAuthSlice } from "./useAuthSlice";
+import { log } from "console";
 
 export const useDashboard = () => {
   const { accounts, plan } = useSelector((state) => state.auth.user);
@@ -25,10 +26,11 @@ export const useDashboard = () => {
       const agendas = await api.get("/api/agenda");
       dispatch(setAgendas(agendas.data));
       console.log(accounts);
-
+      console.log("este es el id" + accounts._id);
       const clients = await api.get("/api/clients/getAccountClients", {
         params: { accountId: accounts._id },
       });
+
       dispatch(setClients(clients.data.clients));
     } catch (error) {
       console.log(error);

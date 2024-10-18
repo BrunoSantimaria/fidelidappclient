@@ -1,19 +1,18 @@
 import React from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
+import dayjs from "dayjs";
 
-export const VisitCharts = () => {
-  // Datos ficticios de visitas por día
-  const visitData = [
-    { day: "Lunes", visits: 30 },
-    { day: "Martes", visits: 50 },
-    { day: "Miércoles", visits: 20 },
-    { day: "Jueves", visits: 40 },
-    { day: "Viernes", visits: 60 },
-    { day: "Sábado", visits: 80 },
-    { day: "Domingo", visits: 45 },
-  ];
+export const VisitCharts = ({ promotions }) => {
+  console.log(promotions);
 
-  // Extraer los nombres de los días y las visitas
+  // Verificar si hay promociones y mapear los datos
+  const visitData =
+    promotions?.map((item) => ({
+      day: dayjs(item.date).format("DD/MM/YYYY"), // Formatear la fecha
+      visits: item.visits,
+    })) || [];
+
+  // Extraer los nombres de los días (fechas en este caso) y las visitas
   const days = visitData.map((data) => data.day);
   const visits = visitData.map((data) => data.visits);
 
@@ -25,6 +24,12 @@ export const VisitCharts = () => {
           {
             data: days,
             scaleType: "band", // Establecer el tipo de escala en "band" para los gráficos de barras
+          },
+        ]}
+        yAxis={[
+          {
+            tickNumber: 10, // Forzar un número fijo de ticks para el eje Y
+            tickMinStep: 1, // Asegurar que los ticks sean enteros
           },
         ]}
         series={[

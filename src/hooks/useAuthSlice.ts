@@ -16,7 +16,12 @@ export const useAuthSlice = () => {
   const startLogin = async (formData) => {
     let token;
     try {
-      const response = await api.post("/auth/signin", formData);
+      const modifiedFormData = {
+        ...formData,
+        email: formData.email.toLowerCase(),
+      };
+
+      const response = await api.post("/auth/signin", modifiedFormData);
       token = response.data.token;
 
       localStorage.setItem("token", token);
@@ -97,7 +102,12 @@ export const useAuthSlice = () => {
 
   const startRegister = async (formData) => {
     try {
-      await api.post("/auth/signup", formData);
+      const modifiedFormData = {
+        ...formData,
+        email: formData.email.toLowerCase(),
+      };
+
+      await api.post("/auth/signup", modifiedFormData);
       toast.success("Usuario creado correctamente");
       handleNavigate("/auth/login#");
     } catch (error) {

@@ -22,6 +22,7 @@ import {
   Backdrop,
   CircularProgress,
 } from "@mui/material";
+import translations from "../../../utils/translation.json";
 import api from "../../../utils/api";
 import { motion } from "framer-motion";
 import Papa from "papaparse";
@@ -275,6 +276,8 @@ export const EmailSender = () => {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage='Filas por página'
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                   />
                 </Box>
               )}
@@ -310,16 +313,24 @@ export const EmailSender = () => {
                   page={page}
                   onPageChange={handleChangePage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage='Filas por página'
+                  labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
               </Box>
             </>
           )}
           {/* Editor de Email */}
           <TextField label='Asunto del Email' variant='outlined' fullWidth margin='normal' value={subject} onChange={handleSubjectChange} />
-
           <div className='my-4'>
             <Typography variant='h6'>Editor de Email</Typography>
-            <EmailEditor ref={emailEditorRef} />
+            <div className='w-[50vw]  md:w-3/4 lg:w-1/2 m-auto'>
+              <EmailEditor
+                ref={emailEditorRef}
+                options={{
+                  locale: translations,
+                }}
+              />
+            </div>
           </div>
 
           {/* Asunto del Email */}

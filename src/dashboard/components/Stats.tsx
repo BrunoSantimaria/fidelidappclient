@@ -19,7 +19,7 @@ export const Stats = () => {
         <PeopleAltRoundedIcon style={{ color: "#2196F3" }} />
         <span>Clientes Registrados</span>
         <span>
-          {metrics?.registeredClients} / {plan?.clientLimit}
+          {metrics?.registeredClients} / {plan?.clientLimit || "Ilimitado"}
         </span>
       </div>
       <div className='w-full md:min-w-[20%] lg:min-w-[20%] flex flex-col shadow-md shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 space-y-4 p-6 rounded-md m-0 text-left'>

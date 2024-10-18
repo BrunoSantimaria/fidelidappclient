@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { Backdrop, Button, CircularProgress, Input, InputLabel, TextField } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Input, Alert } from "@mui/material";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import background from "../../assets/fondocandado2.png";
@@ -17,9 +17,50 @@ export const PromotionClient = () => {
   const [clientName, setClientName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accountId, setAccountId] = useState("");
-  console.log(promotion);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("CL");
 
-  // if (status && status === "authenticated") handleNavigate(`/dashboard/promotion/${id}`);
+  // Manejo de errores de los inputs
+  const [emailError, setEmailError] = useState(false);
+  const [nameError, setNameError] = useState(false);
+
+  // Lista de países con códigos de país
+  const countries = [
+    { code: "CL", name: "Chile", flag: "🇨🇱", dialCode: "+56" },
+    { code: "AR", name: "Argentina", flag: "🇦🇷", dialCode: "+54" },
+    { code: "MX", name: "México", flag: "🇲🇽", dialCode: "+52" },
+    { code: "CO", name: "Colombia", flag: "🇨🇴", dialCode: "+57" },
+    { code: "PE", name: "Perú", flag: "🇵🇪", dialCode: "+51" },
+    { code: "BO", name: "Bolivia", flag: "🇧🇴", dialCode: "+591" },
+    { code: "EC", name: "Ecuador", flag: "🇪🇨", dialCode: "+593" },
+    { code: "UY", name: "Uruguay", flag: "🇺🇾", dialCode: "+598" },
+    { code: "PY", name: "Paraguay", flag: "🇵🇾", dialCode: "+595" },
+    { code: "DO", name: "República Dominicana", flag: "🇩🇴", dialCode: "+1" },
+    { code: "SV", name: "El Salvador", flag: "🇸🇻", dialCode: "+503" },
+    { code: "GT", name: "Guatemala", flag: "🇬🇹", dialCode: "+502" },
+    { code: "HN", name: "Honduras", flag: "🇭🇳", dialCode: "+504" },
+    { code: "CR", name: "Costa Rica", flag: "🇨🇷", dialCode: "+506" },
+  ];
+
+  useEffect(() => {
+    const defaultCountry = countries.find((country) => country.code === "CL");
+    if (defaultCountry) {
+      setPhoneNumber(defaultCountry.dialCode + " ");
+    }
+  }, []);
+
+  const handlePhoneNumberChange = (event) => {
+    setPhoneNumber(event.target.value);
+  };
+
+  const handleCountryChange = (event) => {
+    const selectedCountryCode = event.target.value;
+    setSelectedCountry(selectedCountryCode);
+    const country = countries.find((country) => country.code === selectedCountryCode);
+    if (country) {
+      setPhoneNumber(country.dialCode + " ");
+    }
+  };
 
   useEffect(() => {
     const fetchPromotion = async () => {
@@ -39,23 +80,23 @@ export const PromotionClient = () => {
 
   const handleEmailChange = (event) => {
     setClientEmail(event.target.value);
+    setEmailError(!validateEmail(event.target.value));
   };
+
   const handleNameChange = (event) => {
     setClientName(event.target.value);
+    setNameError(event.target.value.trim() === "");
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleSubmit = async () => {
-    if (!clientEmail) {
-      return toast.info("Por favor, ingresa un email válido.");
+    if (emailError || nameError) {
+      return;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(clientEmail)) return toast.info("Por favor, ingresa un email válido.");
-    if (!clientName || clientName.trim().length < 2) {
-      toast.info("Debes ingresar un nombre.");
-    }
-    setIsSubmitting(true);
-    console.log(accountId);
 
     try {
       await api.post("/api/promotions/client", {
@@ -66,15 +107,19 @@ export const PromotionClient = () => {
           .split(" ")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(" "),
+        clientPhone: phoneNumber.trim(),
         accountId: accountId,
       });
-      // await api.post("/api/clients/addClient/", { accountId, clientData: { name: clientName, email: clientEmail }, promotionId: id });
       toast.success("Te has sumado exitosamente a la promoción.");
       setClientEmail("");
       setClientName("");
+      setPhoneNumber("");
+      setSelectedCountry("CL");
     } catch (error) {
       console.log(error.response.data.error);
-      if (error.response.data.error === "Client already has this promotion") return toast.info("Ya te encuentras en esta promoción.");
+      if (error.response.data.error === "Client already has this promotion") {
+        return toast.info("Ya te encuentras en esta promoción.");
+      }
       toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
     } finally {
       setIsSubmitting(false);
@@ -113,22 +158,13 @@ export const PromotionClient = () => {
   }
 
   return (
-    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen  bg-gradient-to-br from-gray-50 to-main/50'>
+    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
       <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
-        <div className='relative z-10  w-[95%] md:w-[60%] space-y-6  m-0 text-left p-6 rounded-md '>
-          <h1 className='font-poppins font-bold text-5xl'>{promotion.title}</h1>
-          <p className='font-medium'>{promotion.description}</p>
-          <div>
-            <p className='italic'>
-              La promoción se activa con: {promotion.visitsRequired} visitas en {promotion.promotionDuration} días.
-            </p>
-            <p className='italic'>Términos y condiciones aplican, serán enviados a tu correo una vez inscrito a la promoción</p>
-          </div>
-          <section></section>
-
+        <div className='relative z-10 w-[95%] md:w-[60%] space-y-6 m-0 text-left p-6 rounded-md'>
           <div className='space-y-2 flex flex-col mb-6'>
             <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p>
-            {/* <TextField label='Nombre' variant='filled' sx={{ width: "100%" }} value={clientName} onChange={handleNameChange} /> */}
+
+            {nameError && <Alert severity='error'>El nombre no puede estar vacío.</Alert>}
             <Input
               id='name'
               type='name'
@@ -138,6 +174,8 @@ export const PromotionClient = () => {
               sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
               placeholder='Nombre'
             />
+
+            {emailError && <Alert severity='error'>Introduce un email válido.</Alert>}
             <Input
               id='email'
               type='email'
@@ -147,23 +185,41 @@ export const PromotionClient = () => {
               sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
               placeholder='Email'
             />
-            <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting}>
+
+            <div className='flex space-x-2'>
+              <select value={selectedCountry} onChange={handleCountryChange} className='p-2 border border-gray-300 rounded-l-md bg-white'>
+                {countries.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.flag} {country.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                id='phone'
+                type='tel'
+                value={phoneNumber}
+                onChange={handlePhoneNumberChange}
+                placeholder='Número de teléfono (opcional)'
+                className='p-2 border border-gray-300 rounded-r-md bg-white w-full'
+              />
+            </div>
+
+            <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting || nameError || emailError}>
               {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
             </Button>
           </div>
+
+          <h1 className='font-poppins font-bold text-5xl'>{promotion.title}</h1>
+          <p className='font-poppins text-lg'>{promotion.description}</p>
         </div>
 
-        <div className='relative z-10 w-[95%] md:w-[40%] flex justify-center'>
-          <div className='w-full h-120 ml-6 rounded-md overflow-hidden bg-gray-200 shadow-md'>
-            <img src={promotion.imageUrl} alt='Promotion' className='object-cover w-full h-full' />
+        {/* Imagen de la promoción */}
+        {promotion.imageUrl && (
+          <div className='relative w-[95%] md:w-[35%] mx-auto md:mx-0'>
+            <img src={promotion.imageUrl} alt='Promoción' className='rounded-md object-cover w-full h-full' />
           </div>
-        </div>
+        )}
       </div>
-
-      <Backdrop open={isSubmitting} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <CircularProgress color='inherit' />
-        <div className='mt-2 text-white'>Sumándose a la promoción...</div>
-      </Backdrop>
     </section>
   );
 };

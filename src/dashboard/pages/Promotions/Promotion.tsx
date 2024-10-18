@@ -139,10 +139,10 @@ export const Promotion = () => {
   }
 
   return (
-    <main className='flex flex-col p-10 ml-0 md:ml-20 lg:ml-20  w-full gap-5'>
-      <main className='relative flex flex-col justify-center place-items-center space-y-6 w-full md:w-[95%] h-full md:h-[30%] rounded-md p-6 bg-gradient-to-br from-gray-50 to-main/50'>
-        <section className='flex flex-col md:flex-row justify-between w-full md:w-[95%] lg:max-w-[95%] mx-auto'>
-          <div className='relative z-10 w-[95%] md:w-[60%] space-y-6 text-left p-6 rounded-md'>
+    <main className='flex flex-col p-10 ml-0 md:ml-20 lg:ml-20 h-fit w-full gap-5'>
+      <main className=' flex flex-col  justify-center place-items-center space-y-4 w-full md:w-[95%] h-1/3 md:h-1/3 lg:h-1/3  rounded-md p-6 bg-gradient-to-br from-gray-50 to-main/50'>
+        <section className='flex flex-col md:flex-row  justify-between w-full md:w-[95%] lg:max-w-[95%] mx-auto'>
+          <div className='h-1/3 md:h-1/3 z-10 w-[95%] md:w-[60%] space-y-6  text-left p-6 rounded-md'>
             <h1 className='font-poppins font-bold text-2xl md:text-5xl'>{activePromotion.title}</h1>
             <p className='font-medium'>{activePromotion.description}</p>
             <div>
@@ -163,17 +163,16 @@ export const Promotion = () => {
             </div>
           </div>
 
-          <div className='relative z-10 w-[95%] md:w-[40%] flex justify-center'>
-            <div className='w-full h-120 ml-6 rounded-md overflow-hidden bg-gray-200 shadow-md'>
+          <div className='relative z-10 h-[300px] md:h-[450px] w-[95%] md:w-[40%] flex justify-center'>
+            <div className='w-full ml-6 rounded-md overflow-hidden bg-gray-200 shadow-md'>
               <img src={imagePreview} alt='Promotion' className='object-cover w-full h-full' />
             </div>
           </div>
         </section>
       </main>
-      <Divider />
       <PromotionMetrics metrics={activePromotion} />
-      <VisitCharts />
-      <ClientList clients={activePromotion?.statistics.clientList} />
+      <VisitCharts promotions={activePromotion?.statistics.visitsPerDay} />
+      <ClientList clients={activePromotion?.statistics.clientList} promotion={activePromotion} />
 
       {/* Modal de modificación */}
       <Modal open={openModal} onClose={handleCloseModal}>
@@ -183,7 +182,7 @@ export const Promotion = () => {
           <TextField label='Descripción' name='description' value={promotionData.description} onChange={handleInputChange} fullWidth />
           <TextField label='Condiciones' name='conditions' value={promotionData.conditions} onChange={handleInputChange} fullWidth />
           <input type='file' accept='image/*' onChange={handleImageChange} />
-          {imagePreview && <img src={imagePreview} alt='Preview' className='w-full h-40 object-cover mt-4' />}
+          {imagePreview && <img src={imagePreview} alt='Preview' className='w-full  object-cover mt-4' />}
           <Button variant='contained' color='primary' onClick={handleSubmit}>
             Guardar cambios
           </Button>

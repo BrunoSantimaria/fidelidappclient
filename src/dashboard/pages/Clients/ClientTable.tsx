@@ -83,6 +83,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
 
       try {
         await api.post("/api/clients/addClient", newClient);
+        console.log(newClient);
 
         setDisplayedClients([...displayedClients, { name: newClientName, email: newClientEmail, addedPromotions: [] }]);
         toast.info(`Cliente ${newClientName} agregado.`);
@@ -337,6 +338,8 @@ const ClientTable: React.FC<ClientTableProps> = () => {
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage='Filas por página'
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
             />
           </>
         )}

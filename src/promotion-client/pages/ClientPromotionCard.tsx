@@ -51,6 +51,8 @@ export const ClientPromotionCard = () => {
         toast.success("Visita registrada con éxito. La página se refrescará en 3 segundos.");
         setTimeout(() => window.location.reload(), 3000);
       } catch (error) {
+        console.log(error);
+
         toast.error("Error al validar la visita!");
       }
     } else {
@@ -58,6 +60,29 @@ export const ClientPromotionCard = () => {
     }
     setProcessing(false);
     setShowScanner(false);
+  };
+
+  const handleScanComplete = async (result) => {
+    try {
+      await api.post("/api/promotions/complete", { clientEmail: client.email, promotionId: pid });
+      toast.success("Promocion completada con exito.");
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Error al validar la visita!");
+    }
+
+    setProcessing(false);
+    setShowScanner(false);
+  };
+  const handleResetPromotion = async () => {
+    try {
+      await api.post("/api/promotions/restart", { clientEmail: client.email, promotionId: pid });
+      toast.success("Promoción reiniciada");
+      window.location.reload();
+    } catch (error) {
+      toast.error(error.response.data.error);
+    }
   };
 
   useEffect(() => {
@@ -74,8 +99,12 @@ export const ClientPromotionCard = () => {
         setUser(userResponse.data);
         setLoading(false);
 
-        if (response.data.promotion.status === "Redeemed") {
+        if (response.data.promotion.status === "Pending") {
           setShowPopup(true);
+
+          if (response.data.promotion.promotionRecurrent === "True") {
+            setShowPopup(true);
+          }
         }
       } catch (error) {
         console.error("Error fetching promotion details:", error);
@@ -144,7 +173,13 @@ export const ClientPromotionCard = () => {
             </div>
             <div className='flex flex-col items-center'>
               <span className='text-lg font-bold'>Estado:</span>
-              <p>{promotion.status}</p>
+              {promotion.status === "Pending" ? (
+                <p className='text-green-500'>Pendiente</p>
+              ) : promotion.status === "Active" ? (
+                <p className='text-blue-500'>Activa</p>
+              ) : (
+                <p className='text-red-500'>Completada</p>
+              )}
             </div>
             <div className='flex flex-col items-center'>
               <span className='text-lg font-bold'>Canjes Realizados:</span>
@@ -164,6 +199,13 @@ export const ClientPromotionCard = () => {
             </div>
           </div>
         </div>
+        {promotion.status === "Pending" && (
+          <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mt-4 w-[80%] flex'>
+            <span className='p-6 font-bold text-2xl'>
+              Felicidades lograste la meta 🎊. Escanea el codigo QR para canjear tu promoción y darla por completa.
+            </span>
+          </div>
+        )}
         <section className='flex flex-col md:flex md:flex-row mx-6 md:mx-40 '>
           <div className='mt-4 w-full md:w-1/2 space-y-6'>
             <h1 className='mt-4  font-bold text-left font-poppins text-4xl w-full md:w-2/3 md:text-5xl'>{promotionDetails.title}</h1>
@@ -172,17 +214,49 @@ export const ClientPromotionCard = () => {
             <p className='mt-2'>Tipo: {promotionDetails.promotionType}</p>
           </div>
 
-          <div className='mt-4 w-full md:w-3/6 text-center border  rounded-xl mb-12'>
-            <img src={imageUrl} alt='Promotion' className='w-full h-auto mt-2 rounded-xl' />
+          <div className='mt-4 w-2/3 md:w-2/6 md:h-[600px] text-center border rounded-xl mb-12'>
+            <div className='relative w-full h-full aspect-[16/9]'>
+              <img src={imageUrl} alt='Promotion' className='w-full h-full object-cover rounded-xl' />
+            </div>
           </div>
         </section>
-        <Button
-          variant='contained'
-          onClick={() => setShowScanner(true)}
-          className='mt-4 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
-        >
-          Abrir Escáner QR
-        </Button>
+        <Dialog open={showPopup} onClose={closePopup}>
+          <DialogTitle>¡Promoción Completada!</DialogTitle>
+          <DialogContent>
+            <Lottie options={defaultOptions} height={200} width={200} />
+            <p>La promoción ha sido completada exitosamente.</p>
+            {promotion.promotionRecurrent === "True" ? (
+              <>
+                <p>Esta promoción ha sido marcada como recurrente, ¿deseas volver a iniciarla?</p>
+                <Button onClick={restartPromotion} variant='contained' className='mt-2 mr-2'>
+                  Sí
+                </Button>
+              </>
+            ) : (
+              <p>Puedes darle el beneficio al cliente!</p>
+            )}
+            <Button onClick={closePopup} variant='outlined' className='mt-2'>
+              Cerrar
+            </Button>
+          </DialogContent>
+        </Dialog>
+        {promotion.status === "Redeemed" ? (
+          <Button
+            variant='contained'
+            onClick={() => handleResetPromotion()}
+            className='mt-4 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+          >
+            Reiniciar promoción.
+          </Button>
+        ) : (
+          <Button
+            variant='contained'
+            onClick={() => setShowScanner(true)}
+            className='mt-4 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+          >
+            Abrir Escáner QR
+          </Button>
+        )}
 
         <Dialog open={showScanner} onClose={() => setShowScanner(false)}>
           {processing ? (
@@ -192,7 +266,11 @@ export const ClientPromotionCard = () => {
               <DialogTitle>Escáner de Código QR</DialogTitle>
               <DialogContent>
                 <div className='w-full h-[500px] max-w-md mx-auto bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800'>
-                  <Scanner onScan={handleScan} className='w-full h-full' />
+                  {promotion.status === "Pending" ? (
+                    <Scanner onScan={handleScanComplete} className='w-full h-full' />
+                  ) : (
+                    <Scanner onScan={handleScan} className='w-full h-full' />
+                  )}
                 </div>
               </DialogContent>
             </>
@@ -205,7 +283,7 @@ export const ClientPromotionCard = () => {
             <Lottie options={defaultOptions} height={200} width={200} />
             <p>La promoción ha sido completada exitosamente.</p>
             <p>Puedes darle el beneficio al cliente!</p>
-            {promotionDetails.promotionRecurrent === "True" && (
+            {promotion.promotionRecurrent === "True" && (
               <>
                 <p>Esta promoción ha sido marcada como recurrente, ¿deseas volver a iniciarla?</p>
                 <Button onClick={restartPromotion} variant='contained' className='mt-2 mr-2'>

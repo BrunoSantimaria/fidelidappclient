@@ -50,7 +50,7 @@ export const Navigation = () => {
   const containerControls = useAnimationControls();
   const iconControl = useAnimationControls();
   const { plan, metrics } = useDashboard();
-
+  const { user } = useAuthSlice();
   useEffect(() => {
     if (isOpen) {
       containerControls.start("open");
@@ -79,7 +79,9 @@ export const Navigation = () => {
         } md:flex bg-main min-h-screen lg:h-screen md:h-screen flex-col justify-between z-10 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
       >
         <div className='flex flex-row w-full justify-between place-items-center '>
-          <div className='w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-700 rounded-full' />
+          <div className={`${!isOpen ? "hidden" : ""} w-10 h-10 flex bg-gradient-to-br from-orange-500 to-amber-700 rounded-full cursor-pointer`}>
+            <span className='text-center flex m-auto justify-center text-white cursor-pointer'>{user?.name.slice(0, 2)}</span>
+          </div>
           <motion.button
             variants={iconVariants}
             animate={iconControl}

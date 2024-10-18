@@ -57,7 +57,7 @@ export const TablePromotions = () => {
     <>
       <span className='text-2xl font-bold'>Aquí puedes crear y gestionar tus programas de fidelización.</span>
 
-      {promotions.length ? (
+      {promotions?.length ? (
         <>
           <TableContainer component={Paper} className='shadow-md rounded-lg'>
             <Table>
