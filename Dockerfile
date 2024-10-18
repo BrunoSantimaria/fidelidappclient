@@ -23,7 +23,7 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Expone el puerto 80
-EXPOSE 80
+EXPOSE 8080
 
 # Ejecuta Nginx en primer plano
 CMD ["nginx", "-g", "daemon off;"]
