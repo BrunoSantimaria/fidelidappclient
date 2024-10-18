@@ -5,7 +5,7 @@ FROM caddy:latest
 COPY dist /usr/share/caddy
 
 # Copia el archivo Caddyfile al contenedor
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY Caddyfile /Caddyfile
 
 # Expone el puerto 80 (o el puerto que configures en Caddyfile)
 EXPOSE 80
