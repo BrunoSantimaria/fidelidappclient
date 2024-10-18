@@ -1,0 +1,7 @@
+localhost {
+    root * /dist
+    file_server
+
+    # Si la ruta solicitada no existe, redirige a index.html para manejar el enrutamiento con react-router
+    try_files {path} /index.html
+}
