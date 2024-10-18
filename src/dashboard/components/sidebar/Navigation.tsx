@@ -92,9 +92,9 @@ export const Navigation = () => {
         </div>
 
         <div className='flex flex-col h-full mt-6 md:mt-10 lg:mt-10 gap-6 '>
-          <NavigationLink name='Home' link='/'>
+          {/* <NavigationLink name='Home' link='/'>
             <HomeRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
-          </NavigationLink>
+          </NavigationLink> */}
 
           <NavigationLink name='Dashboard' link='/dashboard'>
             <SpaceDashboardRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />

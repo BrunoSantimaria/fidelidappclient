@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, TextField, Typography, Link, Grid, Box, Container } from "@mui/material";
+import { Button, TextField, Typography, Link, Grid, Box, Container, Backdrop, CircularProgress } from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { validateEmail, validatePassword, validateName } from "../../utils/validations";
@@ -19,6 +19,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "", name: "" });
+  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para manejar la carga
 
   const { startLogin, startRegister, startGoogleSignIn } = useAuthSlice();
 
@@ -42,20 +43,34 @@ export const LoginPage = () => {
     if (!emailError && !passwordError && !nameError) {
       const formData = { email, password, ...(isRegister && { name }) };
 
-      if (isRegister) {
-        await startRegister(formData);
-        resetForm();
-        setTimeout(() => {
-          location.reload();
-        }, 3000);
-      } else {
-        await startLogin(formData);
+      setIsLoading(true); // Comenzar la carga
+      try {
+        if (isRegister) {
+          await startRegister(formData);
+          resetForm();
+          setTimeout(() => {
+            location.reload();
+          }, 3000);
+        } else {
+          await startLogin(formData);
+        }
+      } catch (error) {
+        toast.error("Hubo un error al iniciar sesión o registrarse");
+      } finally {
+        setIsLoading(false); // Finalizar la carga
       }
     }
   };
 
   const handleGoogleSignInSuccess = async (response) => {
-    await startGoogleSignIn(response);
+    setIsLoading(true); // Comenzar la carga
+    try {
+      await startGoogleSignIn(response);
+    } catch (error) {
+      toast.error("No se ha podido iniciar sesión");
+    } finally {
+      setIsLoading(false); // Finalizar la carga
+    }
   };
 
   const toggleFormMode = () => {
@@ -140,6 +155,25 @@ export const LoginPage = () => {
           </Box>
         </Box>
       </Container>
+
+      {/* Backdrop y CircularProgress cuando isLoading sea verdadero */}
+      <Backdrop
+        sx={{
+          position: "absolute", // Asegura que el Backdrop esté fijo
+          top: 0, // Posición en la parte superior de la pantalla
+          left: 0, // Posición en la parte izquierda de la pantalla
+          width: "100vw", // Ancho completo de la pantalla
+          height: "100vh", // Alto completo de la pantalla
+          color: "#fff", // Color del texto/progreso
+          zIndex: (theme) => theme.zIndex.drawer + 1, // Asegura que esté encima de otros elementos
+        }}
+        open={isLoading}
+      >
+        <div className='flex flex-col justify-center m-auto'>
+          <CircularProgress color='inherit' />
+          <span className='text-white text-lg text-center m-auto'>Accediendo...</span>
+        </div>
+      </Backdrop>
     </motion.div>
   );
 };

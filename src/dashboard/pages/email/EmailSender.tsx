@@ -30,7 +30,7 @@ import { toast } from "react-toastify";
 import { EmailEditor } from "react-email-editor"; // Importar ReactEmailEditor
 import { useDropzone } from "react-dropzone"; // Importa el hook de Dropzone
 import { UploadFile } from "@mui/icons-material";
-
+import howtouse from "../../../assets/Mi video-1.gif";
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
   visible: {
@@ -41,6 +41,7 @@ const pageTransition = {
 };
 
 export const EmailSender = () => {
+  const [showHowToUse, setShowHowToUse] = useState(false);
   const [contactSource, setContactSource] = useState("csv"); // Estado para la fuente de contactos (CSV o Clientes)
   const [csvFile, setCsvFile] = useState(null); // Archivo CSV seleccionado
   const [subject, setSubject] = useState(""); // Asunto del correo
@@ -223,7 +224,26 @@ export const EmailSender = () => {
                   <span className='flex m-auto justify-center mt-2'>(Maximo 500 clientes por csv.)</span>
                 </div>{" "}
               </div>
+              <div
+                onClick={() => setShowHowToUse(!showHowToUse)} // Mostrar al hacer hover
+                style={{ marginTop: "20px", textAlign: "center" }}
+              >
+                {showHowToUse ? (
+                  <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
+                    Cerrar video.
+                  </Typography>
+                ) : (
+                  <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
+                    ¿Cómo usar esta funcionalidad?
+                  </Typography>
+                )}
 
+                {showHowToUse && (
+                  <div className='flex m-auto text-center justify-center' style={{ marginTop: "10px" }}>
+                    <img src={howtouse} alt='Cómo usar' style={{ maxWidth: "100%", height: "auto" }} />
+                  </div>
+                )}
+              </div>
               {csvData.length > 0 && (
                 <Box mt={4}>
                   <Typography variant='h6'>Vista previa del CSV:</Typography>

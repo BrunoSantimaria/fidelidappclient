@@ -23,7 +23,7 @@ import {
 import Papa from "papaparse";
 import { useDropzone } from "react-dropzone";
 import { UploadFile } from "@mui/icons-material";
-
+import howtouse from "../../../assets/Mi video-1.gif";
 import { useDashboard } from "../../../hooks";
 import api from "../../../utils/api";
 import { toast } from "react-toastify";
@@ -45,6 +45,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const { accounts, getPromotionsAndMetrics, clients, promotions } = useDashboard();
   const [displayedClients, setDisplayedClients] = useState<Client[]>(clients); // Inicializar con los clientes
+  const [showHowToUse, setShowHowToUse] = useState(false);
 
   const [newClientName, setNewClientName] = useState("");
   const [newClientEmail, setNewClientEmail] = useState("");
@@ -73,7 +74,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const addClient = async () => {
     if (newClientName && newClientEmail) {
       const newClient = {
-        accountId: accounts._id, // Sustituye por el accountId correspondiente
+        accountId: accounts._id,
         clientData: {
           name: newClientName,
           email: newClientEmail,
@@ -82,7 +83,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
 
       try {
         await api.post("/api/clients/addClient", newClient);
-        // Agregar cliente al estado sin necesidad de recargar
+
         setDisplayedClients([...displayedClients, { name: newClientName, email: newClientEmail, addedPromotions: [] }]);
         toast.info(`Cliente ${newClientName} agregado.`);
         setNewClientName("");
@@ -252,6 +253,26 @@ const ClientTable: React.FC<ClientTableProps> = () => {
         {/* Componente Dropzone */}
         <div className='w-[50%] m-auto'>
           <CsvDropzone />
+        </div>
+        <div
+          onClick={() => setShowHowToUse(!showHowToUse)} // Mostrar al hacer hover
+          style={{ marginTop: "20px", textAlign: "center" }}
+        >
+          {showHowToUse ? (
+            <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
+              Cerrar video.
+            </Typography>
+          ) : (
+            <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
+              ¿Cómo usar esta funcionalidad?
+            </Typography>
+          )}
+
+          {showHowToUse && (
+            <div className='flex m-auto text-center justify-center' style={{ marginTop: "10px" }}>
+              <img src={howtouse} alt='Cómo usar' style={{ maxWidth: "100%", height: "auto" }} />
+            </div>
+          )}
         </div>
       </div>
 
