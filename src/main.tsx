@@ -29,7 +29,6 @@ createRoot(rootElement).render(
   </Provider>
 );
 
-// Escucha los cambios en la ruta para enviar los datos a Google Analytics
 const sendPageView = (location: any) => {
   ReactGA.send({ hitType: "pageview", page: location.pathname + location.search });
 };

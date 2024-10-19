@@ -164,8 +164,8 @@ export const ClientPromotionCard = () => {
         <meta property='og:url' content={`https://www.fidelidapp.cl/promotions/${pid}`} />
       </Helmet>
       <Container className='flex flex-col items-center p-5 min-h-screen'>
-        <div className='relative p-5 mt-4 bg-white rounded-lg shadow-lg overflow-hidden'>
-          <img src={keyUrl} alt='Background' className='absolute inset-0 object-cover opacity-30' />
+        <div className='relative w-[95%] md:w-2/3 p-5 mt-4 bg-white border border-main/60 rounded-lg shadow-lg overflow-hidden'>
+          <img src={keyUrl} alt='Background' className='absolute inset-0 w-full h-full object-cover opacity-30' />
           <div className='relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='flex flex-col items-center'>
               <span className='text-lg font-bold'>Visitas:</span>
@@ -199,6 +199,7 @@ export const ClientPromotionCard = () => {
             </div>
           </div>
         </div>
+
         {promotion.status === "Pending" && (
           <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mt-4 w-[80%] flex'>
             <span className='p-6 font-bold text-2xl'>
@@ -214,7 +215,7 @@ export const ClientPromotionCard = () => {
             <p className='mt-2'>Tipo: {promotionDetails.promotionType}</p>
           </div>
 
-          <div className='mt-4 w-2/3 md:w-2/6 md:h-[600px] text-center border rounded-xl mb-12'>
+          <div className='mt-4 w-3/3 md:w-2/6 md:h-[600px] text-center border rounded-xl mb-12'>
             <div className='relative w-full h-full aspect-[16/9]'>
               <img src={imageUrl} alt='Promotion' className='w-full h-full object-cover rounded-xl' />
             </div>

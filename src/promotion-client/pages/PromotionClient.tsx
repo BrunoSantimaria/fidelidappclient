@@ -121,9 +121,9 @@ export const PromotionClient = () => {
   }
 
   return (
-    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
+    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full  h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
       <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
-        <div className='relative z-10 w-[95%] md:w-[60%] space-y-6 m-0 text-left p-6 rounded-md'>
+        <div className='relative z-10 w-[100%] md:w-[60%] space-y-6 m-0 text-left p-6 rounded-md'>
           <div className='space-y-2 flex flex-col mb-6'>
             <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p>
 
@@ -169,8 +169,8 @@ export const PromotionClient = () => {
 
         {/* Imagen de la promoción */}
         {promotion.imageUrl && (
-          <div className='relative w-[95%] md:w-[35%] mx-auto md:mx-0'>
-            <img src={promotion.imageUrl} alt='Promoción' className='rounded-md object-cover w-full h-full' />
+          <div className='relative w-[95%] md:w-[35%] mb-12 mx-auto md:mx-0'>
+            <img src={promotion.imageUrl} alt='Promoción' className='rounded-lg shadow-md object-cover w-full h-full' />
           </div>
         )}
       </div>
