@@ -7,7 +7,7 @@ import { ModalLanding } from "../components/ModalLanding";
 export const Home = () => {
   const [open, setOpen] = useState(false);
   const whatsappNumber = "56996706983"; // Reemplaza con tu número de WhatsApp
-  const message = "¡Hola! Me gustaría obtener más información sobre Fidelizarte y sus servicios de programas de fidelización. ¡Gracias!";
+  const message = "¡Hola! Me gustaría obtener una demo de FidelidApp. ¿Cuándo podemos agendar una reunión?";
 
   const handleClick = () => {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
