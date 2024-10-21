@@ -46,8 +46,8 @@ export const ClientPromotionCard = () => {
     setProcessing(true);
     if (result) {
       try {
-        const dailyKey = await result[0].rawValue;
-        await api.post("/api/promotions/visit", { clientEmail: client.email, promotionId: pid, dailyKey });
+        const accountQr = await result[0].rawValue;
+        await api.post("/api/promotions/visit", { clientEmail: client.email, promotionId: pid, accountQr });
         toast.success("Visita registrada con éxito. La página se refrescará en 3 segundos.");
         setTimeout(() => window.location.reload(), 3000);
       } catch (error) {

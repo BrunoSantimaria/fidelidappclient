@@ -96,6 +96,7 @@ export const useAuthSlice = () => {
       }, 2000);
     } catch (error) {
       console.error("Error signing in with Google:", error);
+      if (error.response.status === 409) return toast.error("El email ya está registrado");
       toast.error("No se ha podido iniciar sesión");
     }
   };
@@ -109,8 +110,9 @@ export const useAuthSlice = () => {
 
       await api.post("/auth/signup", modifiedFormData);
       toast.success("Usuario creado correctamente");
-      handleNavigate("/auth/login#");
     } catch (error) {
+      console.log(error);
+
       toast.error("No se ha podido crear el usuario");
     }
   };

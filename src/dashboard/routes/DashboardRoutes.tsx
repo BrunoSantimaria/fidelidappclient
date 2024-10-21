@@ -9,6 +9,7 @@ import { Promotion } from "../pages/Promotions/Promotion";
 import { EmailSender } from "../pages/email/EmailSender";
 import { CreateAgenda } from "../pages/Agenda/CreateAgenda";
 import { Clients } from "../pages/Clients/Clients";
+import { AccountQr } from "../pages/AccountQr/AccountQr";
 
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
@@ -65,6 +66,7 @@ export const DashboardRoutes = () => {
         <Route path='/promotion/:id' element={<Promotion />} />
         <Route path='/agenda/create' element={<CreateAgenda />} />
         <Route path='/clients/list' element={<Clients />} />
+        <Route path='/qr' element={<AccountQr />} />
         {/* Redirigir cualquier otra ruta al Dashboard */}
         <Route path='/*' element={<Navigate to='/' replace />} />
       </Routes>

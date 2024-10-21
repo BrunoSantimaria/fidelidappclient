@@ -15,6 +15,7 @@ import { useDashboard } from "../../../hooks";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MailRoundedIcon from "@mui/icons-material/MailRounded";
 import { toast } from "react-toastify";
+import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 const containerVariants = {
   close: {
     width: "5rem",
@@ -119,6 +120,10 @@ export const Navigation = () => {
               </div>
             </>
           )}
+
+          <NavigationLink name='Código qr' link='/dashboard/qr/'>
+            <QrCode2RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
 
           <NavigationLink name='Clientes' link='/dashboard/clients/list'>
             <GroupsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />

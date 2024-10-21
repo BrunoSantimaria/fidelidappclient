@@ -48,9 +48,6 @@ export const LoginPage = () => {
         if (isRegister) {
           await startRegister(formData);
           resetForm();
-          setTimeout(() => {
-            location.reload();
-          }, 3000);
         } else {
           await startLogin(formData);
         }
