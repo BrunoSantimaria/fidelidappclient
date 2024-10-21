@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import QRCode from "react-qr-code";
+import { useDashboard } from "../../../hooks";
 
 export const AccountQr = () => {
-  const { user } = useAuthSlice();
-  console.log(user.accounts.accountQr);
+  const { user, refreshAccount } = useAuthSlice();
+
   const qrValue = user.accounts.accountQr;
+
   if (!qrValue) return <div>No hay codigo qr en esta cuenta.</div>;
   return (
     <div className='mt-40 space-y-12'>

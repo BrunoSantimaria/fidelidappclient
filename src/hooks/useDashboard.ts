@@ -11,7 +11,7 @@ import { log } from "console";
 export const useDashboard = () => {
   const { accounts, plan } = useSelector((state) => state.auth.user);
   const { metrics, promotions, activePromotion, agendas, clients } = useSelector((state) => state.dashboard);
-  const { startLoggingOut } = useAuthSlice();
+  const { refreshAccount } = useAuthSlice();
   const dispatch = useDispatch();
   const { handleNavigate } = useNavigateTo();
 
@@ -90,7 +90,18 @@ export const useDashboard = () => {
       getPromotionsAndMetrics();
     }
   };
+  const regenerateQr = async (accountId: string) => {
+    console.log(accountId, "clicked");
 
+    try {
+      await api.post(`/accounts/refresh`, { accountId });
+      //await refreshAccount();
+      toast.info("QR regenerado.");
+    } catch (error) {
+      console.log(error);
+      toast.error("Hubo un problema al regenerar el QR.");
+    }
+  };
   return {
     accounts,
     plan,
@@ -105,5 +116,6 @@ export const useDashboard = () => {
     deleteAgenda,
     modifyPromotion,
     clients,
+    regenerateQr,
   };
 };

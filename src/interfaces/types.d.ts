@@ -36,7 +36,7 @@ export interface Testimonial {
 
 export interface Plan {
   type: string;
-  price: number;
+  price?: number;
   description: string[];
   button?: string;
 }

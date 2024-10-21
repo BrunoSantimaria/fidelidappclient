@@ -6,6 +6,7 @@ import { validateEmail, validatePassword, validateName } from "../../utils/valid
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
+import { set } from "react-hook-form";
 
 export const LoginPage = () => {
   const { handleNavigate } = useNavigateTo();
@@ -48,6 +49,8 @@ export const LoginPage = () => {
         if (isRegister) {
           await startRegister(formData);
           resetForm();
+          toast.success("Registro exitoso");
+          setIsRegister(false);
         } else {
           await startLogin(formData);
         }

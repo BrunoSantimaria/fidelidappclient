@@ -109,7 +109,6 @@ export const useAuthSlice = () => {
       };
 
       await api.post("/auth/signup", modifiedFormData);
-      toast.success("Usuario creado correctamente");
     } catch (error) {
       console.log(error);
 
@@ -126,7 +125,29 @@ export const useAuthSlice = () => {
 
     dispatch(onLogOut(""));
   };
+  const refreshAccount = async () => {
+    console.log("click");
 
+    try {
+      const currentUserResponse = await api.get("/auth/current");
+      const { accounts, plan } = currentUserResponse.data;
+
+      localStorage.setItem("accounts", JSON.stringify(accounts));
+      localStorage.setItem("plan", JSON.stringify(plan));
+      const token = localStorage.getItem("token");
+      const user = decodeToken(token);
+      const userWithAccountAndPlan = {
+        ...user,
+        accounts: accounts,
+        plan: plan,
+      };
+
+      dispatch(onLogin(userWithAccountAndPlan));
+    } catch (error) {
+      console.error("Error fetching current user details:", error);
+      toast.error("No se han podido obtener las cuentas y el plan.");
+    }
+  };
   return {
     startLogin,
     startGoogleSignIn,
@@ -134,5 +155,6 @@ export const useAuthSlice = () => {
     user,
     startLoggingOut,
     status,
+    refreshAccount,
   };
 };
