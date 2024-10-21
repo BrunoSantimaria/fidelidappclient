@@ -19,7 +19,7 @@ export const Plans = () => {
           >
             <div>
               {/* Tipo de Plan */}
-              <h5 className='text-xl font-bold text-center mb-2'>{plan.type}</h5>
+              <h5 className='text-2xl font-bold text-center mb-2'>{plan.type}</h5>
               <h6 className={`${plan.price ? "" : "hidden"} text-lg text-gray-500 text-center mb-4`}>${plan.price} CLP/MES</h6>
 
               <ul className='space-y-5 mb-4'>
