@@ -12,8 +12,8 @@ export const Pattern = () => {
   return (
     <div className='relative min-h-[50vh] mt-20 w-full text-center items-center flex'>
       <div className='absolute inset-0 bg-cover bg-center opacity-10 z-0' style={{ backgroundImage: `url(${pattern})` }}></div>
-      <div className='relative z-10 text-left'>
-        <div className='my-6 mx-6 md:my-28 lg:my-28 md:ml-16 lg:ml-36'>
+      <div className='relative z-10 text-left '>
+        <div className='my-6 mx-6 md:my-28 lg:my-28 md:ml-16 lg:ml-36 space-y-6'>
           <h3 className='text-2xl md:text-5xl font-bold text-black w-full md:w-2/3 lg:w-4/5'>
             Crea programas de fidelización para tus clientes de manera rápida y sencilla.
           </h3>
