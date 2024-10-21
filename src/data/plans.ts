@@ -9,6 +9,7 @@ export const planList: Plan[] = [
   },
   {
     type: "Premium",
+    price: "49.990",
     description: [
       "10 promociones activas",
       "Agenda",
