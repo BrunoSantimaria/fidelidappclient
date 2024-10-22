@@ -8,7 +8,7 @@ export const AccountQr = () => {
 
   const qrValue = user.accounts.accountQr;
 
-  if (!qrValue) return <div>No hay codigo qr en esta cuenta.</div>;
+  if (!user) return <div>No hay codigo qr en esta cuenta.</div>;
   return (
     <div className='mt-40 space-y-12'>
       <div className='flex justify-center'>
