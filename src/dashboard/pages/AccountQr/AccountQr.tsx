@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import QRCode from "react-qr-code";
 
@@ -29,7 +29,7 @@ export const AccountQr = () => {
         {/* Renderizar el código QR solo si está disponible */}
         <QRCode value={user.accounts.accountQr} />
       </div>
-      <span className='bg-main text-white p-2 flex justify-center w-fit m-auto rounded-md cursor-pointer'>Regenerar código QR</span>
+      {/* <span className='bg-main text-white p-2 flex justify-center w-fit m-auto rounded-md cursor-pointer'>Regenerar código QR</span> */}
     </div>
   );
 };
