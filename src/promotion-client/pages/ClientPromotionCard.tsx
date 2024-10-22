@@ -164,7 +164,7 @@ export const ClientPromotionCard = () => {
         <meta property='og:url' content={`https://www.fidelidapp.cl/promotions/${pid}`} />
       </Helmet>
       <Container className='flex flex-col items-center p-5 min-h-screen'>
-        <div className='relative w-[95%] md:w-2/3 p-5 mt-4 bg-white border border-main/60 rounded-lg shadow-lg overflow-hidden'>
+        <div className='relative w-[95%] mb-6 md:w-2/3 p-5 mt-4 bg-white border border-main/60 rounded-lg shadow-lg overflow-hidden'>
           <img src={keyUrl} alt='Background' className='absolute inset-0 w-full h-full object-cover opacity-30' />
           <div className='relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='flex flex-col items-center'>
@@ -199,7 +199,23 @@ export const ClientPromotionCard = () => {
             </div>
           </div>
         </div>
-
+        {promotion.status === "Redeemed" ? (
+          <Button
+            variant='contained'
+            onClick={() => handleResetPromotion()}
+            className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+          >
+            Reiniciar promoción.
+          </Button>
+        ) : (
+          <Button
+            variant='contained'
+            onClick={() => setShowScanner(true)}
+            className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+          >
+            Abrir Escáner QR
+          </Button>
+        )}
         {promotion.status === "Pending" && (
           <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mt-4 w-[80%] flex'>
             <span className='p-6 font-bold text-2xl'>
@@ -241,23 +257,6 @@ export const ClientPromotionCard = () => {
             </Button>
           </DialogContent>
         </Dialog>
-        {promotion.status === "Redeemed" ? (
-          <Button
-            variant='contained'
-            onClick={() => handleResetPromotion()}
-            className='mt-4 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
-          >
-            Reiniciar promoción.
-          </Button>
-        ) : (
-          <Button
-            variant='contained'
-            onClick={() => setShowScanner(true)}
-            className='mt-4 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
-          >
-            Abrir Escáner QR
-          </Button>
-        )}
 
         <Dialog open={showScanner} onClose={() => setShowScanner(false)}>
           {processing ? (
