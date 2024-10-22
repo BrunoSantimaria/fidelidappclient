@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { Backdrop, Button, CircularProgress, Input, Alert } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Input, Alert, Divider } from "@mui/material";
+import { Facebook, Instagram, WhatsApp } from "@mui/icons-material"; // Importar íconos de redes sociales
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import background from "../../assets/fondocandado2.png";
@@ -18,7 +19,8 @@ export const PromotionClient = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accountId, setAccountId] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-
+  const [logo, setLogo] = useState("");
+  const [socialMedia, setSocialMedia] = useState({});
   const [emailError, setEmailError] = useState(false);
   const [nameError, setNameError] = useState(false);
 
@@ -32,6 +34,9 @@ export const PromotionClient = () => {
         const response = await api.get(`/api/promotions/${id}`);
         setPromotion(response.data.promotion);
         setAccountId(response.data.accountId);
+        setLogo(response.data.accountLogo);
+        setSocialMedia(response.data.accountSocialMedia[0]); // Asumiendo que solo tienes una entrada en el array de socialMedia
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching promotion:", error);
       } finally {
@@ -121,7 +126,7 @@ export const PromotionClient = () => {
   }
 
   return (
-    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full  h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
+    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
       <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
         <div className='relative z-10 w-[100%] md:w-[60%] space-y-6 m-0 text-left p-6 rounded-md'>
           <div className='space-y-2 flex flex-col mb-6'>
@@ -174,6 +179,31 @@ export const PromotionClient = () => {
           </div>
         )}
       </div>
+      <Divider sx={{ color: "white", width: "60%" }} />
+      {/* Footer con logo y redes sociales */}
+      {(logo || (socialMedia && (socialMedia.instagram || socialMedia.facebook || socialMedia.whatsapp))) && (
+        <footer className='flex flex-row items-center justify-center mt-12 p-6  r'>
+          {logo && <img src={logo} alt='Logo' className='w-40 h-40  mb-4' />}
+
+          <div className='flex space-x-4'>
+            {socialMedia.instagram && (
+              <a href={socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
+                <Instagram sx={{ fontSize: 40, color: "black" }} />
+              </a>
+            )}
+            {socialMedia.facebook && (
+              <a href={socialMedia.facebook} target='_blank' rel='noopener noreferrer'>
+                <Facebook sx={{ fontSize: 40, color: "black" }} />
+              </a>
+            )}
+            {socialMedia.whatsapp && (
+              <a href={`https://wa.me/${socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
+                <WhatsApp sx={{ fontSize: 40, color: "black" }} />
+              </a>
+            )}
+          </div>
+        </footer>
+      )}
     </section>
   );
 };
