@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -28,7 +28,7 @@ import { motion } from "framer-motion";
 import Papa from "papaparse";
 import { useDashboard } from "../../../hooks";
 import { toast } from "react-toastify";
-import { EmailEditor } from "react-email-editor"; // Importar ReactEmailEditor
+import EmailEditor, { EditorRef, EmailEditorProps } from "react-email-editor";
 import { useDropzone } from "react-dropzone"; // Importa el hook de Dropzone
 import { UploadFile } from "@mui/icons-material";
 import howtouse from "../../../assets/Mi video-1.gif";
@@ -55,7 +55,7 @@ export const EmailSender = () => {
   const [openWarningDialog, setOpenWarningDialog] = useState(false); // Diálogo de advertencia para más de 500 contactos
   const { clients } = useDashboard(); // Clientes desde el hook de dashboard
 
-  const emailEditorRef = useRef(); // Referencia al editor de email
+  const emailEditorRef = useRef<EditorRef>(null); // Referencia al editor de email
 
   // Deshabilitar el botón de enviar si el asunto está vacío
   const isSendDisabled = !subject || subject === "";
@@ -324,20 +324,15 @@ export const EmailSender = () => {
           <div className='my-4'>
             <div className='flex flex-col my-6'>
               <span>
-                En el editor puedes usar <span className='font-bold'>'{`{nombreCliente}`}'</span> para personalizar tus correos.
+                En el editor puedes usar <span className='font-bold'>{`{nombreCliente}`}</span> para personalizar tus correos.
               </span>{" "}
               <span className='italic'>
-                Ejemplo: Hola <span className='font-bold'>'{`{nombreCliente}`}'</span> nos contactamos contigo para contarte de nuestra nueva promoción.{" "}
+                Ejemplo: Hola <span className='font-bold'>{`{nombreCliente}`}</span> nos contactamos contigo para contarte de nuestra nueva promoción.{" "}
               </span>
             </div>
             <Typography variant='h6'>Editor de Email</Typography>
-            <div className='w-[50vw]  md:w-3/4 lg:w-1/2 m-auto'>
-              <EmailEditor
-                ref={emailEditorRef}
-                options={{
-                  locale: translations,
-                }}
-              />
+            <div id='email-editor' ref={emailEditorRef} style={{ height: "600px" }}>
+              <EmailEditor ref={emailEditorRef} onReady={onReady} options={{ locale: "es-ES" }} />
             </div>
           </div>
 

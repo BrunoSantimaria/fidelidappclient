@@ -4,13 +4,21 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { useLocation } from "react-router";
 
 const FloatingWhatsAppButton = () => {
-  const whatsappNumber = "56996706983"; // Reemplaza con tu número de WhatsApp
+  const whatsappNumber = "56996706983";
   const message = "¡Hola! Me gustaría obtener más información sobre Fidelizarte y sus servicios de programas de fidelización. ¡Gracias!";
 
   const handleClick = () => {
+    // Registro del evento en Google Analytics
+    if (window.gtag) {
+      window.gtag("event", "whatsapp_click", {
+        event_category: "engagement",
+        event_label: "Floating WhatsApp Button",
+        value: 1,
+      });
+    }
+
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
   };
-
   const location = useLocation();
   const allowedRoutes = ["/", "/auth"];
 

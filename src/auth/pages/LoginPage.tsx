@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, TextField, Typography, Link, Grid, Box, Container, Backdrop, CircularProgress } from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import { set } from "react-hook-form";
+import { Helmet } from "react-helmet-async";
 
 export const LoginPage = () => {
   const { handleNavigate } = useNavigateTo();

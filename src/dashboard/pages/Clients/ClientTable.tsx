@@ -241,18 +241,17 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     <section>
       <div className='w-[95%] flex flex-col md:flex-col m-auto justify-between mb-20'>
         {/* Inputs para agregar cliente manualmente */}
-        <div className='flex flex-row m-auto mb-12'>
-          <TextField label='Nombre' value={newClientName} onChange={(e) => setNewClientName(e.target.value)} style={{ marginRight: "10px" }} />
+        <div className='flex flex-col md:flex-row m-auto mb-12 w-[95%] space-y-2 md:space-y-0 md:space-x-2 md:justify-center'>
+          <TextField label='Nombre' value={newClientName} onChange={(e) => setNewClientName(e.target.value)} />
           <TextField label='Email' value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} />
-          <div className='flex'>
-            <Button variant='contained' color='primary' onClick={addClient} style={{ marginLeft: "10px", display: "flex", height: "50px" }}>
-              Agregar Cliente
-            </Button>
-          </div>
+
+          <Button variant='contained' color='primary' onClick={addClient} style={{ marginLeft: "10px", display: "flex", height: "50px" }}>
+            Agregar Cliente
+          </Button>
         </div>
 
         {/* Componente Dropzone */}
-        <div className='w-[50%] m-auto'>
+        <div className='w-[100%]  m-auto'>
           <CsvDropzone />
         </div>
         <div

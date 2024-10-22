@@ -21,9 +21,9 @@ export const AccountQr = () => {
   }
 
   return (
-    <div className='mt-40 space-y-12'>
+    <div className='mt-24 md:mt-56 space-y-12'>
       <div className='flex justify-center'>
-        <p className='text-center text-xl'>Usa este código QR para que tus clientes lo escaneen en cada visita</p>
+        <p className='text-center text-xl  md:text-2xl md:w-1/3'>Usa este código QR para que tus clientes lo escaneen en cada visita</p>
       </div>
       <div className='flex justify-center'>
         {/* Renderizar el código QR solo si está disponible */}

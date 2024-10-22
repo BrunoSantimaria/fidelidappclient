@@ -5,7 +5,7 @@ import FloatingWhatsAppButton from "../layaout/components/FloatingWhatsAppButton
 import { Box } from "@mui/material";
 import { DashboardRoutes } from "../dashboard/routes/DashboardRoutes";
 import { useAuthSlice } from "../hooks/useAuthSlice";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Landing } from "../landing/pages";
 import { PromotionClient } from "../promotion-client/pages";
 import { ToastContainer, toast } from "react-toastify";
@@ -14,6 +14,7 @@ import { ClientPromotionCard } from "../promotion-client/pages/ClientPromotionCa
 import Agenda from "../agenda-client/Agenda";
 import CancelAppointment from "../agenda-client/CancelAppointment";
 import ConfirmAppointment from "../agenda-client/ConfirmAppointment";
+
 export const AppRouter = () => {
   const { status } = useAuthSlice();
 
@@ -28,6 +29,14 @@ export const AppRouter = () => {
     faqsRef: useRef(null),
     contactRef: useRef(null),
   };
+
+  useEffect(() => {
+    const currentTitle = document.title;
+    // Verificar si la variable de entorno contiene 'localhost'
+    if (import.meta.env.VITE_API_URL.includes("localhost")) {
+      document.title = `DEV - ${currentTitle}`;
+    }
+  }, []); // El useEffect se ejecuta solo una vez al cargar
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
