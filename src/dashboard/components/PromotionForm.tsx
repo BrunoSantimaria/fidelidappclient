@@ -69,6 +69,7 @@ export const PromotionForm = () => {
         await api.post("/api/promotions/create", formData);
         await getPromotionsAndMetrics();
         toast.success("Promoción creada con éxito");
+        setLoading(false);
         navigate("/dashboard");
       } catch (error) {
         console.log(error);

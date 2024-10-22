@@ -322,6 +322,14 @@ export const EmailSender = () => {
           {/* Editor de Email */}
           <TextField label='Asunto del Email' variant='outlined' fullWidth margin='normal' value={subject} onChange={handleSubjectChange} />
           <div className='my-4'>
+            <div className='flex flex-col my-6'>
+              <span>
+                En el editor puedes usar <span className='font-bold'>'{`{nombreCliente}`}'</span> para personalizar tus correos.
+              </span>{" "}
+              <span className='italic'>
+                Ejemplo: Hola <span className='font-bold'>'{`{nombreCliente}`}'</span> nos contactamos contigo para contarte de nuestra nueva promocion.{" "}
+              </span>
+            </div>
             <Typography variant='h6'>Editor de Email</Typography>
             <div className='w-[50vw]  md:w-3/4 lg:w-1/2 m-auto'>
               <EmailEditor
