@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { Backdrop, Button, CircularProgress, Input, Alert, Divider } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Input, Alert, Divider, duration } from "@mui/material";
 import { Facebook, Instagram, WhatsApp } from "@mui/icons-material"; // Importar íconos de redes sociales
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
@@ -79,7 +79,7 @@ export const PromotionClient = () => {
         clientPhone: phoneNumber.trim(),
         accountId: accountId,
       });
-      toast.success("Te has sumado exitosamente a la promoción.");
+      toast.success("Has sido agregado a la promoción exitosamente. Enviaremos tu Fidelicard a tu correo!.");
       setClientEmail("");
       setClientName("");
       setPhoneNumber("");
