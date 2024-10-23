@@ -332,7 +332,7 @@ export const EmailSender = () => {
             </div>
             <Typography variant='h6'>Editor de Email</Typography>
             <div id='email-editor' ref={emailEditorRef} style={{ height: "600px" }}>
-              <EmailEditor ref={emailEditorRef} onReady={onReady} options={{ locale: "es-ES" }} />
+              <EmailEditor ref={emailEditorRef} options={{ locale: "es-ES" }} />
             </div>
           </div>
 
