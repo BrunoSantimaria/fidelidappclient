@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { TextField, Button, Typography, Container, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
+import { Helmet } from "react-helmet";
 import api from "../../utils/api";
 import { toast } from "react-toastify";
 
@@ -19,6 +20,14 @@ const ContactForm = () => {
     try {
       await api.post("/auth/contact", data);
       toast.success("¡Formulario enviado con éxito!");
+
+      // Disparar evento de GTAG para el envío de formulario
+      window.gtag("event", "form_submit", {
+        event_category: "Contact",
+        event_label: "Contact Form Submission",
+        value: 1,
+      });
+
       reset();
     } catch (error) {
       console.log(error);
@@ -32,6 +41,23 @@ const ContactForm = () => {
 
   return (
     <Container sx={{ marginTop: "60px", marginBottom: "60px", maxWidth: "80vw" }}>
+      <Helmet>
+        <script async src='https://www.googletagmanager.com/gtag/js?id=AW-16750398859'></script>
+        <script>
+          {`
+     
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-16750398859"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-16750398859');
+</script>
+          `}
+        </script>
+      </Helmet>
+
       <Typography variant='h4' align='center' gutterBottom>
         ¿Interesado en saber más? Contáctanos
       </Typography>
