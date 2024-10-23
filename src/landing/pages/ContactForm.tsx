@@ -22,7 +22,7 @@ const ContactForm = () => {
       toast.success("¡Formulario enviado con éxito!");
 
       // Disparar evento de GTAG para el envío de formulario
-      window.gtag("event", "form_submit", {
+      window.gtag("event", "gtm.formSubmit", {
         event_category: "Contact",
         event_label: "Contact Form Submission",
         value: 1,
