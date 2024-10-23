@@ -70,9 +70,10 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
       await api.post("/auth/contact", formData);
       toast.success("¡Formulario enviado con éxito!");
 
-      window.gtag("event", "form_submit", {
-        event_category: "Contact Form",
-        event_label: formData.email,
+      window.gtag("event", "gtm.formSubmit", {
+        event_category: "Contact",
+        event_label: "Contact Form Submission",
+        value: 1,
       });
 
       return handleClose();
