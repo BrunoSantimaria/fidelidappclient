@@ -10,7 +10,7 @@ const FloatingWhatsAppButton = () => {
   const handleClick = () => {
     // Registro del evento en Google Analytics
     if (window.gtag) {
-      window.gtag("event", "conversion", {
+      window.gtag("event", "gtm.linkClick", {
         send_to: "AW-16750398859/mIpMCPK-5OAZEIubm7M-",
         event_category: "engagement",
         event_label: "Floating WhatsApp Button",
@@ -32,6 +32,7 @@ const FloatingWhatsAppButton = () => {
   return (
     <Box
       onClick={handleClick}
+      id='whatsapp-button'
       aria-label='whatsapp'
       sx={{
         zIndex: 10,
