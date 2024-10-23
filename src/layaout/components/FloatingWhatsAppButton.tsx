@@ -34,6 +34,8 @@ const FloatingWhatsAppButton = () => {
       onClick={handleClick}
       id='whatsapp-button'
       aria-label='whatsapp'
+      class='css-186o8fi
+'
       sx={{
         zIndex: 10,
         position: "fixed",
