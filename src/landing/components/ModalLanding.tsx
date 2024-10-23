@@ -61,7 +61,9 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
     return isValid;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Evita el comportamiento predeterminado del formulario
+
     if (!checkErrors()) {
       return;
     }
@@ -76,18 +78,20 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
         value: 1,
       });
 
-      return handleClose();
+      handleClose(); // Cierra el modal después del envío
     } catch (error) {
       console.log(error);
-      return toast.error("Hubo un error al enviar el formulario.");
+      toast.error("Hubo un error al enviar el formulario.");
     }
   };
 
   return (
-    <>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Déjanos tus datos para que nos contactemos contigo.</DialogTitle>
-        <DialogContent>
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle>Déjanos tus datos para que nos contactemos contigo.</DialogTitle>
+      <DialogContent>
+        <form onSubmit={handleSubmit}>
+          {" "}
+          {/* Aquí se agrega el formulario */}
           <TextField
             margin='dense'
             label='Nombre'
@@ -120,16 +124,17 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
             error={Boolean(errors.message)}
             helperText={errors.message}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color='secondary'>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} color='primary' data-tag='asistant'>
-            Enviar
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+          <DialogActions>
+            <Button onClick={handleClose} color='secondary'>
+              Cancelar
+            </Button>
+            <Button type='submit' color='primary'>
+              {" "}
+              Enviar
+            </Button>
+          </DialogActions>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
