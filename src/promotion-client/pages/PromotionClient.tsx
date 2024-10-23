@@ -35,7 +35,7 @@ export const PromotionClient = () => {
         setPromotion(response.data.promotion);
         setAccountId(response.data.accountId);
         setLogo(response.data.accountLogo);
-        setSocialMedia(response.data.accountSocialMedia[0]); // Asumiendo que solo tienes una entrada en el array de socialMedia
+        setSocialMedia(response.data.accountSocialMedia[0]);
         console.log(response.data);
       } catch (error) {
         console.error("Error fetching promotion:", error);

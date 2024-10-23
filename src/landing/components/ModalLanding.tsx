@@ -69,10 +69,15 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
     try {
       await api.post("/auth/contact", formData);
       toast.success("¡Formulario enviado con éxito!");
+
+      window.gtag("event", "form_submit", {
+        event_category: "Contact Form",
+        event_label: formData.email,
+      });
+
       return handleClose();
     } catch (error) {
       console.log(error);
-
       return toast.error("Hubo un error al enviar el formulario.");
     }
   };
@@ -119,7 +124,7 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
           <Button onClick={handleClose} color='secondary'>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} color='primary'>
+          <Button onClick={handleSubmit} color='primary' data-tag='asistant'>
             Enviar
           </Button>
         </DialogActions>
