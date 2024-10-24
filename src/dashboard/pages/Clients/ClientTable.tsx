@@ -28,6 +28,7 @@ import { useDashboard } from "../../../hooks";
 import api from "../../../utils/api";
 import { toast } from "react-toastify";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
+import { ReactTyped, Typed } from "react-typed";
 
 // Definir el tipo para los clientes
 interface Client {
@@ -53,8 +54,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const [csvClients, setCsvClients] = useState<Client[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false); // Estado para el loading
-  console.log(accounts.emailsSentCount - plan.emailLimit);
-  console.log(clients.length);
 
   useEffect(() => {
     getPromotionsAndMetrics();
@@ -71,9 +70,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  console.log("plan email " + plan?.emailLimit);
-  const emailLeft = accounts?.emailSentAccount - plan?.emailLimit;
-  // Agregar un nuevo cliente manualmente
+
   const addClient = async () => {
     if (newClientName && newClientEmail) {
       const newClient = {
@@ -132,22 +129,24 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
   };
   const handleCsvData = (data: any[]) => {
-    if (data.length > 500000) {
-      toast.error("El archivo CSV no puede contener más de 500 clientes.");
-      return;
-    }
+    const newClients: Client[] = data
+      .map((row: any) => {
+        // Solo tomar las columnas 'name' y 'email', ignorando otras
+        const clientName = row.nombre || row.Name || row.name || row.Nombre || ""; // Buscar variantes de "name"
+        const clientEmail = row.email || row.Email || ""; // Buscar variantes de "email"
 
-    const newClients: Client[] = data.map((row: any) => {
-      // Asumiendo que 'nombre', 'Name', 'email', etc. pueden aparecer en el CSV
-      const clientName = row.nombre || row.Name || row.name || row.Nombre; // Buscar variantes de "name"
-      const clientEmail = row.email || row.Email; // Buscar variantes de "email"
-
-      return {
-        name: clientName,
-        email: clientEmail,
-        addedPromotions: [],
-      };
-    });
+        // Retornar el cliente solo si tiene un correo válido (nombre es opcional)
+        if (clientEmail.trim()) {
+          // Validar solo el correo
+          return {
+            name: clientName.trim() || "Cliente", // Si no hay nombre, asignar una cadena vacía
+            email: clientEmail.trim(),
+            addedPromotions: [],
+          };
+        }
+        return null; // Retornar null si no hay un correo válido
+      })
+      .filter(Boolean); // Filtrar los valores nulos
 
     setCsvClients(newClients);
     setOpenDialog(true); // Abrir el diálogo para previsualizar los clientes
@@ -179,10 +178,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
       accept: { "text/csv": [".csv"] },
       multiple: false,
     });
-    const isFreePlan = plan?.planStatus === "free";
-    const isWithinLimit = Number(plan?.emailLimit) > Number(accounts.emailSentCount);
-    console.log("Is Free Plan:", isFreePlan); // true
-    console.log("Is Within Limit:", isWithinLimit); // true
+
     return (
       <Paper
         {...getRootProps()}
@@ -209,7 +205,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
             <Button variant='contained' color='primary' sx={{ marginTop: 2 }}>
               Subir archivo
             </Button>
-            <span className='flex m-auto justify-center mt-2'>{plan?.planStatus === "free" ? "(Maximo 500 clientes por csv.)" : ""}</span>
+            <span className='flex m-auto justify-center mt-2'>{plan?.planStatus === "free" ? "" : ""}</span>
           </div>
         )}
       </Paper>
@@ -217,39 +213,42 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   };
 
   const confirmCsvClients = async () => {
+    setLoading(true);
+    setOpenDialog(false);
+
     try {
-      setLoading(true);
-      setOpenDialog(false);
+      // Filtrar clientes inválidos
+      const validClients = csvClients.filter((client) => client.name && client.email);
 
-      const requests = csvClients.map((client) => {
-        console.log(client.name, client.email);
-
-        const cleanedName = client.name;
+      // Crear un array de promesas
+      const requests = validClients.map((client) => {
+        const cleanedName = client.name.trim();
         const formattedName = cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1).toLowerCase();
 
-        return api.post("/api/clients/addClient", {
-          accountId: accounts._id,
-          clientData: {
-            name: formattedName,
-            email: client.email.trim(),
-          },
-        });
+        return api
+          .post("/api/clients/addClient", {
+            accountId: accounts._id,
+            clientData: {
+              name: formattedName,
+              email: client.email.trim(),
+            },
+          })
+          .catch((error) => {
+            console.error(`Error al agregar cliente ${formattedName} (${client.email}):`, error);
+          });
       });
 
+      // Esperar a que todas las promesas se resuelvan
       await Promise.all(requests);
 
       await getPromotionsAndMetrics();
       toast.info("Clientes agregados correctamente");
-      setLoading(false);
     } catch (error) {
       console.error("Error al agregar clientes:", error);
+    } finally {
       setLoading(false);
     }
   };
-
-  console.log("Plan Status:", plan?.planStatus);
-  console.log("Email Limit:", plan?.emailLimit);
-  console.log("Emails Sent Count:", accounts.emailSentCount);
 
   return (
     <section>
@@ -389,8 +388,15 @@ const ClientTable: React.FC<ClientTableProps> = () => {
         >
           {" "}
           <div className='flex flex-col space-y-6 m-auto'>
-            <CircularProgress color='inherit' />
-            <Typography>Cargando clientes...</Typography>
+            <CircularProgress color='inherit' className='m-auto' />
+            <div>
+              <ReactTyped
+                strings={["Cargando clientes...", "Esto puede durar un poco ⌛", "Gracias por tu paciencia.", "Ya casi estamos listos 🚀"]}
+                typeSpeed={50}
+                backSpeed={30}
+                loop
+              />
+            </div>
           </div>
         </Backdrop>
       </Paper>

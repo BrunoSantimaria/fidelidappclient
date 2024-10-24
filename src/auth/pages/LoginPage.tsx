@@ -81,6 +81,28 @@ export const LoginPage = () => {
 
   return (
     <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
+      <Backdrop
+        className=' flex m-auto justify-center items-center'
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: "5%", // Hacerlo circular
+          width: "250px", // Cubre todo el ancho de la ventana
+          height: "250px", // Cubre todo el alto de la ventana
+          color: "#fff", // Color del progreso y texto
+          zIndex: (theme) => theme.zIndex.drawer + 1, // Por encima de otros elementos
+          margin: "auto", // Eliminar cualquier margen
+          padding: 0, // Eliminar cualquier padding
+          boxSizing: "border-box", // Asegura que el tamaño sea respetado
+        }}
+        open={isLoading} // Solo se mostrará si isLoading es true
+      >
+        <div className='flex flex-col justify-center items-center'>
+          <CircularProgress color='inherit' />
+          <span className='text-white text-lg text-center mt-2'>Accediendo...</span>
+        </div>
+      </Backdrop>
       <Container component='main' maxWidth='xs' sx={{ margintop: "120px" }}>
         <Box
           sx={{
@@ -134,7 +156,7 @@ export const LoginPage = () => {
               error={!!errors.password}
               helperText={errors.password}
             />
-            <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
+            <Button disabled={isLoading} type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
               {isRegister ? "Registrarse" : "Iniciar Sesión"}
             </Button>
 
@@ -158,23 +180,6 @@ export const LoginPage = () => {
       </Container>
 
       {/* Backdrop y CircularProgress cuando isLoading sea verdadero */}
-      <Backdrop
-        sx={{
-          position: "absolute", // Asegura que el Backdrop esté fijo
-          top: 0, // Posición en la parte superior de la pantalla
-          left: 0, // Posición en la parte izquierda de la pantalla
-          width: "100vw", // Ancho completo de la pantalla
-          height: "100vh", // Alto completo de la pantalla
-          color: "#fff", // Color del texto/progreso
-          zIndex: (theme) => theme.zIndex.drawer + 1, // Asegura que esté encima de otros elementos
-        }}
-        open={isLoading}
-      >
-        <div className='flex flex-col justify-center m-auto'>
-          <CircularProgress color='inherit' />
-          <span className='text-white text-lg text-center m-auto'>Accediendo...</span>
-        </div>
-      </Backdrop>
     </motion.div>
   );
 };
