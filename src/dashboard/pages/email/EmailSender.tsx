@@ -21,6 +21,7 @@ import {
   DialogTitle,
   Backdrop,
   CircularProgress,
+  Checkbox,
 } from "@mui/material";
 import translations from "../../../utils/translation.json";
 import api from "../../../utils/api";
@@ -32,6 +33,8 @@ import EmailEditor, { EditorRef, EmailEditorProps } from "react-email-editor";
 import { useDropzone } from "react-dropzone"; // Importa el hook de Dropzone
 import { UploadFile } from "@mui/icons-material";
 import howtouse from "../../../assets/Mi video-1.gif";
+import { useAuthSlice } from "../../../hooks/useAuthSlice";
+import { set } from "react-hook-form";
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
   visible: {
@@ -53,16 +56,23 @@ export const EmailSender = () => {
   const [emailCount, setEmailCount] = useState(0); // Cantidad de correos a enviar
   const [loading, setLoading] = useState(false); // Estado de carga para enviar correos
   const [openWarningDialog, setOpenWarningDialog] = useState(false); // Diálogo de advertencia para más de 500 contactos
-  const { clients } = useDashboard(); // Clientes desde el hook de dashboard
-
+  const [selectedClients, setSelectedClients] = useState([]);
+  const [selectedSection, setSelectedSection] = useState("clients"); // 'clients' o 'csv'
+  const [csvClients, setCsvClients] = useState([]);
+  const [selectedCsvData, setSelectedCsvData] = useState([]);
+  const { clients, plan, accounts } = useDashboard(); // Clientes desde el hook de dashboard
+  const isFreePlan = plan?.planStatus === "free";
+  const isWithinLimit = Number(plan?.emailLimit) > Number(accounts.emailsSentCount);
   const emailEditorRef = useRef<EditorRef>(null); // Referencia al editor de email
+  const { refreshAccount } = useAuthSlice();
+  const handleClick = () => {
+    const whatsappNumber = "56996706983";
+    const message = "¡Hola! Me gustaría obtener más información sobre pasar mi cuenta a pro. ¡Gracias!";
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
+  };
 
-  // Deshabilitar el botón de enviar si el asunto está vacío
   const isSendDisabled = !subject || subject === "";
 
-  // Manejo del cambio de fuente de contacto (CSV o Clientes)
-
-  // Manejo de cambio de asunto
   const handleSubjectChange = (e) => {
     setSubject(e.target.value);
   };
@@ -72,26 +82,77 @@ export const EmailSender = () => {
     const totalEmails = contactSource === "csv" ? csvData.length : clients.length;
     setEmailCount(totalEmails);
 
-    if (totalEmails > 500) {
-      setOpenWarningDialog(true); // Mostrar diálogo de advertencia si hay más de 500 contactos
+    setOpenDialog(true); // Abrir el diálogo de confirmación
+  };
+  const handleSectionChange = (section) => {
+    setSelectedSection(section);
+    if (section === "clients") {
+      setCsvClients([]); // Limpiar los clientes del CSV al cambiar a la sección de 'Clientes'
+    }
+  };
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      // Selecciona todos los emails ya sea de csvData o clients
+      const newSelecteds =
+        contactSource === "csv"
+          ? csvData.map((row) => row.email) // Solo correo para selección
+          : clients.map((client) => client.email); // Solo correo para selección
+
+      if (contactSource === "csv") {
+        setSelectedCsvData(newSelecteds); // Selecciona todos los correos del CSV
+      } else {
+        setSelectedClients(newSelecteds); // Selecciona todos los correos de los clientes
+      }
     } else {
-      setOpenDialog(true); // Abrir el diálogo de confirmación
+      // Deselecciona todos los emails
+      if (contactSource === "csv") {
+        setSelectedCsvData([]); // Deselecciona todos los correos del CSV
+      } else {
+        setSelectedClients([]); // Deselecciona todos los correos de los clientes
+      }
     }
   };
 
+  const handleCheckboxChange = (event, email) => {
+    const isChecked = event.target.checked;
+
+    if (contactSource === "csv") {
+      // Manejar selección para CSV
+      setSelectedCsvData((prevSelected) => (isChecked ? [...prevSelected, email] : prevSelected.filter((selected) => selected !== email)));
+    } else {
+      setSelectedClients((prevSelected) => (isChecked ? [...prevSelected, email] : prevSelected.filter((selected) => selected !== email)));
+    }
+  };
   // Confirmar el envío de correos
   const handleConfirmSend = async () => {
     setLoading(true);
 
-    let recipients = [];
+    let recipients;
 
-    // Seleccionar destinatarios según la fuente de contactos
     if (contactSource === "csv") {
-      recipients = csvData.filter((row) => row.email && /\S+@\S+\.\S+/.test(row.email));
+      recipients = csvData
+        .filter((row) => selectedCsvData.includes(row.email) && row.email && /\S+@\S+\.\S+/.test(row.email))
+        .map((row) => ({
+          email: row.email,
+          name: row.name || "Cliente",
+        }));
     } else if (contactSource === "clients") {
-      recipients = clients.filter((client) => client.email && /\S+@\S+\.\S+/.test(client.email));
+      recipients = clients
+        .filter((client) => selectedClients.includes(client.email) && client.email && /\S+@\S+\.\S+/.test(client.email))
+        .map((client) => ({
+          email: client.email,
+          name: client.name || "Cliente",
+        }));
     }
-
+    if (recipients.length > plan.emailLimit - accounts.emailsSentCount) {
+      if (plan.emailLimit >= accounts.emailsSentCount) {
+        setLoading(false);
+        return toast.info(`Te has quedado sin limite de emails. Hazte PRO ahora y aumenta tu límite a 10.000. 🚀`);
+      } else {
+        setLoading(false);
+        return toast.info(`Te quedan disponibles ${plan.emailLimit - accounts.emailsSentCount} emails, por favor selecciona menos destinatarios.`);
+      }
+    }
     // Validar si hay destinatarios válidos
     if (recipients.length === 0) {
       toast.error("No hay destinatarios válidos.");
@@ -122,8 +183,8 @@ export const EmailSender = () => {
         template: templateHtml,
         clients: recipients,
       };
-
-      // Enviar los datos del formulario (asunto, template, y lista de clientes)
+      console.log(recipients);
+      //Enviar los datos del formulario (asunto, template, y lista de clientes)
       await api.post("/api/email/send", formData, {
         headers: {
           "Content-Type": "application/json",
@@ -131,8 +192,10 @@ export const EmailSender = () => {
       });
 
       toast.success("Correo enviado correctamente.");
+      refreshAccount();
       setSubject("");
       setCsvFile(null);
+      setSelectedClients([]);
       emailEditorRef.current.editor.loadDesign({ body: { rows: [] } }); // Limpiar el editor
     } catch (error) {
       console.error("Error al enviar el correo:", error);
@@ -142,24 +205,33 @@ export const EmailSender = () => {
       setOpenDialog(false);
     }
   };
+  useEffect(() => {
+    refreshAccount();
+  }, [clients]);
+  useEffect(() => {
+    refreshAccount();
+  }, [loading]);
+
   const handleContactSourceChange = (event) => {
     setContactSource(event.target.value);
+    setSelectedClients([]);
+    setSelectedCsvData([]);
     if (event.target.value === "clients") {
-      setCsvFile(null); // Limpiar CSV si seleccionamos "Clientes"
-      setCsvData([]); // Limpiar datos del CSV
+      setCsvFile(null);
+      setCsvData([]);
     }
   };
-  // Funciones para manejar la paginación de los datos
-  const handleChangePage = (newPage) => {
+
+  const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+    setSelectedClients([]);
   };
 
-  // Función para manejar el archivo CSV con react-dropzone
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
 
@@ -171,7 +243,6 @@ export const EmailSender = () => {
 
     setCsvFile(file);
 
-    // Parsear el archivo CSV usando papaparse
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
@@ -183,11 +254,7 @@ export const EmailSender = () => {
           }))
           .filter((row) => row.name || row.email); // Filtrar filas sin nombre ni email
 
-        if (filteredData.length > 500) {
-          toast.error("El archivo CSV contiene más de 500 contactos, no se puede cargar.");
-        } else {
-          setCsvData(filteredData); // Si es menor a 500, cargar los datos
-        }
+        setCsvData(filteredData); // Si es menor a 500, cargar los datos
       },
     });
   };
@@ -198,10 +265,59 @@ export const EmailSender = () => {
     accept: { "text/csv": [".csv"] },
     multiple: false,
   });
+  const isSelectedAll =
+    contactSource === "csv"
+      ? selectedCsvData.length > 0 && selectedCsvData.length === csvData.length
+      : selectedClients.length > 0 && selectedClients.length === clients.length;
 
   return (
-    <motion.main initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='w-full h-full flex flex-row relative'>
-      <div className='flex flex-col p-10 ml-0 md:ml-20 lg:ml-20 w-full gap-5'>
+    <motion.main
+      initial='hidden'
+      animate='visible'
+      exit='hidden'
+      variants={pageTransition}
+      className='md:p-10 ml-4 md:ml-20 lg:ml-20 w-[95%] gap-5 m-auto h-full flex flex-col justify-center  '
+    >
+      <div className='flex w-full m-auto flex-col justify-center mb-12 text-lg p-12  rounded-md shadow-md shadow-gray-600/40  bg-gradient-to-br from-gray-50 to-main/40'>
+        <div className='flex w-full space-y-2 md:space-y-0 flex-col md:flex-row md:space-x-6 justify-center m-auto'>
+          <span>Correos enviados en los últimos 30 días: {accounts?.emailsSentCount || 0}</span>
+          <span>Limite de correos al mes: {plan?.emailLimit}</span>
+        </div>
+        {!isWithinLimit ? (
+          <span className='m-auto mt-6'>
+            {plan?.planStatus === "free" ? (
+              <span
+                onClick={handleClick}
+                className='p-2 w-[95%]  md:w-2/6 bg-main text-white hover:bg-main/90 duration-300 cursor-pointer rounded-md shadow-md shadow-gray-600/40 text-center m-auto mt-6'
+              >
+                Limite alcanzado. Hazte PRO ahora y aumenta tu límite a <span className='font-bold'>10.000</span>.
+              </span>
+            ) : (
+              "Has alcanzado tu limite mensual"
+            )}
+          </span>
+        ) : (
+          <span className='flex m-auto'>
+            <span className='flex m-auto'>
+              Te quedan disponibles <span className='font-bold mx-1'> {plan.emailLimit - accounts.emailsSentCount} </span> emails.
+            </span>{" "}
+          </span>
+        )}
+
+        <div className='flex '>
+          {isFreePlan && isWithinLimit ? (
+            <span
+              onClick={handleClick}
+              className='p-2 w-[95%] md:w-2/6 bg-main text-white hover:bg-main/90 duration-300 cursor-pointer rounded-md shadow-md shadow-gray-600/40 text-center m-auto mt-6'
+            >
+              Hazte PRO ahora y aumenta tu límite a <span className='font-bold'>10.000</span>.
+            </span>
+          ) : (
+            <span></span>
+          )}
+        </div>
+      </div>
+      <div className=' w-full gap-5'>
         <Box>
           <span className='font-bold text-3xl pb-6 flex'>A continuación podrás crear emails y enviarlos masivamente.</span>
 
@@ -222,7 +338,7 @@ export const EmailSender = () => {
                   <Button variant='contained' color='primary' sx={{ marginTop: 2 }}>
                     Subir archivo
                   </Button>
-                  <span className='flex m-auto justify-center mt-2'>(Maximo 500 clientes por csv.)</span>
+                  <span className='flex m-auto justify-center mt-2'></span>
                 </div>{" "}
               </div>
               <div
@@ -253,13 +369,26 @@ export const EmailSender = () => {
                       <Table>
                         <TableHead>
                           <TableRow>
+                            <TableCell padding='checkbox'>
+                              <Checkbox
+                                checked={isSelectedAll} // Si está seleccionado todo
+                                onChange={handleSelectAllClick} // Función para seleccionar todo
+                                indeterminate={selectedCsvData.length > 0 && selectedCsvData.length < csvData.length} // Selección parcial
+                              />
+                            </TableCell>
                             <TableCell>Nombre</TableCell>
                             <TableCell>Correo Electrónico</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {csvData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                            <TableRow key={index}>
+                            <TableRow key={index} hover>
+                              <TableCell padding='checkbox'>
+                                <Checkbox
+                                  checked={selectedCsvData.indexOf(row.email) !== -1} // Verifica si está seleccionado
+                                  onChange={(event) => handleCheckboxChange(event, row.email)} // Cambia el estado
+                                />
+                              </TableCell>
                               <TableCell>{row.name}</TableCell>
                               <TableCell>{row.email}</TableCell>
                             </TableRow>
@@ -291,13 +420,23 @@ export const EmailSender = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
+                        <TableCell padding='checkbox'>
+                          <Checkbox
+                            checked={isSelectedAll}
+                            onChange={handleSelectAllClick}
+                            indeterminate={selectedClients.length > 0 && selectedClients.length < clients.length}
+                          />
+                        </TableCell>
                         <TableCell>Nombre</TableCell>
                         <TableCell>Correo Electrónico</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {clients.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((client, index) => (
-                        <TableRow key={index}>
+                      {clients.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((client) => (
+                        <TableRow key={client.email} hover>
+                          <TableCell padding='checkbox'>
+                            <Checkbox checked={selectedClients.indexOf(client.email) !== -1} onChange={(event) => handleCheckboxChange(event, client.email)} />
+                          </TableCell>
                           <TableCell>{client.name}</TableCell>
                           <TableCell>{client.email}</TableCell>
                         </TableRow>
@@ -339,7 +478,13 @@ export const EmailSender = () => {
           {/* Asunto del Email */}
 
           {/* Botón para enviar el correo */}
-          <Button variant='contained' color='primary' fullWidth disabled={isSendDisabled} onClick={handleSendEmails}>
+          <Button
+            variant='contained'
+            color='primary'
+            fullWidth
+            disabled={isSendDisabled || (!selectedClients.length && !selectedCsvData.length)}
+            onClick={handleSendEmails}
+          >
             Enviar Correos
           </Button>
         </Box>
@@ -349,7 +494,9 @@ export const EmailSender = () => {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Confirmar Envío</DialogTitle>
         <DialogContent>
-          <DialogContentText>Estás a punto de enviar correos a {emailCount} destinatarios. ¿Estás seguro?</DialogContentText>
+          <DialogContentText>
+            Estás a punto de enviar correos a {selectedClients.length + selectedCsvData.length} destinatarios. ¿Estás seguro?
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)} color='secondary'>

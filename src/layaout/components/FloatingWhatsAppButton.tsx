@@ -19,6 +19,7 @@ const FloatingWhatsAppButton = () => {
     }
 
     // Abrir el chat de WhatsApp
+
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
   };
 

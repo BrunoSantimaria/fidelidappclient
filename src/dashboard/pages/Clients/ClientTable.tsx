@@ -43,7 +43,7 @@ interface ClientTableProps {
 const ClientTable: React.FC<ClientTableProps> = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { accounts, getPromotionsAndMetrics, clients, promotions } = useDashboard();
+  const { accounts, getPromotionsAndMetrics, clients, promotions, plan } = useDashboard();
   const [displayedClients, setDisplayedClients] = useState<Client[]>(clients); // Inicializar con los clientes
   const [showHowToUse, setShowHowToUse] = useState(false);
 
@@ -53,6 +53,8 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const [csvClients, setCsvClients] = useState<Client[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false); // Estado para el loading
+  console.log(accounts.emailsSentCount - plan.emailLimit);
+  console.log(clients.length);
 
   useEffect(() => {
     getPromotionsAndMetrics();
@@ -69,7 +71,8 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
+  console.log("plan email " + plan?.emailLimit);
+  const emailLeft = accounts?.emailSentAccount - plan?.emailLimit;
   // Agregar un nuevo cliente manualmente
   const addClient = async () => {
     if (newClientName && newClientEmail) {
@@ -123,7 +126,11 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     return clientPromotions.length > 0 ? clientPromotions : null;
   };
 
-  // Manejar la carga de archivos CSV
+  const handleClick = () => {
+    const whatsappNumber = "56996706983";
+    const message = "¡Hola! Me gustaría obtener más información sobre pasar mi cuenta a pro. ¡Gracias!";
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
+  };
   const handleCsvData = (data: any[]) => {
     if (data.length > 500) {
       toast.error("El archivo CSV no puede contener más de 500 clientes.");
@@ -172,7 +179,10 @@ const ClientTable: React.FC<ClientTableProps> = () => {
       accept: { "text/csv": [".csv"] },
       multiple: false,
     });
-
+    const isFreePlan = plan?.planStatus === "free";
+    const isWithinLimit = Number(plan?.emailLimit) > Number(accounts.emailSentCount);
+    console.log("Is Free Plan:", isFreePlan); // true
+    console.log("Is Within Limit:", isWithinLimit); // true
     return (
       <Paper
         {...getRootProps()}
@@ -199,7 +209,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
             <Button variant='contained' color='primary' sx={{ marginTop: 2 }}>
               Subir archivo
             </Button>
-            <span className='flex m-auto justify-center mt-2'>(Maximo 500 clientes por csv.)</span>
+            <span className='flex m-auto justify-center mt-2'>{plan?.planStatus === "free" ? "(Maximo 500 clientes por csv.)" : ""}</span>
           </div>
         )}
       </Paper>
@@ -237,10 +247,15 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     }
   };
 
+  console.log("Plan Status:", plan?.planStatus);
+  console.log("Email Limit:", plan?.emailLimit);
+  console.log("Emails Sent Count:", accounts.emailSentCount);
+
   return (
     <section>
       <div className='w-[95%] flex flex-col md:flex-col m-auto justify-between mb-20'>
         {/* Inputs para agregar cliente manualmente */}
+
         <div className='flex flex-col md:flex-row m-auto mb-12 w-[95%] space-y-2 md:space-y-0 md:space-x-2 md:justify-center'>
           <TextField label='Nombre' value={newClientName} onChange={(e) => setNewClientName(e.target.value)} />
           <TextField label='Email' value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} />
@@ -372,8 +387,11 @@ const ClientTable: React.FC<ClientTableProps> = () => {
           }}
           open={loading}
         >
-          <CircularProgress color='inherit' />
-          <Typography>Cargando clientes...</Typography>
+          {" "}
+          <div className='flex flex-col space-y-6'>
+            <CircularProgress color='inherit' />
+            <Typography>Cargando clientes...</Typography>
+          </div>
         </Backdrop>
       </Paper>
     </section>

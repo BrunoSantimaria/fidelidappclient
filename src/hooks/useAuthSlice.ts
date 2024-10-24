@@ -1,6 +1,6 @@
 // hooks/useAuth.ts
 import { useDispatch, useSelector } from "react-redux";
-import { onLogin, onLogOut } from "../store/auth/authSlice";
+import { onLogin, onLogOut, refreshAccountAndPlan } from "../store/auth/authSlice";
 import api from "../utils/api";
 import Cookies from "js-cookie";
 import { useNavigateTo } from "./useNavigateTo";
@@ -134,20 +134,19 @@ export const useAuthSlice = () => {
 
       localStorage.setItem("accounts", JSON.stringify(accounts));
       localStorage.setItem("plan", JSON.stringify(plan));
-      const token = localStorage.getItem("token");
-      const user = decodeToken(token);
-      const userWithAccountAndPlan = {
-        ...user,
+
+      const accountAndPlan = {
         accounts: accounts,
         plan: plan,
       };
 
-      dispatch(onLogin(userWithAccountAndPlan));
+      dispatch(refreshAccountAndPlan(accountAndPlan));
     } catch (error) {
       console.error("Error fetching current user details:", error);
       toast.error("No se han podido obtener las cuentas y el plan.");
     }
   };
+
   return {
     startLogin,
     startGoogleSignIn,

@@ -98,6 +98,13 @@ export const authSlice = createSlice({
       state.errorMessage = null;
       state.errorRegisterMessage = action.payload || null;
     },
+    refreshAccountAndPlan: (state, action) => {
+      state.user = {
+        ...state.user,
+        accounts: action.payload.accounts,
+        plan: action.payload.plan,
+      };
+    },
     clearErrorMessage: (state) => {
       state.errorMessage = null;
       state.errorRegisterMessage = null;
@@ -105,6 +112,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { onChecking, onLogin, onLogOut, clearErrorMessage, onLogOutRegister } = authSlice.actions;
+export const { onChecking, onLogin, onLogOut, clearErrorMessage, onLogOutRegister, refreshAccountAndPlan } = authSlice.actions;
 
 export default authSlice.reducer;
