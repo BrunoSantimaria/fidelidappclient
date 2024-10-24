@@ -132,7 +132,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
   };
   const handleCsvData = (data: any[]) => {
-    if (data.length > 500) {
+    if (data.length > 500000) {
       toast.error("El archivo CSV no puede contener más de 500 clientes.");
       return;
     }
@@ -388,7 +388,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
           open={loading}
         >
           {" "}
-          <div className='flex flex-col space-y-6'>
+          <div className='flex flex-col space-y-6 m-auto'>
             <CircularProgress color='inherit' />
             <Typography>Cargando clientes...</Typography>
           </div>
