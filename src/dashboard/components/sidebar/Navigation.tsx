@@ -6,6 +6,7 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import LoyaltyRoundedIcon from "@mui/icons-material/LoyaltyRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -139,6 +140,11 @@ export const Navigation = () => {
               <PersonAddAlt1RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
             </NavigationLink>
           </div>
+          {/* <div>
+            <NavigationLink name='Ajustes' link='/dashboard/settings'>
+              <SettingsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+            </NavigationLink>
+          </div> */}
           <div onClick={startLoggingOut}>
             <NavigationLink name='Salir'>
               <LogoutRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />

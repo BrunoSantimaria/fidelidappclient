@@ -18,7 +18,14 @@ const ContactForm = () => {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      await api.post("/auth/contact", data);
+      // Enviar datos al backend, incluyendo phone y organization
+      await api.post("/auth/contact", {
+        name: data.name,
+        email: data.email,
+        message: data.message,
+        phone: data.phone, // Agregado
+        organization: data.organization, // Agregado
+      });
       toast.success("¡Formulario enviado con éxito!");
 
       // Disparar evento de GTAG para el envío de formulario
@@ -45,15 +52,11 @@ const ContactForm = () => {
         <script async src='https://www.googletagmanager.com/gtag/js?id=AW-16750398859'></script>
         <script>
           {`
-     
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-16750398859"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
 
-  gtag('config', 'AW-16750398859');
-</script>
+          gtag('config', 'AW-16750398859');
           `}
         </script>
       </Helmet>
@@ -65,7 +68,7 @@ const ContactForm = () => {
         <TextField
           label='Nombre'
           variant='outlined'
-          {...register("name", { required: "Name is required" })}
+          {...register("name", { required: "El nombre es requerido" })}
           error={!!errors.name}
           helperText={errors.name ? errors.name.message : ""}
         />
@@ -73,16 +76,30 @@ const ContactForm = () => {
           label='Email'
           variant='outlined'
           type='email'
-          {...register("email", { required: "Valid email is required" })}
+          {...register("email", { required: "El correo electrónico es requerido" })}
           error={!!errors.email}
           helperText={errors.email ? errors.email.message : ""}
+        />
+        <TextField
+          label='Número de Teléfono' // Nuevo campo
+          variant='outlined'
+          {...register("phone")}
+          error={!!errors.phone}
+          helperText={errors.phone ? errors.phone.message : ""}
+        />
+        <TextField
+          label='Organización' // Nuevo campo
+          variant='outlined'
+          {...register("organization")}
+          error={!!errors.organization}
+          helperText={errors.organization ? errors.organization.message : ""}
         />
         <TextField
           label='Mensaje'
           variant='outlined'
           multiline
           rows={4}
-          {...register("message", { required: "Message is required" })}
+          {...register("message", { required: "El mensaje es requerido" })}
           error={!!errors.message}
           helperText={errors.message ? errors.message.message : ""}
         />

@@ -8,20 +8,27 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
     name: "",
     email: "",
     message: "",
+    phone: "", // Nuevo campo para el número de teléfono
+    organization: "", // Nuevo campo para la organización
   });
+
   const [errors, setErrors] = useState({
     name: "",
     email: "",
     message: "",
+    phone: "", // Nuevo campo para errores de teléfono
+    organization: "", // Nuevo campo para errores de organización
   });
 
   useEffect(() => {
     return () => {
-      setErrors({ name: "", email: "", message: "" });
+      setErrors({ name: "", email: "", message: "", phone: "", organization: "" });
       setFormData({
         name: "",
         email: "",
         message: "",
+        phone: "", // Reinicia el campo de teléfono
+        organization: "", // Reinicia el campo de organización
       });
     };
   }, [handleClose]);
@@ -35,7 +42,7 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
   };
 
   const checkErrors = () => {
-    const newErrors = { name: "", email: "", message: "" };
+    const newErrors = { name: "", email: "", message: "", phone: "", organization: "" };
     let isValid = true;
 
     if (!formData.name.trim()) {
@@ -57,6 +64,18 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
       isValid = false;
     }
 
+    // Validación para el teléfono
+    if (!formData.phone.trim()) {
+      newErrors.phone = "El número de teléfono es requerido";
+      isValid = false;
+    }
+
+    // Validación para la organización
+    if (!formData.organization.trim()) {
+      newErrors.organization = "La organización es requerida";
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
   };
@@ -69,7 +88,13 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
     }
 
     try {
-      await api.post("/auth/contact", formData);
+      await api.post("/auth/contact", {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        phone: formData.phone, // Envía el número de teléfono
+        organization: formData.organization, // Envía la organización
+      });
       toast.success("¡Formulario enviado con éxito!");
 
       window.gtag("event", "gtm.formSubmit", {
@@ -90,8 +115,6 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
       <DialogTitle>Déjanos tus datos para que nos contactemos contigo.</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit}>
-          {" "}
-          {/* Aquí se agrega el formulario */}
           <TextField
             margin='dense'
             label='Nombre'
@@ -115,6 +138,26 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
           />
           <TextField
             margin='dense'
+            label='Número de Teléfono' // Nuevo campo
+            name='phone'
+            fullWidth
+            value={formData.phone}
+            onChange={handleInputChange}
+            error={Boolean(errors.phone)}
+            helperText={errors.phone}
+          />
+          <TextField
+            margin='dense'
+            label='Organización' // Nuevo campo
+            name='organization'
+            fullWidth
+            value={formData.organization}
+            onChange={handleInputChange}
+            error={Boolean(errors.organization)}
+            helperText={errors.organization}
+          />
+          <TextField
+            margin='dense'
             label='Mensaje'
             name='message'
             type='text'
@@ -129,7 +172,6 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
               Cancelar
             </Button>
             <Button type='submit' color='primary'>
-              {" "}
               Enviar
             </Button>
           </DialogActions>

@@ -10,6 +10,7 @@ import { EmailSender } from "../pages/email/EmailSender";
 import { CreateAgenda } from "../pages/Agenda/CreateAgenda";
 import { Clients } from "../pages/Clients/Clients";
 import { AccountQr } from "../pages/AccountQr/AccountQr";
+import { Settings } from "../pages/Settings/Settings";
 
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
@@ -47,6 +48,14 @@ export const DashboardRoutes = () => {
           element={
             <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
               <EmailSender />
+            </motion.div>
+          }
+        />
+        <Route
+          path='/settings'
+          element={
+            <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
+              <Settings />
             </motion.div>
           }
         />

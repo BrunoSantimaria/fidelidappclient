@@ -16,6 +16,7 @@
     "@lexical/plain-text": "^0.18.0",
     "@lexical/react": "^0.18.0",
     "@lexical/rich-text": "^0.18.0",
+    "@mercadopago/sdk-react": "^0.0.19",
     "@mui/icons-material": "^6.1.1",
     "@mui/material": "^6.1.1",
     "@mui/x-charts": "^7.19.0",
