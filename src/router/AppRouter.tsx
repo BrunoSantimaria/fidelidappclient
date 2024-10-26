@@ -49,6 +49,7 @@ export const AppRouter = () => {
           <Route path='/agendas/:agendaId' element={<Agenda />} />
           <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
           <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
+          <Route path='/promotions/:id' element={<PromotionClient />} />
           <Route path='/promotion/:id' element={<PromotionClient />} />
           <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
           {status === "non-authenticated" ? (

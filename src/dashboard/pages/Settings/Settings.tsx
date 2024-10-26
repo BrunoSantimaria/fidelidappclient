@@ -6,7 +6,7 @@ import { Subscript } from "@mui/icons-material";
 import { Subscription } from "./views/Subscription";
 
 export const Settings = () => {
-  const [selectedSection, setSelectedSection] = useState("Account Settings");
+  const [selectedSection, setSelectedSection] = useState("Ajustes de cuenta");
 
   const sections = [
     { id: "account", label: "Ajustes de cuenta", icon: "⚙️" },

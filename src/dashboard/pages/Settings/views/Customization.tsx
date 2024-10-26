@@ -1,14 +1,14 @@
 import { Button, Input } from "@mui/material";
 import React, { useState, useEffect } from "react";
+import { useSettings } from "../../../../hooks/useSettings";
 
 export const Customization = () => {
-  // Valores iniciales para compararlos con los cambios
+  const { handleCustomization } = useSettings();
   const initialLogo = null;
   const initialInstagram = "";
   const initialFacebook = "";
   const initialWhatsapp = "";
 
-  // Estados para los campos de entrada
   const [logo, setLogo] = useState(initialLogo);
   const [instagram, setInstagram] = useState(initialInstagram);
   const [facebook, setFacebook] = useState(initialFacebook);
@@ -36,7 +36,15 @@ export const Customization = () => {
     setFacebook(initialFacebook);
     setWhatsapp(initialWhatsapp);
   };
-
+  const handleSubmit = () => {
+    const settings = {
+      logo,
+      instagram,
+      facebook,
+      whatsapp,
+    };
+    handleCustomization(settings);
+  };
   // Efecto para verificar si los valores han cambiado
   useEffect(() => {
     const isSame = logo === initialLogo && instagram === initialInstagram && facebook === initialFacebook && whatsapp === initialWhatsapp;
@@ -96,6 +104,7 @@ export const Customization = () => {
           variant='contained'
           className={`bg-blue-500 text-white p-2 rounded ${isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
           disabled={isSaveDisabled}
+          onClick={handleSubmit}
         >
           Guardar Cambios
         </Button>

@@ -4,13 +4,20 @@ import { Dashboard } from "../pages";
 import { CreatePromotion } from "../pages/Promotions/CreatePromotion";
 import { Navigation } from "../components/sidebar/Navigation";
 import { useDashboard } from "../../hooks";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Promotion } from "../pages/Promotions/Promotion";
 import { EmailSender } from "../pages/email/EmailSender";
 import { CreateAgenda } from "../pages/Agenda/CreateAgenda";
 import { Clients } from "../pages/Clients/Clients";
 import { AccountQr } from "../pages/AccountQr/AccountQr";
 import { Settings } from "../pages/Settings/Settings";
+import { useAuthSlice } from "../../hooks/useAuthSlice";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
+});
 
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
@@ -23,17 +30,40 @@ const pageTransition = {
 
 export const DashboardRoutes = () => {
   const { getPromotionsAndMetrics, plan, metrics } = useDashboard();
+  const { user } = useAuthSlice();
+  const [notifications, setNotifications] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   useEffect(() => {
     getPromotionsAndMetrics();
+
+    const eventSource = new EventSource(`http://localhost:8080/events/${user.accounts._id}`);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setNotifications((prev) => [...prev, data]);
+      console.log("Nueva notificación:", data);
+
+      // Configurar el snackbar
+      setSnackbarMessage(data.message || "Nueva notificación recibida");
+      setSnackbarSeverity("info"); // O cambia esto según el tipo de mensaje
+      setSnackbarOpen(true);
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("Error en la conexión SSE:", error);
+      eventSource.close();
+    };
+
+    return () => eventSource.close();
   }, []);
 
   return (
     <>
       <Navigation />
       <Routes>
-        {/* Permitir acceso a la promoción sin autenticación */}
-
         <Route
           path='/'
           element={
@@ -42,7 +72,6 @@ export const DashboardRoutes = () => {
             </motion.div>
           }
         />
-
         <Route
           path='/email-sender'
           element={
@@ -51,15 +80,6 @@ export const DashboardRoutes = () => {
             </motion.div>
           }
         />
-        <Route
-          path='/settings'
-          element={
-            <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
-              <Settings />
-            </motion.div>
-          }
-        />
-        {/* Proteger ruta de creación de promociones */}
         <Route
           path='/promotions/create'
           element={
@@ -76,9 +96,15 @@ export const DashboardRoutes = () => {
         <Route path='/agenda/create' element={<CreateAgenda />} />
         <Route path='/clients/list' element={<Clients />} />
         <Route path='/qr' element={<AccountQr />} />
-        {/* Redirigir cualquier otra ruta al Dashboard */}
+        <Route path='/settings' element={<Settings />} />
         <Route path='/*' element={<Navigate to='/' replace />} />
       </Routes>
+
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
