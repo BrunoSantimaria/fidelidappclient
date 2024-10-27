@@ -5,7 +5,7 @@ import { Customization } from "./views/Customization";
 import { Subscript } from "@mui/icons-material";
 import { Subscription } from "./views/Subscription";
 import { AccountSettings } from "./views/AccountSettings";
-import tagManager from "react-gtm-module";
+
 export const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("Ajustes de cuenta");
 
