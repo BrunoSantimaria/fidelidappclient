@@ -140,11 +140,11 @@ export const Navigation = () => {
               <PersonAddAlt1RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
             </NavigationLink>
           </div>
-          <div>
+          {/* <div>
             <NavigationLink name='Ajustes' link='/dashboard/settings'>
               <SettingsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
             </NavigationLink>
-          </div>
+          </div> */}
           <div onClick={startLoggingOut}>
             <NavigationLink name='Salir'>
               <LogoutRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />

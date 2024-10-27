@@ -80,7 +80,7 @@ export const TablePromotions = () => {
                         {promotion.title}
                       </Link>
                     </TableCell>
-                    <TableCell>{promotion.description}</TableCell>
+                    <TableCell>{promotion.description.slice(0, 150)}...</TableCell>
                     <TableCell>{promotion.promotionDuration}</TableCell>
                     <TableCell>{promotion.promotionRecurrent === "True" ? "Sí" : "No"}</TableCell>
                     <TableCell>{promotion.promotionType}</TableCell>

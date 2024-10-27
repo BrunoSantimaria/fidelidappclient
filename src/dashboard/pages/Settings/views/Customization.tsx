@@ -53,7 +53,7 @@ export const Customization = () => {
   }, [logo, instagram, facebook, whatsapp]);
 
   return (
-    <div>
+    <div className='w-[95%] m-auto md:ml-20'>
       <h2 className='text-2xl font-bold mb-4'>Personalización</h2>
 
       {/* Input para el logo */}

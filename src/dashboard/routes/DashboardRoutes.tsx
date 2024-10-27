@@ -35,11 +35,11 @@ export const DashboardRoutes = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
+  const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
     getPromotionsAndMetrics();
 
-    const eventSource = new EventSource(`http://localhost:8080/events/${user.accounts._id}`);
+    const eventSource = new EventSource(`${url}/events/${user.accounts._id}`);
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -48,7 +48,7 @@ export const DashboardRoutes = () => {
 
       // Configurar el snackbar
       setSnackbarMessage(data.message || "Nueva notificación recibida");
-      setSnackbarSeverity("info"); // O cambia esto según el tipo de mensaje
+      setSnackbarSeverity("info");
       setSnackbarOpen(true);
     };
 

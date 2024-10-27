@@ -96,7 +96,7 @@ export const Subscription = () => {
   };
 
   return (
-    <div>
+    <div className='w-[95%] m-auto md:ml-20'>
       <h2 className='text-2xl font-bold mb-4'>Suscripción</h2>
 
       {/* Mostrar el plan actual */}
@@ -120,7 +120,7 @@ export const Subscription = () => {
 
       {/* Botón para gestionar la suscripción con Mercado Pago */}
       {plan === "Free" && (
-        <div className='mt-4'>
+        <div className='mt-4 md:w-1/3 w-full'>
           <Wallet initialization={initialization} onSubmit={onSubmit} onReady={onReady} onError={onError} />
         </div>
       )}

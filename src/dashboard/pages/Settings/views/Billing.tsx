@@ -7,7 +7,7 @@ export const Billing = () => {
   const [rut, setRut] = useState("");
 
   return (
-    <div>
+    <div className='w-[95%] m-auto md:ml-20'>
       <h2 className='text-2xl font-bold mb-4'>Sección de facturación.</h2>
 
       <div className='flex items-center mb-4'>

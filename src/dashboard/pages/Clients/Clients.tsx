@@ -15,7 +15,7 @@ const pageTransition = {
 export const Clients = () => {
   return (
     <motion.main initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='w-full h-full flex flex-row relative'>
-      <section className='flex flex-col p-10 ml-0 md:ml-20 lg:ml-20 w-full gap-5'>
+      <section className='flex flex-col md:p-10 ml-0 md:ml-20 lg:ml-20 w-full gap-5'>
         <ClientTable />
       </section>
     </motion.main>
