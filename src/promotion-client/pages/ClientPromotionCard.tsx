@@ -9,6 +9,8 @@ import keyUrl from "../../assets/fondocandado2.png";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { Helmet } from "react-helmet-async";
 import api from "../../utils/api";
+const marioCoinSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav";
+const marioStarSound = "https://themushroomkingdom.net/sounds/wav/smb2/smb2_grow.wav";
 
 export const ClientPromotionCard = () => {
   const { cid, pid } = useParams();
@@ -46,10 +48,16 @@ export const ClientPromotionCard = () => {
     setProcessing(true);
     if (result) {
       try {
+        console.log(result);
+
         const accountQr = await result[0].rawValue;
         await api.post("/api/promotions/visit", { clientEmail: client.email, promotionId: pid, accountQr });
         toast.success("Visita registrada con éxito. La página se refrescará en 3 segundos.");
-        setTimeout(() => window.location.reload(), 3000);
+        const audio = new Audio(marioCoinSound);
+        audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } catch (error) {
         console.log(error);
 
@@ -66,6 +74,8 @@ export const ClientPromotionCard = () => {
     try {
       await api.post("/api/promotions/complete", { clientEmail: client.email, promotionId: pid });
       toast.success("Promocion completada con exito.");
+      const audio = new Audio(marioStarSound);
+      audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
     } catch (error) {
       console.log(error);
 
@@ -267,9 +277,9 @@ export const ClientPromotionCard = () => {
               <DialogContent>
                 <div className='w-full h-[500px] max-w-md mx-auto bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800'>
                   {promotion.status === "Pending" ? (
-                    <Scanner onScan={handleScanComplete} className='w-full h-full' />
+                    <Scanner onScan={handleScanComplete} components={{ audio: false }} className='w-full h-full' />
                   ) : (
-                    <Scanner onScan={handleScan} className='w-full h-full' />
+                    <Scanner onScan={handleScan} components={{ audio: false }} className='w-full h-full' />
                   )}
                 </div>
               </DialogContent>
