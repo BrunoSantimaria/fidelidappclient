@@ -223,7 +223,7 @@ export const ClientPromotionCard = () => {
             </span>
           </div>
         )}
-        <section className='flex flex-col md:flex md:flex-row mx-6 md:mx-40 '>
+        <section className='flex flex-col md:flex md:flex-row mx-6 md:mx-60 w-5/6 m-auto  '>
           <div className='mt-4 w-full md:w-1/2 space-y-6'>
             <h1 className='mt-4  font-bold text-left font-poppins text-4xl w-full md:w-2/3 md:text-5xl'>{promotionDetails.title}</h1>
             <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
@@ -231,7 +231,7 @@ export const ClientPromotionCard = () => {
             <p className='mt-2'>Tipo: {promotionDetails.promotionType}</p>
           </div>
 
-          <div className='mt-4 w-3/3 md:w-2/6 md:h-[600px] text-center border rounded-xl mb-12'>
+          <div className='mt-4 w-3/3 md:w-3/6 md:h-[600px] text-center border rounded-xl mb-12'>
             <div className='relative w-full h-full aspect-[16/9]'>
               <img src={imageUrl} alt='Promotion' className='w-full h-full object-cover rounded-xl' />
             </div>
