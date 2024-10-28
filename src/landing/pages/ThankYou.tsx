@@ -1,20 +1,22 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const ThankYou = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Aquí puedes agregar el código para enviar la conversión
-    // Ejemplo: enviar un evento a Google Analytics o cualquier herramienta que uses
-    console.log("Conversión registrada");
-    // Si estás usando Google Analytics:
-    // window.gtag('event', 'conversion', {
-    //   'send_to': 'AW-XXXXXXXXX/YYYYYYYYY',
-    //   'value': 1.0,
-    //   'currency': 'USD'
-    // });
-    setTimeout(() => {
-      window.location.href = "/"; // Redirige al usuario a la página principal
-    }, 3000); // Redirige después de 3 segundos
-  }, []);
+    if (window.gtag) {
+      window.gtag("event", "conversion", {
+        send_to: "AW-16750398859/c0iYCPTA7-IZEIubm7M-",
+      });
+    }
+
+    const timeoutId = setTimeout(() => {
+      navigate("/");
+    }, 3000);
+
+    return () => clearTimeout(timeoutId);
+  }, [navigate]);
 
   return (
     <div>
