@@ -181,22 +181,22 @@ export const PromotionClient = () => {
       </div>
       <Divider sx={{ color: "white", width: "60%" }} />
       {/* Footer con logo y redes sociales */}
-      {(logo || (socialMedia && (socialMedia.instagram || socialMedia.facebook || socialMedia.whatsapp))) && (
+      {(logo || (socialMedia && (socialMedia?.instagram || socialMedia.facebook || socialMedia.whatsapp))) && (
         <footer className='flex flex-row items-center justify-center mt-12 p-6  r'>
           {logo && <img src={logo} alt='Logo' className='w-40 h-40  mb-4' />}
 
           <div className='flex space-x-4'>
-            {socialMedia.instagram && (
+            {socialMedia?.instagram && (
               <a href={socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
                 <Instagram sx={{ fontSize: 40, color: "black" }} />
               </a>
             )}
-            {socialMedia.facebook && (
-              <a href={socialMedia.facebook} target='_blank' rel='noopener noreferrer'>
+            {socialMedia?.facebook && (
+              <a href={socialMedia?.facebook} target='_blank' rel='noopener noreferrer'>
                 <Facebook sx={{ fontSize: 40, color: "black" }} />
               </a>
             )}
-            {socialMedia.whatsapp && (
+            {socialMedia?.whatsapp && (
               <a href={`https://wa.me/${socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
                 <WhatsApp sx={{ fontSize: 40, color: "black" }} />
               </a>
