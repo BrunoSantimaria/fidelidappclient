@@ -102,7 +102,11 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
         event_label: "Contact Form Submission",
         value: 1,
       });
-
+      window.gtag("event", "form_submit", {
+        event_category: "Contact",
+        event_label: "Contact Form Submission",
+        value: 1,
+      });
       handleClose(); // Cierra el modal después del envío
     } catch (error) {
       console.log(error);
