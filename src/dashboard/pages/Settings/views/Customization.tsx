@@ -1,41 +1,51 @@
 import { Button, Input } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useSettings } from "../../../../hooks/useSettings";
+import { useAuthSlice } from "../../../../hooks/useAuthSlice";
 
 export const Customization = () => {
-  const { handleCustomization } = useSettings();
-  const initialLogo = null;
-  const initialInstagram = "";
-  const initialFacebook = "";
-  const initialWhatsapp = "";
+  const { user } = useAuthSlice();
+  const { handleCustomization, loading } = useSettings();
+
+  // Asegúrate de que user y user.accounts estén definidos
+  if (!user || !user.accounts) {
+    return <div>Cargando...</div>; // Representación de carga
+  }
+
+  const initialLogo = user.accounts.logo || "";
+  console.log();
+
+  const socialMedia = user.accounts.socialMedia || {}; // Cambia aquí
+  const initialInstagram = socialMedia.instagram || "";
+  const initialFacebook = socialMedia.facebook || "";
+  const initialWhatsapp = socialMedia.whatsapp || "";
 
   const [logo, setLogo] = useState(initialLogo);
+  const [logoPreview, setLogoPreview] = useState(initialLogo);
   const [instagram, setInstagram] = useState(initialInstagram);
   const [facebook, setFacebook] = useState(initialFacebook);
   const [whatsapp, setWhatsapp] = useState(initialWhatsapp);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
-  // Función para manejar la carga de imagen
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogo(reader.result); // Guardar el logo en base64
-      };
-      reader.readAsDataURL(file);
+      setLogo(file);
+      setLogoPreview(URL.createObjectURL(file));
     } else {
       setLogo(null);
+      setLogoPreview(null);
     }
   };
 
-  // Función para limpiar todos los campos
   const handleCancel = () => {
     setLogo(initialLogo);
+    setLogoPreview(null);
     setInstagram(initialInstagram);
     setFacebook(initialFacebook);
     setWhatsapp(initialWhatsapp);
   };
+
   const handleSubmit = () => {
     const settings = {
       logo,
@@ -45,10 +55,9 @@ export const Customization = () => {
     };
     handleCustomization(settings);
   };
-  // Efecto para verificar si los valores han cambiado
+
   useEffect(() => {
     const isSame = logo === initialLogo && instagram === initialInstagram && facebook === initialFacebook && whatsapp === initialWhatsapp;
-
     setIsSaveDisabled(isSame);
   }, [logo, instagram, facebook, whatsapp]);
 
@@ -60,8 +69,7 @@ export const Customization = () => {
       <div className='mb-4'>
         <label className='block mb-2'>Logo de la cuenta</label>
         <Input type='file' className='w-full border rounded p-2' accept='image/*' onChange={handleLogoChange} />
-        {/* Vista previa del logo */}
-        {logo && <img src={logo} alt='Logo preview' className='mt-4 w-32 h-32 object-cover' />}
+        {logoPreview && <img src={logoPreview} alt='Logo preview' className='mt-4 w-32 h-32 object-cover' />}
       </div>
 
       {/* Redes sociales */}
@@ -103,7 +111,7 @@ export const Customization = () => {
         <Button
           variant='contained'
           className={`bg-blue-500 text-white p-2 rounded ${isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-          disabled={isSaveDisabled}
+          disabled={isSaveDisabled || loading}
           onClick={handleSubmit}
         >
           Guardar Cambios

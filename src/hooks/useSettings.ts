@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuthSlice } from "./useAuthSlice";
 import { log } from "console";
 import api from "../utils/api";
+import { toast } from "react-toastify";
 
 export const useSettings = () => {
-  const { user } = useAuthSlice();
+  const { user, refreshAccount } = useAuthSlice();
+  const [loading, setLoading] = useState(false);
   const accountId = user.accounts._id;
   const base64ToBlob = (base64Data, contentType) => {
     const byteCharacters = atob(base64Data.split(",")[1]);
@@ -24,21 +26,35 @@ export const useSettings = () => {
   };
 
   const handleCustomization = async (settings) => {
-    const data = {
-      logo: settings.logo,
-      socialMedia: {
-        instagram: settings.instagram,
-        facebook: settings.facebook,
-        whatsapp: settings.whatsapp,
-      },
-    };
+    const formData = new FormData();
 
+    formData.append("accountId", accountId);
+    if (settings.logo) {
+      formData.append("logo", settings.logo); // Adjunta el archivo solo si existe
+    }
+    formData.append(
+      "socialMedia",
+      JSON.stringify({
+        instagram: settings.instagram || "", // Asegúrate de que sean cadenas
+        facebook: settings.facebook || "",
+        whatsapp: settings.whatsapp || "",
+      })
+    );
+
+    setLoading(true);
     try {
-      const resp = await api.put("/accounts/settings/customize", data);
-      console.log(resp);
+      const resp = await api.post(`/accounts/settings/customize`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.info("Configuración actualizada");
     } catch (error) {
-      console.log(error);
+      console.error("Error en la personalización:", error);
+    } finally {
+      setLoading(false);
     }
   };
-  return { handleCustomization };
+  return { handleCustomization, loading };
 };

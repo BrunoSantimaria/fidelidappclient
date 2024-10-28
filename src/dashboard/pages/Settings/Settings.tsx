@@ -10,10 +10,10 @@ export const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("Ajustes de cuenta");
 
   const sections = [
-    { id: "account", label: "Ajustes de cuenta", icon: "⚙️" },
-    { id: "personal", label: "Personalización", icon: "🛠️" },
-    { id: "privacy", label: "Suscripción", icon: "💳" },
-    { id: "notifications", label: "Factura", icon: "🧾" },
+    { id: "1", label: "Ajustes de cuenta", icon: "⚙️" },
+    { id: "2", label: "Personalización", icon: "🛠️" },
+    { id: "3", label: "Suscripción", icon: "💳" },
+    { id: "4", label: "Factura", icon: "🧾" },
   ];
 
   const renderSection = () => {

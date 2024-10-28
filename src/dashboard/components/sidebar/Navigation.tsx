@@ -17,6 +17,7 @@ import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MailRoundedIcon from "@mui/icons-material/MailRounded";
 import { toast } from "react-toastify";
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
+import { Divider } from "@mui/material";
 const containerVariants = {
   close: {
     width: "5rem",
@@ -140,6 +141,7 @@ export const Navigation = () => {
               <PersonAddAlt1RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
             </NavigationLink>
           </div>
+          <Divider className='bg-gray-300/80' />
           {/* <div>
             <NavigationLink name='Ajustes' link='/dashboard/settings'>
               <SettingsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
