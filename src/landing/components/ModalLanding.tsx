@@ -110,9 +110,8 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
         value: 1,
       });
 
-      handleClose(); // Cierra el modal
+      handleClose();
 
-      // Redirigir a la página de "Thank You"
       navigate("/thankyou");
     } catch (error) {
       console.log(error);
