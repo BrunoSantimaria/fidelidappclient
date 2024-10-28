@@ -5,11 +5,9 @@ export const ThankYou = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (window.gtag) {
-      window.gtag("event", "conversion", {
-        send_to: "AW-16750398859/c0iYCPTA7-IZEIubm7M-",
-      });
-    }
+    window.gtag("event", "conversion", {
+      send_to: "AW-16750398859/c0iYCPTA7-IZEIubm7M-",
+    });
 
     const timeoutId = setTimeout(() => {
       navigate("/");
