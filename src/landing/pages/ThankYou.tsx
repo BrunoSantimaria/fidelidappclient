@@ -13,7 +13,7 @@ export const ThankYou = () => {
   }, [navigate]);
 
   return (
-    <div>
+    <div className='mt-20'>
       <h1>¡Gracias por tu envío!</h1>
       <p>Tu formulario ha sido enviado con éxito.</p>
     </div>

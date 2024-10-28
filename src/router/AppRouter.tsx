@@ -53,6 +53,7 @@ export const AppRouter = () => {
           <Route path='/promotions/:id' element={<PromotionClient />} />
           <Route path='/promotion/:id' element={<PromotionClient />} />
           <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
+          <Route path='/thankyou' element={<ThankYou />} />
           {status === "non-authenticated" ? (
             <>
               <Route path='/agendas/:agendaId' element={<Agenda />} />
@@ -64,6 +65,7 @@ export const AppRouter = () => {
           ) : (
             <>
               <Route path='/' element={<Landing refs={refs} />} />
+              <Route path='/thankyou' element={<ThankYou />} />
               <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
               <Route path='/dashboard/*' element={<DashboardRoutes />} />
             </>
