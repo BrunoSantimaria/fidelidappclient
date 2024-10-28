@@ -7,15 +7,29 @@ const FloatingWhatsAppButton = () => {
   const whatsappNumber = "56996706983";
   const message = "¡Hola! Me gustaría obtener más información sobre Fidelizarte y sus servicios de programas de fidelización. ¡Gracias!";
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    // Obtén el elemento que disparó el evento
+    const buttonElement = e.currentTarget;
+
+    // Accede al id y clases del botón
+    const buttonId = buttonElement.id;
+    const buttonClasses = buttonElement.className;
+
+    console.log("Button ID:", buttonId);
+    console.log("Button Classes:", buttonClasses);
+
+    // Solo se envía el evento a Google Analytics si está definido
     if (window.gtag) {
       window.gtag("event", "gtm.click", {
         event_category: "engagement",
         event_label: "Floating WhatsApp Button",
         value: 1,
+        button_id: buttonId, // Puedes agregarlo al evento
+        button_classes: buttonClasses, // También aquí
       });
     }
 
+    // Abre WhatsApp con el número y mensaje especificados
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
   };
 
