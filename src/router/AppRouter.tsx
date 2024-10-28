@@ -65,8 +65,9 @@ export const AppRouter = () => {
           ) : (
             <>
               <Route path='/' element={<Landing refs={refs} />} />
-              <Route path='/thankyou' element={<ThankYou />} />
+
               <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
+              <Route path='/thankyou' element={<ThankYou />} />
               <Route path='/dashboard/*' element={<DashboardRoutes />} />
             </>
           )}

@@ -14,6 +14,7 @@ import { Settings } from "../pages/Settings/Settings";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress"; // Importa el indicador de carga
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -29,7 +30,7 @@ const pageTransition = {
 };
 
 export const DashboardRoutes = () => {
-  const { getPromotionsAndMetrics, plan, metrics } = useDashboard();
+  const { getPromotionsAndMetrics, plan, metrics, loading } = useDashboard();
   const { user } = useAuthSlice();
   const [notifications, setNotifications] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -38,26 +39,6 @@ export const DashboardRoutes = () => {
   const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
     getPromotionsAndMetrics();
-
-    const eventSource = new EventSource(`${url}/events/${user.accounts._id}`);
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setNotifications((prev) => [...prev, data]);
-      console.log("Nueva notificación:", data);
-
-      // Configurar el snackbar
-      setSnackbarMessage(data.message || "Nueva notificación recibida");
-      setSnackbarSeverity("info");
-      setSnackbarOpen(true);
-    };
-
-    eventSource.onerror = (error) => {
-      console.error("Error en la conexión SSE:", error);
-      eventSource.close();
-    };
-
-    return () => eventSource.close();
   }, []);
 
   return (

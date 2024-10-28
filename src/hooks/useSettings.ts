@@ -48,7 +48,7 @@ export const useSettings = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-
+      refreshAccount();
       toast.info("Configuración actualizada");
     } catch (error) {
       console.error("Error en la personalización:", error);

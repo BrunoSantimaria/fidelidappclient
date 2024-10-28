@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../utils/api";
-import { cleanActivePromotion, setActivePromotion, setAgendas, setClients, setMetrics, setPromotions } from "../store/dashboard/dashboardSlice";
+import { cleanActivePromotion, setActivePromotion, setAgendas, setClients, setLoading, setMetrics, setPromotions } from "../store/dashboard/dashboardSlice";
 import { toast } from "react-toastify";
 import { onLogOut } from "../store/auth/authSlice";
 import { useNavigateTo } from "./useNavigateTo";
@@ -10,7 +10,7 @@ import { log } from "console";
 
 export const useDashboard = () => {
   const { accounts, plan } = useSelector((state) => state.auth.user);
-  const { metrics, promotions, activePromotion, agendas, clients } = useSelector((state) => state.dashboard);
+  const { metrics, promotions, activePromotion, agendas, clients, loading } = useSelector((state) => state.dashboard);
   const { refreshAccount } = useAuthSlice();
   const dispatch = useDispatch();
   const { handleNavigate } = useNavigateTo();
@@ -19,14 +19,14 @@ export const useDashboard = () => {
     try {
       const resp = await api.get("/api/promotions");
       console.log(resp.data);
-
+      dispatch(setLoading(true));
       dispatch(setPromotions(resp.data.promotions));
       dispatch(setMetrics(resp.data.metrics));
 
       const agendas = await api.get("/api/agenda");
       dispatch(setAgendas(agendas.data));
       console.log(accounts);
-      console.log("este es el id" + accounts._id);
+
       const clients = await api.get("/api/clients/getAccountClients", {
         params: { accountId: accounts._id },
       });
@@ -39,12 +39,10 @@ export const useDashboard = () => {
         dispatch(onLogOut(""));
         handleNavigate("/");
       }
+    } finally {
+      dispatch(setLoading(false));
     }
   };
-
-  useEffect(() => {
-    getPromotionsAndMetrics();
-  }, []);
 
   const getPromotionById = async (id: string) => {
     try {
@@ -117,5 +115,6 @@ export const useDashboard = () => {
     modifyPromotion,
     clients,
     regenerateQr,
+    loading,
   };
 };
