@@ -2,8 +2,9 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } 
 import { useEffect, useState } from "react";
 import api from "../../utils/api";
 import { toast } from "react-toastify";
-
+import { useNavigate } from "react-router-dom";
 export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose: () => void }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -92,18 +93,26 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
         name: formData.name,
         email: formData.email,
         message: formData.message,
-        phone: formData.phone, // Envía el número de teléfono
-        organization: formData.organization, // Envía la organización
+        phone: formData.phone,
+        organization: formData.organization,
       });
       toast.success("¡Formulario enviado con éxito!");
 
+      // Aquí registrarás la conversión
       window.gtag("event", "gtm.formSubmit", {
         event_category: "Contact",
         event_label: "Contact Form Submission",
         value: 1,
       });
+      window.gtag("event", "form_submit", {
+        event_category: "Contact",
+        event_label: "Contact Form Submission",
+        value: 1,
+      });
 
-      handleClose(); // Cierra el modal después del envío
+      handleClose();
+
+      navigate("/thankyou");
     } catch (error) {
       console.log(error);
       toast.error("Hubo un error al enviar el formulario.");

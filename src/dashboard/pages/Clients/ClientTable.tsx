@@ -56,8 +56,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const [loading, setLoading] = useState(false); // Estado para el loading
 
   useEffect(() => {
-    getPromotionsAndMetrics();
-
     setDisplayedClients(clients);
   }, []); // Asegúrate de actualizar los clientes cuando cambien
 

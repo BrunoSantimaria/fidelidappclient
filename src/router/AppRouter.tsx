@@ -14,6 +14,7 @@ import { ClientPromotionCard } from "../promotion-client/pages/ClientPromotionCa
 import Agenda from "../agenda-client/Agenda";
 import CancelAppointment from "../agenda-client/CancelAppointment";
 import ConfirmAppointment from "../agenda-client/ConfirmAppointment";
+import ThankYou from "../agenda-client/ThankYou";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
@@ -52,17 +53,21 @@ export const AppRouter = () => {
           <Route path='/promotions/:id' element={<PromotionClient />} />
           <Route path='/promotion/:id' element={<PromotionClient />} />
           <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
+          <Route path='/thankyou' element={<ThankYou />} />
           {status === "non-authenticated" ? (
             <>
               <Route path='/agendas/:agendaId' element={<Agenda />} />
               <Route path='/' element={<Landing refs={refs} />} />
+              <Route path='/thankyou' element={<ThankYou />} />
               <Route path='/auth/*' element={<AuthRoutes />} />
               <Route path='/dashboard' element={<Navigate to='/' replace />} />
             </>
           ) : (
             <>
               <Route path='/' element={<Landing refs={refs} />} />
+
               <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
+              <Route path='/thankyou' element={<ThankYou />} />
               <Route path='/dashboard/*' element={<DashboardRoutes />} />
             </>
           )}

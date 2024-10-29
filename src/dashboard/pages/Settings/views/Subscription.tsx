@@ -1,129 +1,121 @@
 import React, { useState, useEffect } from "react";
 import { CardPayment, initMercadoPago, Wallet } from "@mercadopago/sdk-react";
+import { motion } from "framer-motion";
+import api from "../../../../utils/api";
+import { useAuthSlice } from "../../../../hooks/useAuthSlice";
 
-initMercadoPago("TEST-c4ac0466-9823-4fc7-9838-169c5f67539c");
+initMercadoPago("APP_USR-9d40b454-ffba-40df-b223-745404bea593", { locale: "es-AR" });
 
 export const Subscription = () => {
+  const { user } = useAuthSlice();
+  const [preferenceId, setPreferenceId] = useState(null);
   const [plan, setPlan] = useState("Free"); // Plan actual del usuario ("Free" o "Pro")
   const [expirationDate, setExpirationDate] = useState(null); // Fecha de vencimiento si es Pro
-  const initialization = {
-    amount: 100,
-  };
 
-  const onSubmit = async (formData) => {
-    // callback llamado al hacer clic en el botón enviar datos
-    return new Promise((resolve, reject) => {
-      fetch("/process_payment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          // recibir el resultado del pago
-          resolve();
-        })
-        .catch((error) => {
-          // manejar la respuesta de error al intentar crear el pago
-          reject();
-        });
-    });
-  };
-
-  const onError = async (error) => {
-    // callback llamado para todos los casos de error de Brick
+  const onError = (error) => {
     console.log(error);
   };
 
-  const onReady = async () => {
-    /*
-      Callback llamado cuando Brick está listo.
-      Aquí puedes ocultar cargamentos de su sitio, por ejemplo.
-    */
-  };
-  // Simulación de fecha de vencimiento para un plan Pro
-  useEffect(() => {
-    if (plan === "Pro") {
-      const exampleExpirationDate = new Date();
-      exampleExpirationDate.setDate(exampleExpirationDate.getDate() + 10); // 10 días más
-      setExpirationDate(exampleExpirationDate);
-    }
-  }, [plan]);
+  const onReady = async (data) => {
+    // Aquí puedes manejar la respuesta de Mercado Pago
+    if (data?.status === "approved") {
+      // Actualiza la base de datos con el nuevo plan y accountId
+      await updatePlanInDatabase();
 
-  // Función para gestionar el pago (Mercado Pago)
-  const handleMercadoPago = async () => {
+      // Establecer la fecha de vencimiento al activar el plan Pro
+      const newExpirationDate = new Date();
+      newExpirationDate.setDate(newExpirationDate.getDate() + 30); // 30 días más
+      setExpirationDate(newExpirationDate); // Actualiza el estado de expirationDate
+    }
+  };
+
+  const handleUpgradeToPro = async () => {
     try {
-      // Realizar una llamada a tu backend para crear la preferencia de pago
-      const response = await fetch("/api/create_preference", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          // Aquí envías los datos necesarios para la preferencia
-          items: [
-            {
-              title: "Plan Pro",
-              unit_price: 1000, // Precio del plan Pro
-              quantity: 1,
-            },
-          ],
-        }),
+      const response = await api.post("/api/mercadopago/create_preference", {
+        items: [
+          {
+            title: "Plan Pro FidelidApp",
+            unit_price: 49990,
+            quantity: 1,
+          },
+        ],
+        accountId: user.accounts._id, // Reemplaza con el accountId real del usuario
       });
 
-      const preference = await response.json();
-
-      // Inicia el flujo de pago con la preferencia de Mercado Pago
-      window.MercadoPago.openCheckout({
-        url: preference.init_point,
-      });
+      if (response.data.preferenceId) {
+        setPreferenceId(response.data.preferenceId);
+      } else {
+        console.error("No se recibió un ID de preferencia válido", response.data);
+      }
     } catch (error) {
-      console.error("Error al crear la preferencia:", error);
+      console.error("Error al crear la preferencia:", error.response ? error.response.data : error.message);
     }
   };
 
-  // Función para actualizar al plan Pro
-  const handleUpgradeToPro = () => {
-    setPlan("Pro");
+  const updatePlanInDatabase = async () => {
+    try {
+      const response = await api.put("/api/user/updatePlan", {
+        accountId: "accountId_aqui", // Reemplaza con el accountId real del usuario
+        plan: "Pro",
+        expirationDate: expirationDate, // Agrega la expirationDate si es necesario
+      });
+      if (response.status === 200) {
+        console.log("Plan actualizado correctamente");
+        setPlan("Pro"); // Actualiza el estado del plan a Pro
+      } else {
+        console.error("Error al actualizar el plan:", response.data);
+      }
+    } catch (error) {
+      console.error("Error en la actualización de la base de datos:", error.response ? error.response.data : error.message);
+    }
   };
 
-  // Función para mostrar formato de fecha
   const formatDate = (date) => {
     if (!date) return "";
     return date.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
   };
 
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div className='w-[95%] m-auto md:ml-20'>
-      <h2 className='text-2xl font-bold mb-4'>Suscripción</h2>
+    <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
+      <div className='w-[95%] m-auto md:ml-20'>
+        <h2 className='text-2xl font-bold mb-4'>Suscripción</h2>
 
-      {/* Mostrar el plan actual */}
-      <div className='mb-4'>
-        <p className='text-lg'>
-          <strong>Plan activo:</strong> {plan}
-        </p>
-      </div>
-
-      {/* Mostrar la fecha de vencimiento si el plan es Pro */}
-      {plan === "Pro" && expirationDate && (
+        {/* Mostrar el plan actual */}
         <div className='mb-4'>
           <p className='text-lg'>
-            <strong>Vence el:</strong> {formatDate(expirationDate)}
+            <strong>Plan activo:</strong> {plan}
           </p>
-          {expirationDate.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000 && (
-            <p className='text-red-500'>¡Tu suscripción vence pronto! Renueva para no perder acceso a las funciones Pro.</p>
-          )}
         </div>
-      )}
 
-      {/* Botón para gestionar la suscripción con Mercado Pago */}
-      {plan === "Free" && (
-        <div className='mt-4 md:w-1/3 w-full'>
-          <Wallet initialization={initialization} onSubmit={onSubmit} onReady={onReady} onError={onError} />
-        </div>
-      )}
-    </div>
+        {/* Mostrar la fecha de vencimiento si el plan es Pro */}
+        {plan === "Pro" && expirationDate && (
+          <div className='mb-4'>
+            <p className='text-lg'>
+              <strong>Vence el:</strong> {formatDate(expirationDate)}
+            </p>
+            {expirationDate.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000 && (
+              <p className='text-red-500'>¡Tu suscripción vence pronto! Renueva para no perder acceso a las funciones Pro.</p>
+            )}
+          </div>
+        )}
+
+        {/* Botón para gestionar la suscripción con Mercado Pago */}
+        {plan === "Free" && (
+          <div className='mt-4 md:w-1/3 w-full'>
+            <Wallet
+              initialization={{ preferenceId }} // Pasa el preferenceId aquí
+              onSubmit={handleUpgradeToPro}
+              onReady={onReady} // Maneja la respuesta en onReady
+              onError={onError}
+            />{" "}
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 };

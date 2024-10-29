@@ -10,20 +10,7 @@ import { Provider } from "react-redux";
 import { store } from "./store/store.ts";
 import { HelmetProvider } from "react-helmet-async";
 import ReactGA from "react-ga4";
-import TagManager from "react-gtm-module";
 
-const tagManagerArgs = {
-  gtmId: "GTM-PHNQR39N",
-};
-TagManager.initialize(tagManagerArgs);
-
-TagManager.dataLayer({
-  dataLayer: {
-    event: "pageview",
-    path: "/",
-    title: "FidelidApp",
-  },
-});
 ReactGA.initialize("G-Q91RG51PRW");
 
 const rootElement = document.getElementById("root")!;

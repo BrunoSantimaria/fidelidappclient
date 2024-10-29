@@ -4,10 +4,11 @@ import { useForm } from "react-hook-form";
 import { Helmet } from "react-helmet";
 import api from "../../utils/api";
 import { toast } from "react-toastify";
+import { useNavigateTo } from "../../hooks/useNavigateTo";
 
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { handleNavigate } = useNavigateTo();
   const {
     register,
     handleSubmit,
@@ -35,7 +36,7 @@ const ContactForm = () => {
         value: 1,
       });
 
-      reset();
+      handleNavigate("/thankyou");
     } catch (error) {
       console.log(error);
       toast.error("Hubo un error al enviar el formulario.");
