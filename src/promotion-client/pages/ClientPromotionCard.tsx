@@ -11,6 +11,7 @@ import { Helmet } from "react-helmet-async";
 import api from "../../utils/api";
 const marioCoinSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav";
 const marioStarSound = "https://themushroomkingdom.net/sounds/wav/smb2/smb2_grow.wav";
+const marioNewLifeSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_1-up.wav"
 
 export const ClientPromotionCard = () => {
   const { cid, pid } = useParams();
@@ -85,15 +86,6 @@ export const ClientPromotionCard = () => {
     setProcessing(false);
     setShowScanner(false);
   };
-  const handleResetPromotion = async () => {
-    try {
-      await api.post("/api/promotions/restart", { clientEmail: client.email, promotionId: pid });
-      toast.success("Promoción reiniciada");
-      window.location.reload();
-    } catch (error) {
-      toast.error(error.response.data.error);
-    }
-  };
 
   useEffect(() => {
     const fetchPromotionDetails = async () => {
@@ -108,6 +100,10 @@ export const ClientPromotionCard = () => {
         const userResponse = await api.get("/auth/current");
         setUser(userResponse.data);
         setLoading(false);
+
+        if (response.data.promotion.status === "Expired") {
+          toast.error("Esta promoción ha expirado! Presiona el botón para reiniciarla.");
+        }
 
         if (response.data.promotion.status === "Pending") {
           setShowPopup(true);
@@ -130,8 +126,13 @@ export const ClientPromotionCard = () => {
   const restartPromotion = async () => {
     try {
       await api.post("/api/promotions/restart", { clientEmail: client.email, promotionId: pid });
-      toast.success("Promoción reiniciada");
-      window.location.reload();
+      toast.success("Promoción reiniciada, la página se refrescará en 3 segundos.");
+      const audio = new Audio(marioNewLifeSound);
+      await audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
+      //Set wait for 3 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (error) {
       toast.error(error.response.data.error);
     }
@@ -187,8 +188,10 @@ export const ClientPromotionCard = () => {
                 <p className='text-green-500'>Pendiente</p>
               ) : promotion.status === "Active" ? (
                 <p className='text-blue-500'>Activa</p>
+              ) : promotion.status === "Expired" ? (
+                <p className='text-red-500'>Expirada</p>
               ) : (
-                <p className='text-red-500'>Completada</p>
+                <p className='text-green-500'>Completada</p>
               )}
             </div>
             <div className='flex flex-col items-center'>
@@ -209,13 +212,13 @@ export const ClientPromotionCard = () => {
             </div>
           </div>
         </div>
-        {promotion.status === "Redeemed" ? (
+        {promotion.status === "Redeemed" || promotion.status === "Expired" ? (
           <Button
             variant='contained'
-            onClick={() => handleResetPromotion()}
+            onClick={() => restartPromotion()}
             className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
           >
-            Reiniciar promoción.
+            Reiniciar promoción?
           </Button>
         ) : (
           <Button
