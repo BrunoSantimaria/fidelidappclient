@@ -5,7 +5,7 @@ import { useAuthSlice } from "../../../../hooks/useAuthSlice";
 import { motion } from "framer-motion";
 
 export const Customization = () => {
-  const { user } = useAuthSlice();
+  const { user, refreshAccount } = useAuthSlice();
   const { handleCustomization, loading } = useSettings();
 
   // Asegúrate de que user y user.accounts estén definidos
@@ -47,7 +47,7 @@ export const Customization = () => {
     setWhatsapp(initialWhatsapp);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const settings = {
       logo,
       instagram,
@@ -55,6 +55,7 @@ export const Customization = () => {
       whatsapp,
     };
     handleCustomization(settings);
+    await refreshAccount();
   };
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export const Customization = () => {
   };
   return (
     <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
-      <div className='w-[95%] m-auto md:ml-20'>
+      <div className='w-[95%] m-auto flex flex-col md:ml-20 h-screen'>
         <h2 className='text-2xl font-bold mb-4'>Personalización</h2>
 
         {/* Input para el logo */}

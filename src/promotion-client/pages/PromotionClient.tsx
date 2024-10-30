@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { Backdrop, Button, CircularProgress, Input, Alert, Divider, duration } from "@mui/material";
-import { Facebook, Instagram, WhatsApp } from "@mui/icons-material"; // Importar íconos de redes sociales
+import { Backdrop, Button, CircularProgress, Input, Alert, Divider } from "@mui/material";
+import { Facebook, Instagram, WhatsApp } from "@mui/icons-material";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import background from "../../assets/fondocandado2.png";
@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 export const PromotionClient = () => {
   const { id } = useParams();
-  const { status } = useAuthSlice();
+  const { status, user } = useAuthSlice();
   const { handleNavigate } = useNavigateTo();
   const [loading, setLoading] = useState(true);
   const [promotion, setPromotion] = useState(null);
@@ -19,7 +19,6 @@ export const PromotionClient = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accountId, setAccountId] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [logo, setLogo] = useState("");
   const [socialMedia, setSocialMedia] = useState({});
   const [emailError, setEmailError] = useState(false);
   const [nameError, setNameError] = useState(false);
@@ -34,9 +33,7 @@ export const PromotionClient = () => {
         const response = await api.get(`/api/promotions/${id}`);
         setPromotion(response.data.promotion);
         setAccountId(response.data.accountId);
-        setLogo(response.data.accountLogo);
-        setSocialMedia(response.data.accountSocialMedia[0]);
-        console.log(response.data);
+        setSocialMedia(user.accounts.socialMedia || {}); // Extraer redes sociales del usuario
       } catch (error) {
         console.error("Error fetching promotion:", error);
       } finally {
@@ -45,7 +42,7 @@ export const PromotionClient = () => {
     };
 
     fetchPromotion();
-  }, [id]);
+  }, [id, user.accounts.socialMedia]); // Agregar user.accounts.socialMedia a las dependencias
 
   const handleEmailChange = (event) => {
     setClientEmail(event.target.value);
@@ -168,7 +165,7 @@ export const PromotionClient = () => {
             </Button>
           </div>
 
-          <h1 className='font-poppins font-bold text-5xl'>{promotion.title}</h1>
+          <h1 className='font-poppins font-bold text-3xl md:text-5xl'>{promotion.title}</h1>
           <p className='font-poppins text-lg'>{promotion.description}</p>
         </div>
 
@@ -181,24 +178,31 @@ export const PromotionClient = () => {
       </div>
       <Divider sx={{ color: "white", width: "60%" }} />
       {/* Footer con logo y redes sociales */}
-      {(logo || (socialMedia && (socialMedia?.instagram || socialMedia.facebook || socialMedia.whatsapp))) && (
-        <footer className='flex flex-row items-center justify-center mt-12 p-6  r'>
-          {logo && <img src={logo} alt='Logo' className='w-40 h-40  mb-4' />}
+      {user?.accounts && (
+        <footer className='flex flex-row items-center justify-cente space-x-20 r mt-12 p-6'>
+          {user.accounts.logo && (
+            <img
+              src={user.accounts.logo}
+              alt='Logo'
+              className='max-w-full max-h-20 md:max-h-36 mb-4 object-contain'
+              style={{ width: "auto", height: "auto" }}
+            />
+          )}
 
           <div className='flex space-x-4'>
-            {socialMedia?.instagram && (
-              <a href={socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
-                <Instagram sx={{ fontSize: 40, color: "black" }} />
+            {user.accounts.socialMedia.instagram && (
+              <a href={user.accounts.socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
+                <Instagram sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
               </a>
             )}
-            {socialMedia?.facebook && (
-              <a href={socialMedia?.facebook} target='_blank' rel='noopener noreferrer'>
-                <Facebook sx={{ fontSize: 40, color: "black" }} />
+            {user.accounts.socialMedia.facebook && (
+              <a href={user.accounts.socialMedia.facebook} target='_blank' rel='noopener noreferrer'>
+                <Facebook sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
               </a>
             )}
-            {socialMedia?.whatsapp && (
-              <a href={`https://wa.me/${socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
-                <WhatsApp sx={{ fontSize: 40, color: "black" }} />
+            {user.accounts.socialMedia.whatsapp && (
+              <a href={`https://wa.me/${user.accounts.socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
+                <WhatsApp sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
               </a>
             )}
           </div>

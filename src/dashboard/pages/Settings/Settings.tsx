@@ -5,15 +5,16 @@ import { Customization } from "./views/Customization";
 import { Subscript } from "@mui/icons-material";
 import { Subscription } from "./views/Subscription";
 import { AccountSettings } from "./views/AccountSettings";
+import { useAuthSlice } from "../../../hooks/useAuthSlice";
 
 export const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("Ajustes de cuenta");
-
+  const { user } = useAuthSlice();
   const sections = [
     { id: "1", label: "Ajustes de cuenta", icon: "⚙️" },
     { id: "2", label: "Personalización", icon: "🛠️" },
-    { id: "3", label: "Suscripción", icon: "💳" },
-    { id: "4", label: "Factura", icon: "🧾" },
+    // { id: "3", label: "Suscripción", icon: "💳" },
+    // { id: "4", label: "Factura", icon: "🧾" },
   ];
 
   const renderSection = () => {
@@ -32,18 +33,21 @@ export const Settings = () => {
   };
 
   return (
-    <div className='flex h-screen w-screen md:w-[95%] m-auto  mt-0 flex-col '>
-      <nav className='flex flex-col md:flex md:flex-row w-[95%]  justify-around m-auto md:ml-40  p-6 h-fit  rounded-md'>
-        <div className=' text-center md:mr-20'>
-          <img
-            src='https://res.cloudinary.com/di92lsbym/image/upload/v1727803250/mdrcrkxgoufdqb4aqfyb.png'
-            alt='Avatar'
-            className='rounded-full mx-auto w-36 '
-          />
-          <p className='mt-2 text-lg font-bold mb-2'>FidelidApp</p>
+    <div className='flex flex-col md:flex-row  md:h-screen w-screen md:w-[80%] md:ml-24 m-auto md:mt-40'>
+      <nav className='flex flex-col md:flex md:flex-col md:w-[20%] justify-start m-auto md:ml-0 h-screen md:h-[90%] rounded-md'>
+        {/* Contenedor del logo y el nombre */}
+        <div className='flex flex-col   text-center mb-4'>
+          {user?.accounts.logo ? (
+            <img src={user?.accounts.logo} alt='Avatar' className='rounded-md bg-gray-500/30  p-4 mx-auto w-20 md:w-36' />
+          ) : (
+            <div className='rounded-full mx-auto w-24 h-24 bg-main flex items-center text-left justify-center cursor-pointer'>
+              <span className='text-slate-200 text-lg'>{user?.name[0]}</span>
+            </div>
+          )}
+          <p className='mt-2 text-lg font-bold'>{user?.accounts.name}</p>
         </div>
 
-        <ul className='space-y-4 md:w-[50%]'>
+        <ul className='p-2 md:space-y-4 flex flex-row flex-wrap md:w-[100%] md:flex-nowrap md:flex md:flex-col'>
           {sections.map((section) => (
             <li
               key={section.id}
@@ -57,7 +61,7 @@ export const Settings = () => {
         </ul>
       </nav>
 
-      <div className='flex-grow p-6 md:p-10'>{renderSection()}</div>
+      <div className='flex flex-col min-h-screen md:flex-grow p-6 md:p-10'>{renderSection()}</div>
     </div>
   );
 };
