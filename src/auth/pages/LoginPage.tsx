@@ -16,7 +16,7 @@ export const LoginPage = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
