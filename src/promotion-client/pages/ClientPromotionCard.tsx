@@ -27,6 +27,19 @@ export const ClientPromotionCard = () => {
 
   // Updated generateIcons function for 5-icon rows
   const generateIcons = (actualVisits, visitsRequired) => {
+
+    if (visitsRequired > 15) {
+      // Render a single icon with a counter when visitsRequired is greater than 15
+      return (
+        <div className="flex items-center space-x-2">
+          <Favorite className="text-green-500" />
+          <span className="text-gray-700 font-bold">
+            x {actualVisits}
+            </span>
+        </div>
+      );
+    }
+
     const icons = [];
     for (let i = 0; i < actualVisits; i++) {
       icons.push(<Favorite key={`active-${i}`} className='text-green-500' />);
