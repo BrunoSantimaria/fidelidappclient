@@ -25,6 +25,7 @@ export const ClientPromotionCard = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
 
+  // Updated generateIcons function for 5-icon rows
   const generateIcons = (actualVisits, visitsRequired) => {
     const icons = [];
     for (let i = 0; i < actualVisits; i++) {
@@ -33,7 +34,17 @@ export const ClientPromotionCard = () => {
     for (let i = actualVisits; i < visitsRequired; i++) {
       icons.push(<FavoriteBorder key={`inactive-${i}`} className='text-gray-400' />);
     }
-    return icons;
+
+    // Arrange icons in rows of 5
+    const rows = [];
+    for (let i = 0; i < icons.length; i += 5) {
+      rows.push(
+        <div key={`row-${i}`} className='flex justify-center space-x-1'>
+          {icons.slice(i, i + 5)}
+        </div>
+      );
+    }
+    return rows;
   };
 
   const formatDate = (dateString) => {
@@ -125,14 +136,19 @@ export const ClientPromotionCard = () => {
 
   const restartPromotion = async () => {
     try {
-      await api.post("/api/promotions/restart", { clientEmail: client.email, promotionId: pid });
-      toast.success("Promoción reiniciada, la página se refrescará en 3 segundos.");
-      const audio = new Audio(marioNewLifeSound);
-      await audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
-      //Set wait for 3 seconds
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      //Set Alert to confirm 
+      if (window.confirm("¿Estás seguro de que deseas ceanjear las visitas? Esto reiniciará el conteo de visitas. ")) {
+        await api.post("/api/promotions/restart", { clientEmail: client.email, promotionId: pid });
+        toast.success("Promoción reiniciada, la página se refrescará en 3 segundos.");
+        const audio = new Audio(marioNewLifeSound);
+        await audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
+        //Set wait for 3 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      } else {
+        toast.error("Cancelando reinicio de promoción...");
+      }
     } catch (error) {
       toast.error(error.response.data.error);
     }
@@ -174,13 +190,14 @@ export const ClientPromotionCard = () => {
         <meta property='og:description' content={promotionDetails.description || "Detalles de la promoción"} />
         <meta property='og:url' content={`https://www.fidelidapp.cl/promotions/${pid}`} />
       </Helmet>
-      <Container className='flex flex-col items-center p-5 min-h-screen'>
-        <div className='relative w-[95%] mb-6 md:w-2/3 p-5 mt-4 bg-white border border-main/60 rounded-lg shadow-lg overflow-hidden'>
+      <Container className='flex flex-col items-center p-8 min-h-screen'>
+        <div className='relative w-[95%] mb-6 md:w-2/3 p-10 bg-white border border-main/60 rounded-lg shadow-lg overflow-hidden'>
           <img src={keyUrl} alt='Background' className='absolute inset-0 w-full h-full object-cover opacity-30' />
           <div className='relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='flex flex-col items-center'>
               <span className='text-lg font-bold'>Visitas:</span>
-              <div className='flex'>{generateIcons(promotion.actualVisits, promotionDetails.visitsRequired)}</div>
+              <div className='space-y-2'>
+                {generateIcons(promotion.actualVisits, promotionDetails.visitsRequired)}</div>
             </div>
             <div className='flex flex-col items-center'>
               <span className='text-lg font-bold'>Estado:</span>
@@ -212,13 +229,33 @@ export const ClientPromotionCard = () => {
             </div>
           </div>
         </div>
-        {promotion.status === "Redeemed" || promotion.status === "Expired" ? (
+
+
+
+        {promotionDetails.pointSystem ? (
+          <div className="flex flex-col space-y-4 w-full items-center justify-center">
+            <Button
+              variant='contained'
+              onClick={() => restartPromotion()}
+              className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+            >
+              Canjear Visitas
+            </Button>
+            <Button
+              variant='contained'
+              onClick={() => setShowScanner(true)}
+              className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+            >
+              Abrir Escáner QR
+            </Button>
+          </div>
+        ) : promotion.status === "Redeemed" || promotion.status === "Expired" ? (
           <Button
             variant='contained'
             onClick={() => restartPromotion()}
             className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
           >
-            Reiniciar promoción?
+            Canjear Visitas
           </Button>
         ) : (
           <Button
@@ -229,6 +266,8 @@ export const ClientPromotionCard = () => {
             Abrir Escáner QR
           </Button>
         )}
+
+
         {promotion.status === "Pending" && (
           <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mt-4 w-[80%] flex'>
             <span className='p-6 font-bold text-2xl'>
