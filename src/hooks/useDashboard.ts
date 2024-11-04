@@ -14,7 +14,9 @@ export const useDashboard = () => {
   const { refreshAccount } = useAuthSlice();
   const dispatch = useDispatch();
   const { handleNavigate } = useNavigateTo();
-
+  useEffect(() => {
+    getSubscription();
+  }, []);
   const getPromotionsAndMetrics = async () => {
     try {
       const resp = await api.get("/api/promotions");
@@ -100,6 +102,14 @@ export const useDashboard = () => {
       toast.error("Hubo un problema al regenerar el QR.");
     }
   };
+  const getSubscription = async () => {
+    try {
+      const response = await api.get(`/api/mercadopago/check_and_update_subscription/${accounts._id}`);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return {
     accounts,
     plan,
@@ -116,5 +126,6 @@ export const useDashboard = () => {
     clients,
     regenerateQr,
     loading,
+    getSubscription,
   };
 };

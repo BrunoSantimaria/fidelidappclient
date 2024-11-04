@@ -82,15 +82,17 @@ export const Navigation = () => {
           isOpen ? "fixed" : "hidden"
         } md:flex bg-main min-h-screen lg:h-screen md:h-screen flex-col justify-between z-10 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
       >
-        <div className='flex flex-row w-full justify-between place-items-center '>
+        <div className='flex flex-row w-full justify-between place-items-center'>
           <div
-            className={`${!isOpen ? "hidden" : ""} ${user?.accounts.logo ? "w-16" : "bg-gradient-to-br from-orange-500 to-amber-700 w-10 h-10"}  flex  rounded-full cursor-pointer`}
+            className={`${!isOpen ? "hidden" : ""} ${
+              user?.accounts?.logo ? "w-16" : "bg-gradient-to-br from-orange-500 to-amber-700 w-10 h-10"
+            } flex rounded-full cursor-pointer`}
             onClick={() => handleNavigate("/dashboard/settings")}
           >
-            {user?.accounts.logo ? (
-              <img src={user.accounts.logo} className='' />
+            {user?.accounts?.logo ? (
+              <img src={user.accounts.logo} alt='User Logo' className='' />
             ) : (
-              <span className='text-center flex m-auto justify-center text-white cursor-pointer'>{user?.name.slice(0, 2)}</span>
+              <span className='text-center flex m-auto justify-center text-white cursor-pointer'>{user?.name ? user.name.slice(0, 2) : "NN"}</span>
             )}
           </div>
           <motion.button
@@ -100,7 +102,7 @@ export const Navigation = () => {
             className='p-2 bg-transparent rounded-full flex duration-300 hover:text-white/60'
             onClick={handleOpen}
           >
-            <ArrowForwardRoundedIcon className='text-white w-8 h-8 stroke-neutral-200 ' />
+            <ArrowForwardRoundedIcon className='text-white w-8 h-8 stroke-neutral-200' />
           </motion.button>
         </div>
 
