@@ -35,7 +35,7 @@ export const ClientPromotionCard = () => {
           <Favorite className="text-green-500" />
           <span className="text-gray-700 font-bold">
             x {actualVisits}
-            </span>
+          </span>
         </div>
       );
     }
@@ -98,9 +98,16 @@ export const ClientPromotionCard = () => {
   const handleScanComplete = async (result) => {
     try {
       await api.post("/api/promotions/complete", { clientEmail: client.email, promotionId: pid });
-      toast.success("Promocion completada con exito.");
+      toast.success("Promoción completada con exito, la página se refrescará en 3 segundos.");
+
       const audio = new Audio(marioStarSound);
-      audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
+      await audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
+
+      // Refresh after 3 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+
     } catch (error) {
       console.log(error);
 
@@ -149,13 +156,17 @@ export const ClientPromotionCard = () => {
 
   const restartPromotion = async () => {
     try {
-      //Set Alert to confirm 
-      if (window.confirm("¿Estás seguro de que deseas ceanjear las visitas? Esto reiniciará el conteo de visitas. ")) {
-        await api.post("/api/promotions/restart", { clientEmail: client.email, promotionId: pid });
-        toast.success("Promoción reiniciada, la página se refrescará en 3 segundos.");
+      // Confirmation alert
+      if (window.confirm("¿Estás seguro de que deseas reiniciar la promoción ? Esto volverá a comenzar la cuenta a 0")) {
+        await api.post("/api/promotions/restart", {
+          clientEmail: client.email,
+          promotionId: pid,
+        });
+        toast.success("Promoción reiniciada con exito, la página se refrescará en 3 segundos.");
         const audio = new Audio(marioNewLifeSound);
         await audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
-        //Set wait for 3 seconds
+
+        // Refresh after 3 seconds
         setTimeout(() => {
           window.location.reload();
         }, 3000);
@@ -163,9 +174,54 @@ export const ClientPromotionCard = () => {
         toast.error("Cancelando reinicio de promoción...");
       }
     } catch (error) {
-      toast.error(error.response.data.error);
+      toast.error(error.response?.data?.error || "Error al reiniciar la promoción.");
     }
   };
+
+  const redeemPromotion = async (pointsToRedeem) => {
+    try {
+      // Get actual visits or points from the client or promotion data (assuming `actualVisits` is available)
+      const availablePoints = promotion.actualVisits; // Replace `actualVisits` with the actual variable holding current points
+
+      // Check if `pointsToRedeem` is provided; if not, prompt for input
+      if (pointsToRedeem == null) {
+        const input = prompt("¿Cuántos puntos deseas canjear?");
+        pointsToRedeem = parseInt(input, 10);
+        if (isNaN(pointsToRedeem) || pointsToRedeem <= 0) {
+          toast.error("Número de puntos no válido. Operación cancelada.");
+          return;
+        }
+      }
+
+      // Validate if pointsToRedeem is within available points
+      if (pointsToRedeem > availablePoints) {
+        toast.error(`No puedes canjear más puntos de los disponibles. Tienes ${availablePoints} puntos.`);
+        return;
+      }
+
+      // Confirmation alert
+      if (window.confirm("¿Estás seguro de que deseas canjear " + pointsToRedeem + " visitas ? Esta operación no se puede deshacer y debe ser validada por el negocio!")) {
+        await api.post("/api/promotions/redeem", {
+          clientEmail: client.email,
+          promotionId: pid,
+          pointsToRedeem
+        });
+        toast.success("Promoción canjeada con exito, la página se refrescará en 3 segundos.");
+        const audio = new Audio(marioNewLifeSound);
+        await audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
+
+        // Refresh after 3 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      } else {
+        toast.error("Cancelando canjeo de promoción...");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Error al reiniciar la promoción.");
+    }
+  };
+
 
   const defaultOptions = {
     loop: true,
@@ -244,50 +300,61 @@ export const ClientPromotionCard = () => {
         </div>
 
 
-
-        {promotionDetails.pointSystem ? (
-          <div className="flex flex-col space-y-4 w-full items-center justify-center">
-            <Button
-              variant='contained'
-              onClick={() => restartPromotion()}
-              className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
-            >
-              Canjear Visitas
-            </Button>
-            <Button
-              variant='contained'
-              onClick={() => setShowScanner(true)}
-              className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
-            >
-              Abrir Escáner QR
-            </Button>
+        {promotion.status === "Pending" && (
+          <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mb-4 w-[80%] flex'>
+            <span className='p-6 font-bold text-2xl'>
+              Felicidades lograste la meta 🎊. Muestra este mensaje al encargado de la tienda para canjear tu beneficio!
+            </span>
           </div>
-        ) : promotion.status === "Redeemed" || promotion.status === "Expired" ? (
+        )}
+
+
+        {promotion.status === "Redeemed"  || promotion.status === "Expired" ? (
           <Button
             variant='contained'
             onClick={() => restartPromotion()}
             className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
           >
-            Canjear Visitas
+            Reiniciar Promoción
           </Button>
-        ) : (
+        ) : promotion.status === "Pending" ? (
           <Button
             variant='contained'
-            onClick={() => setShowScanner(true)}
-            className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+            onClick={() => redeemPromotion(promotion.actualVisits)}
+            className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
           >
-            Abrir Escáner QR
+            Canjear Regalo
           </Button>
-        )}
+        ) :
+          promotionDetails.pointSystem ? (
+            <div className="flex flex-col space-y-4 w-full items-center justify-center">
+              <Button
+                variant='contained'
+                onClick={() => setShowScanner(true)}
+                className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+              >
+                Abrir Escáner QR para sumar visitas
+              </Button>
+              <Button
+                variant='contained'
+                onClick={() => redeemPromotion()}
+                className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+              >
+                Canjear Visitas por Beneficios
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant='contained'
+              onClick={() => setShowScanner(true)}
+              className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+            >
+              Abrir Escáner QR para sumar viistas
+            </Button>
+          )}
 
 
-        {promotion.status === "Pending" && (
-          <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mt-4 w-[80%] flex'>
-            <span className='p-6 font-bold text-2xl'>
-              Felicidades lograste la meta 🎊. Escanea el codigo QR para canjear tu promoción y darla por completa.
-            </span>
-          </div>
-        )}
+
         <section className='flex flex-col md:flex md:flex-row mx-6 md:mx-60 w-5/6 m-auto  '>
           <div className='mt-4 w-full md:w-1/2 space-y-6'>
             <h1 className='mt-4  font-bold text-left font-poppins text-4xl w-full md:w-2/3 md:text-5xl'>{promotionDetails.title}</h1>
@@ -310,7 +377,7 @@ export const ClientPromotionCard = () => {
             {promotion.promotionRecurrent === "True" ? (
               <>
                 <p>Esta promoción ha sido marcada como recurrente, ¿deseas volver a iniciarla?</p>
-                <Button onClick={restartPromotion} variant='contained' className='mt-2 mr-2'>
+                <Button onClick={restartPromotion()} variant='contained' className='mt-2 mr-2'>
                   Sí
                 </Button>
               </>
@@ -351,7 +418,7 @@ export const ClientPromotionCard = () => {
             {promotion.promotionRecurrent === "True" && (
               <>
                 <p>Esta promoción ha sido marcada como recurrente, ¿deseas volver a iniciarla?</p>
-                <Button onClick={restartPromotion} variant='contained' className='mt-2 mr-2'>
+                <Button onClick={restartPromotion()} variant='contained' className='mt-2 mr-2'>
                   Sí
                 </Button>
               </>
