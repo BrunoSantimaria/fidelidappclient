@@ -110,7 +110,7 @@ export const Subscription = () => {
 
       // Redirigir a la URL de pago de Mercado Pago
       const redirectUrl = `https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=${response.data.subscriptionId}`;
-      window.location.href = redirectUrl; // Redirige al usuario
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error("Error creando la preferencia:", error.response ? error.response.data : error.message);
     }
