@@ -18,6 +18,7 @@ import MailRoundedIcon from "@mui/icons-material/MailRounded";
 import { toast } from "react-toastify";
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 import { Divider } from "@mui/material";
+import { useNavigateTo } from "../../../hooks/useNavigateTo";
 const containerVariants = {
   close: {
     width: "5rem",
@@ -49,7 +50,7 @@ export const Navigation = () => {
   const { startLoggingOut } = useAuthSlice();
   const [isOpen, setIsOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-
+  const { handleNavigate } = useNavigateTo();
   const containerControls = useAnimationControls();
   const iconControl = useAnimationControls();
   const { plan, metrics } = useDashboard();
@@ -82,8 +83,15 @@ export const Navigation = () => {
         } md:flex bg-main min-h-screen lg:h-screen md:h-screen flex-col justify-between z-10 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
       >
         <div className='flex flex-row w-full justify-between place-items-center '>
-          <div className={`${!isOpen ? "hidden" : ""} w-10 h-10 flex bg-gradient-to-br from-orange-500 to-amber-700 rounded-full cursor-pointer`}>
-            <span className='text-center flex m-auto justify-center text-white cursor-pointer'>{user?.name.slice(0, 2)}</span>
+          <div
+            className={`${!isOpen ? "hidden" : ""} ${user?.accounts.logo ? "w-16" : "bg-gradient-to-br from-orange-500 to-amber-700 w-10 h-10"}  flex  rounded-full cursor-pointer`}
+            onClick={() => handleNavigate("/dashboard/settings")}
+          >
+            {user?.accounts.logo ? (
+              <img src={user.accounts.logo} className='' />
+            ) : (
+              <span className='text-center flex m-auto justify-center text-white cursor-pointer'>{user?.name.slice(0, 2)}</span>
+            )}
           </div>
           <motion.button
             variants={iconVariants}

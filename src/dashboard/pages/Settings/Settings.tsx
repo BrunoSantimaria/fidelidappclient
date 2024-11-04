@@ -13,7 +13,7 @@ export const Settings = () => {
   const sections = [
     { id: "1", label: "Ajustes de cuenta", icon: "⚙️" },
     { id: "2", label: "Personalización", icon: "🛠️" },
-    // { id: "3", label: "Suscripción", icon: "💳" },
+    { id: "3", label: "Suscripción", icon: "💳" },
     // { id: "4", label: "Factura", icon: "🧾" },
   ];
 

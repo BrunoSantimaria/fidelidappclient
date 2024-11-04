@@ -7,6 +7,7 @@ import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import background from "../../assets/fondocandado2.png";
 import { toast } from "react-toastify";
+import { Helmet } from "react-helmet-async";
 
 export const PromotionClient = () => {
   const { id } = useParams();
@@ -123,92 +124,98 @@ export const PromotionClient = () => {
   }
 
   return (
-    <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
-      <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
-        <div className='relative z-10 w-[100%] md:w-[60%] space-y-6 m-0 text-left p-6 rounded-md'>
-          <div className='space-y-2 flex flex-col mb-6'>
-            <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p>
+    <>
+      {" "}
+      <Helmet>
+        <title>{promotion.title || "Fidelidapp"}</title>
+      </Helmet>
+      <section className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
+        <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
+          <div className='relative z-10 w-[100%] md:w-[60%] space-y-6 m-0 text-left p-6 rounded-md'>
+            <div className='space-y-2 flex flex-col mb-6'>
+              <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p>
 
-            {nameError && <Alert severity='error'>El nombre no puede estar vacío.</Alert>}
-            <Input
-              id='name'
-              type='name'
-              value={clientName}
-              onChange={handleNameChange}
-              autoComplete='name'
-              sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
-              placeholder='Nombre'
-            />
+              {nameError && <Alert severity='error'>El nombre no puede estar vacío.</Alert>}
+              <Input
+                id='name'
+                type='name'
+                value={clientName}
+                onChange={handleNameChange}
+                autoComplete='name'
+                sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
+                placeholder='Nombre'
+              />
 
-            {emailError && <Alert severity='error'>Introduce un email válido.</Alert>}
-            <Input
-              id='email'
-              type='email'
-              value={clientEmail}
-              onChange={handleEmailChange}
-              autoComplete='email'
-              sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
-              placeholder='Email'
-            />
+              {emailError && <Alert severity='error'>Introduce un email válido.</Alert>}
+              <Input
+                id='email'
+                type='email'
+                value={clientEmail}
+                onChange={handleEmailChange}
+                autoComplete='email'
+                sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
+                placeholder='Email'
+              />
 
-            <Input
-              id='phone'
-              type='tel'
-              value={phoneNumber}
-              onChange={handlePhoneNumberChange}
-              placeholder='Número de teléfono (opcional)'
-              sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
-            />
+              <Input
+                id='phone'
+                type='tel'
+                value={phoneNumber}
+                onChange={handlePhoneNumberChange}
+                placeholder='Número de teléfono (opcional)'
+                sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
+              />
 
-            <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting || nameError || emailError}>
-              {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
-            </Button>
+              <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting || nameError || emailError}>
+                {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
+              </Button>
+            </div>
+
+            <h1 className='font-poppins font-bold text-3xl md:text-5xl'>{promotion.title}</h1>
+            <p className='font-poppins text-lg'>{promotion.description}</p>
           </div>
 
-          <h1 className='font-poppins font-bold text-3xl md:text-5xl'>{promotion.title}</h1>
-          <p className='font-poppins text-lg'>{promotion.description}</p>
-        </div>
-
-        {/* Imagen de la promoción */}
-        {promotion.imageUrl && (
-          <div className='relative w-[95%] md:w-[35%] mb-12 mx-auto md:mx-0'>
-            <img src={promotion.imageUrl} alt='Promoción' className='rounded-lg shadow-md object-cover w-full h-full' />
-          </div>
-        )}
-      </div>
-      <Divider sx={{ color: "white", width: "60%" }} />
-      {/* Footer con logo y redes sociales */}
-      {user?.accounts && (
-        <footer className='flex flex-row items-center justify-cente space-x-20 r mt-12 p-6'>
-          {user.accounts.logo && (
-            <img
-              src={user.accounts.logo}
-              alt='Logo'
-              className='max-w-full max-h-20 md:max-h-36 mb-4 object-contain'
-              style={{ width: "auto", height: "auto" }}
-            />
+          {/* Imagen de la promoción */}
+          {promotion.imageUrl && (
+            <div className='relative w-[95%] md:w-[35%] mb-12 mx-auto md:mx-0'>
+              <img src={promotion.imageUrl} alt='Promoción' className='rounded-lg shadow-md object-cover w-full h-full' />
+            </div>
           )}
+        </div>
+        <Divider sx={{ color: "white", width: "60%" }} />
+        {/* Footer con logo y redes sociales */}
+        {user?.accounts && (
+          <footer className='flex flex-row items-center justify-cente space-x-20 r mt-12 p-6'>
+            {user.accounts.logo && (
+              <img
+                src={user.accounts.logo}
+                alt='Logo'
+                className='max-w-full max-h-20 md:max-h-36 mb-4 object-contain'
+                style={{ width: "auto", height: "auto" }}
+              />
+            )}
 
-          <div className='flex space-x-4'>
-            {user.accounts.socialMedia.instagram && (
-              <a href={user.accounts.socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
-                <Instagram sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
-              </a>
-            )}
-            {user.accounts.socialMedia.facebook && (
-              <a href={user.accounts.socialMedia.facebook} target='_blank' rel='noopener noreferrer'>
-                <Facebook sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
-              </a>
-            )}
-            {user.accounts.socialMedia.whatsapp && (
-              <a href={`https://wa.me/${user.accounts.socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
-                <WhatsApp sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
-              </a>
-            )}
-          </div>
-        </footer>
-      )}
-    </section>
+            <div className='flex space-x-4'>
+              {user.accounts.socialMedia.instagram && (
+                <a href={user.accounts.socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
+                  <Instagram sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
+                </a>
+              )}
+              {user.accounts.socialMedia.facebook && (
+                <a href={user.accounts.socialMedia.facebook} target='_blank' rel='noopener noreferrer'>
+                  <Facebook sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
+                </a>
+              )}
+              {user.accounts.socialMedia.whatsapp && (
+                <a href={`https://wa.me/${user.accounts.socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
+                  <WhatsApp sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
+                </a>
+              )}
+            </div>
+          </footer>
+        )}
+      </section>
+    </>
   );
 };
 

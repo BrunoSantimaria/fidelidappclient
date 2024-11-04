@@ -9,11 +9,10 @@ export const Welcome = () => {
   return (
     <>
       <section className='flex flex-col   shadow-md shadow-neutral-200 bg-gradient-to-br from-gray-100 to-main/30 space-y-4 p-6 rounded-md m-0 text-left  w-full '>
-        <div className='text-2xl font-bold'>¡Bienvenido a FidelidApp, {user?.accounts.name ? user?.accounts.name : user.name}!</div>
+        <div className='text-2xl font-bold'>¡Bienvenido a FidelidApp, {user?.accounts?.name || user?.name || ""}!</div>{" "}
         <div className='w-full text-left '>
           Aquí encontrarás herramientas diseñadas para mejorar la fidelidad de tus clientes y maximizar el rendimiento de tus programas de fidelización.
         </div>
-
         <div>
           En este dashboard, podrás:
           <ul className='list-disc ml-5'>

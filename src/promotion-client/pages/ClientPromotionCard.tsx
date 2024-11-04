@@ -11,7 +11,7 @@ import { Helmet } from "react-helmet-async";
 import api from "../../utils/api";
 const marioCoinSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav";
 const marioStarSound = "https://themushroomkingdom.net/sounds/wav/smb2/smb2_grow.wav";
-const marioNewLifeSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_1-up.wav"
+const marioNewLifeSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_1-up.wav";
 
 export const ClientPromotionCard = () => {
   const { cid, pid } = useParams();
@@ -27,15 +27,12 @@ export const ClientPromotionCard = () => {
 
   // Updated generateIcons function for 5-icon rows
   const generateIcons = (actualVisits, visitsRequired) => {
-
     if (visitsRequired > 15) {
       // Render a single icon with a counter when visitsRequired is greater than 15
       return (
-        <div className="flex items-center space-x-2">
-          <Favorite className="text-green-500" />
-          <span className="text-gray-700 font-bold">
-            x {actualVisits}
-            </span>
+        <div className='flex items-center space-x-2'>
+          <Favorite className='text-green-500' />
+          <span className='text-gray-700 font-bold'>x {actualVisits}</span>
         </div>
       );
     }
@@ -149,7 +146,7 @@ export const ClientPromotionCard = () => {
 
   const restartPromotion = async () => {
     try {
-      //Set Alert to confirm 
+      //Set Alert to confirm
       if (window.confirm("¿Estás seguro de que deseas ceanjear las visitas? Esto reiniciará el conteo de visitas. ")) {
         await api.post("/api/promotions/restart", { clientEmail: client.email, promotionId: pid });
         toast.success("Promoción reiniciada, la página se refrescará en 3 segundos.");
@@ -197,7 +194,7 @@ export const ClientPromotionCard = () => {
   return (
     <>
       <Helmet>
-        <title>{promotionDetails.title || "Fidelidapp"}</title>
+        <title>FidelidCard: {promotionDetails.title || "Fidelidapp"}</title>
         <meta name='description' content={promotionDetails.description || "Detalles de la promoción"} />
         <meta property='og:title' content={promotionDetails.title || "Fidelidapp"} />
         <meta property='og:description' content={promotionDetails.description || "Detalles de la promoción"} />
@@ -209,8 +206,7 @@ export const ClientPromotionCard = () => {
           <div className='relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='flex flex-col items-center'>
               <span className='text-lg font-bold'>Visitas:</span>
-              <div className='space-y-2'>
-                {generateIcons(promotion.actualVisits, promotionDetails.visitsRequired)}</div>
+              <div className='space-y-2'>{generateIcons(promotion.actualVisits, promotionDetails.visitsRequired)}</div>
             </div>
             <div className='flex flex-col items-center'>
               <span className='text-lg font-bold'>Estado:</span>
@@ -243,10 +239,8 @@ export const ClientPromotionCard = () => {
           </div>
         </div>
 
-
-
         {promotionDetails.pointSystem ? (
-          <div className="flex flex-col space-y-4 w-full items-center justify-center">
+          <div className='flex flex-col space-y-4 w-full items-center justify-center'>
             <Button
               variant='contained'
               onClick={() => restartPromotion()}
@@ -279,7 +273,6 @@ export const ClientPromotionCard = () => {
             Abrir Escáner QR
           </Button>
         )}
-
 
         {promotion.status === "Pending" && (
           <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mt-4 w-[80%] flex'>

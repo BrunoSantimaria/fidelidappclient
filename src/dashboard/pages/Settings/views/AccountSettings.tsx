@@ -77,7 +77,6 @@ export const AccountSettings = () => {
             </div>
             <Input
               type='email'
-              disabled
               placeholder='info@empresa.com'
               className='w-full border rounded p-2'
               value={senderEmail}

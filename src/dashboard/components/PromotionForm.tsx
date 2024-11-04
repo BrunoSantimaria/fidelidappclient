@@ -147,7 +147,7 @@ export const PromotionForm = () => {
             />
           </Grid>
 
-          <Grid item xs={6}>
+          <Grid item xs={6} className='flex flex-row space-y-6 md:space-y-0 space-x-36'>
             <FormControl component='fieldset' error={formik.touched.promotionType && Boolean(formik.errors.promotionType)}>
               <FormLabel component='legend'>Elige el tipo de beneficio</FormLabel>
               <RadioGroup aria-label='promotionType' name='promotionType' value={formik.values.promotionType} onChange={formik.handleChange}>
@@ -155,9 +155,6 @@ export const PromotionForm = () => {
                 <FormControlLabel value='Regalo' control={<Radio />} label='Regalo' />
               </RadioGroup>
             </FormControl>
-          </Grid>
-
-          <Grid item xs={12}>
             <FormControl component='fieldset' error={formik.touched.promotionRecurrent && Boolean(formik.errors.promotionRecurrent)}>
               <FormLabel component='legend'>¿Será recurrente?</FormLabel>
               <RadioGroup aria-label='promotionRecurrent' name='promotionRecurrent' value={formik.values.promotionRecurrent} onChange={formik.handleChange}>
@@ -166,6 +163,8 @@ export const PromotionForm = () => {
               </RadioGroup>
             </FormControl>
           </Grid>
+
+          <Grid item xs={12}></Grid>
 
           <Grid item xs={12}>
             <TextField

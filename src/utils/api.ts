@@ -3,20 +3,17 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 export const baseURL = API_URL;
 
-axios.defaults.withCredentials = true; // Para enviar cookies automáticamente
+axios.defaults.withCredentials = true;
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // Asegura que las cookies se envíen en solicitudes CORS
+  withCredentials: true,
 });
 
-// Interceptor de solicitudes
 api.interceptors.request.use(
   (config) => {
-    // Obtener el token del localStorage
     const token = localStorage.getItem("token");
 
-    // Si el token existe, lo agregamos al encabezado Authorization
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -28,13 +25,11 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor de respuestas
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Manejar errores aquí, por ejemplo, refrescar el token o redirigir al login
     return Promise.reject(error);
   }
 );
