@@ -170,7 +170,7 @@ export const Subscription = () => {
 
         <>
           <div className={`${!user?.accounts.activePayer && user?.accounts.planStatus === "pro" ? "hidden" : ""} flex justify-start mt-6`}>
-            {user.accounts.planStatus === "free" ? (
+            {user.accounts.planStatus === "free" || user.accounts.planStatus === "admin" ? (
               <Button className='' variant='contained' color='primary' onClick={createPreference}>
                 ¡Suscríbete al Plan Pro ahora!
               </Button>
