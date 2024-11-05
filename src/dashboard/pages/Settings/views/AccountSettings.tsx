@@ -22,6 +22,11 @@ export const AccountSettings = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Validación: Nombre no vacío y senderEmail no vaciar si tenía un valor inicial
+    if (!name.trim()) {
+      setError("El nombre de usuario no puede estar vacío.");
+      return;
+    }
     if (!senderEmail.trim() && user?.accounts.senderEmail) {
       setError("El sender email no puede dejarse vacío.");
       return;
