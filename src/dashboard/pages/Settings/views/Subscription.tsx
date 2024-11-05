@@ -18,8 +18,9 @@ import {
   DialogContentText,
   Dialog,
 } from "@mui/material";
-
-initMercadoPago("APP_USR-187d954f-4005-446b-9fff-b898407c4646", { locale: "es-CL" });
+import { useDashboard } from "../../../../hooks";
+const MERCADOPAGO_PUBLIC = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
+initMercadoPago(MERCADOPAGO_PUBLIC, { locale: "es-CL" });
 
 export const Subscription = () => {
   const { user, refreshAccount } = useAuthSlice();
@@ -30,11 +31,15 @@ export const Subscription = () => {
   const [subscriptionId, setSubscriptionId] = useState(null);
   const preapprovalId = "2c938084929566050192d988bf5c14e6";
   const nextPaymentDate = new Date(user?.accounts.planExpiration);
+  const { getSubscription } = useDashboard();
   const formattedNextPaymentDate = nextPaymentDate.toLocaleDateString("es-ES", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+  useEffect(() => {
+    getSubscription();
+  }, []);
 
   useEffect(() => {
     const fetchSubscriptionData = async () => {

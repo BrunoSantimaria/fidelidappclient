@@ -29,6 +29,7 @@ import api from "../../../utils/api";
 import { toast } from "react-toastify";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
 import { ReactTyped, Typed } from "react-typed";
+import { useAuthSlice } from "../../../hooks/useAuthSlice";
 
 // Definir el tipo para los clientes
 interface Client {
@@ -44,9 +45,11 @@ interface ClientTableProps {
 const ClientTable: React.FC<ClientTableProps> = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const { refreshAccount } = useAuthSlice();
   const { accounts, getPromotionsAndMetrics, clients, promotions, plan } = useDashboard();
   const [displayedClients, setDisplayedClients] = useState<Client[]>(clients); // Inicializar con los clientes
   const [showHowToUse, setShowHowToUse] = useState(false);
+  console.log("clientes", accounts.clients);
 
   const [newClientName, setNewClientName] = useState("");
   const [newClientEmail, setNewClientEmail] = useState("");
@@ -56,7 +59,9 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const [loading, setLoading] = useState(false); // Estado para el loading
 
   useEffect(() => {
-    setDisplayedClients(clients);
+    getPromotionsAndMetrics();
+    setDisplayedClients(accounts.clients);
+    refreshAccount();
   }, []); // Asegúrate de actualizar los clientes cuando cambien
 
   // Controlar la paginación
@@ -68,6 +73,20 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  function formatClientName(name) {
+    const trimmedName = name.trim();
+    if (trimmedName) {
+      return trimmedName
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
+    }
+    return "";
+  }
+
+  function formatClientEmail(email) {
+    return email.trim().toLowerCase();
+  }
 
   const addClient = async () => {
     if (newClientName && newClientEmail) {
@@ -210,44 +229,40 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     );
   };
 
+  const batchSize = 200; // Define el tamaño del lote
+
   const confirmCsvClients = async () => {
     setLoading(true);
     setOpenDialog(false);
+    console.log(csvClients);
 
     try {
-      // Filtrar clientes inválidos
       const validClients = csvClients.filter((client) => client.name && client.email);
+      console.log("Clientes válidos a enviar:", validClients);
 
-      // Crear un array de promesas
-      const requests = validClients.map((client) => {
-        const cleanedName = client.name.trim();
-        const formattedName = cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1).toLowerCase();
+      for (let i = 0; i < validClients.length; i += batchSize) {
+        const clientBatch = validClients.slice(i, i + batchSize);
+        console.log(`Enviando lote de ${clientBatch.length} clientes:`, clientBatch);
 
-        return api
-          .post("/api/clients/addClient", {
-            accountId: accounts._id,
-            clientData: {
-              name: formattedName,
-              email: client.email.trim(),
-            },
-          })
-          .catch((error) => {
-            console.error(`Error al agregar cliente ${formattedName} (${client.email}):`, error);
-          });
-      });
+        // Enviar cada lote al servidor
+        const response = await api.post("/api/clients/addClientsBatch", {
+          accountId: accounts._id,
+          clientsData: clientBatch,
+        });
 
-      // Esperar a que todas las promesas se resuelvan
-      await Promise.all(requests);
+        // Imprimir la respuesta del servidor para depuración
+        console.log("Respuesta del servidor:", response.data);
+      }
 
-      await getPromotionsAndMetrics();
       toast.info("Clientes agregados correctamente");
     } catch (error) {
       console.error("Error al agregar clientes:", error);
+      toast.error("Error al agregar clientes. Verifique la consola.");
     } finally {
+      await getPromotionsAndMetrics();
       setLoading(false);
     }
   };
-
   return (
     <section>
       <div className='w-[95%] flex flex-col md:flex-col m-auto justify-between mb-20'>
@@ -289,7 +304,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
       </div>
 
       <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
-        {!clients.length ? (
+        {!accounts.clients.length ? (
           <section className='shadow-md shadow-neutral-200 bg-gradient-to-br from-gray-100 to-main/30 p-6 rounded-md'>
             <div className='flex flex-col space-y-6'>
               <span className='text-center text-lg text-black/60'>No hay clientes disponibles, empieza agregando uno arriba o sube un archivo CSV.</span>

@@ -30,7 +30,7 @@ const pageTransition = {
 };
 
 export const DashboardRoutes = () => {
-  const { getPromotionsAndMetrics, plan, metrics, loading } = useDashboard();
+  const { getPromotionsAndMetrics, plan, metrics, loading, getSubscription } = useDashboard();
   const { user } = useAuthSlice();
   const [notifications, setNotifications] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -40,7 +40,9 @@ export const DashboardRoutes = () => {
   useEffect(() => {
     getPromotionsAndMetrics();
   }, []);
-
+  useEffect(() => {
+    getSubscription();
+  }, []);
   return (
     <>
       <Navigation />

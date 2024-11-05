@@ -65,6 +65,11 @@ export const EmailSender = () => {
   const isWithinLimit = Number(plan?.emailLimit) > Number(accounts.emailsSentCount);
   const emailEditorRef = useRef<EditorRef>(null); // Referencia al editor de email
   const { refreshAccount } = useAuthSlice();
+  const { getPromotionsAndMetrics } = useDashboard();
+  useEffect(() => {
+    getPromotionsAndMetrics();
+  }, []);
+
   const handleClick = () => {
     const whatsappNumber = "56996706983";
     const message = "¡Hola! Me gustaría obtener más información sobre pasar mi cuenta a pro. ¡Gracias!";

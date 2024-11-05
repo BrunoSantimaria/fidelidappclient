@@ -14,9 +14,7 @@ export const useDashboard = () => {
   const { refreshAccount } = useAuthSlice();
   const dispatch = useDispatch();
   const { handleNavigate } = useNavigateTo();
-  useEffect(() => {
-    getSubscription();
-  }, []);
+
   const getPromotionsAndMetrics = async () => {
     try {
       const resp = await api.get("/api/promotions");
