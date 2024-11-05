@@ -4,7 +4,7 @@ export const planList: Plan[] = [
   {
     type: "Gratis",
 
-    description: ["1 promoción activa", "Agenda", "Maximo 500 clientes", "Carga de Clientes por CSV", "Reportes generales y por promoción"],
+    description: ["1 promoción activa", "Agenda", "Maximo 250 clientes", "Carga de Clientes por CSV", "Reportes generales y por promoción"],
     button: "COMIENZA GRATIS",
   },
   {
