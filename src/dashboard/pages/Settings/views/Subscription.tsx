@@ -170,14 +170,16 @@ export const Subscription = () => {
 
         <>
           <div className={`${!user?.accounts.activePayer && user?.accounts.planStatus === "pro" ? "hidden" : ""} flex justify-start mt-6`}>
-            {user.accounts.planStatus === "free" || user.accounts.planStatus === "admin" ? (
+            {user?.accounts?.planStatus === "free" ? (
               <Button className='' variant='contained' color='primary' onClick={createPreference}>
                 ¡Suscríbete al Plan Pro ahora!
               </Button>
             ) : (
-              <Button variant='contained' color='error' onClick={() => setOpenDialog(true)}>
-                Cancelar Suscripción
-              </Button>
+              user?.accounts?.planStatus === "pro" && (
+                <Button variant='contained' color='error' onClick={() => setOpenDialog(true)}>
+                  Cancelar Suscripción
+                </Button>
+              )
             )}
 
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
