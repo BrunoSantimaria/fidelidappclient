@@ -342,9 +342,9 @@ export const ClientPromotionCard = () => {
           <Button
             variant='contained'
             onClick={() => setShowScanner(true)}
-            className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+            className='mt-12 w-[95%] md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
           >
-            Abrir Escáner QR para sumar viistas
+            Abrir Escáner QR para sumar visitas
           </Button>
         )}
 

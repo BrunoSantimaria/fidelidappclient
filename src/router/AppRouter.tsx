@@ -15,12 +15,14 @@ import Agenda from "../agenda-client/Agenda";
 import CancelAppointment from "../agenda-client/CancelAppointment";
 import ConfirmAppointment from "../agenda-client/ConfirmAppointment";
 import ThankYou from "../agenda-client/ThankYou";
+import { PromotionQrLanding } from "../landing/components/PromotionQrLanding";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
 
   const refs = {
     homeRef: useRef(null),
+    promotionRef: useRef(null),
     servicesRef: useRef(null),
     patternRef: useRef(null),
     howItWorksRef: useRef(null),
@@ -59,6 +61,7 @@ export const AppRouter = () => {
               <Route path='/agendas/:agendaId' element={<Agenda />} />
               <Route path='/' element={<Landing refs={refs} />} />
               <Route path='/thankyou' element={<ThankYou />} />
+              <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
               <Route path='/auth/*' element={<AuthRoutes />} />
               <Route path='/dashboard' element={<Navigate to='/' replace />} />
             </>

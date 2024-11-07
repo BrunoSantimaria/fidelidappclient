@@ -3,14 +3,17 @@ import background from "../../assets/Cover.jpeg";
 import background2 from "../../assets/Cover3.jpeg";
 import { useState } from "react";
 import { ModalLanding } from "../components/ModalLanding";
-
-export const Home = () => {
+import { FaArrowCircleDown } from "react-icons/fa";
+import { FaArrowDown } from "react-icons/fa6";
+import { handleScrollTo } from "../../utils/handleScrollTo";
+import { useNavigateTo } from "../../hooks/useNavigateTo";
+export const Home = ({ refs }) => {
   const [open, setOpen] = useState(false);
   const whatsappNumber = "56996706983"; // Reemplaza con tu número de WhatsApp
   const message = "¡Hola! Me gustaría obtener una demo de FidelidApp. ¿Cuándo podemos agendar una reunión?";
-
+  const { handleNavigate } = useNavigateTo();
   const handleClick = () => {
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
+    handleNavigate("/auth/login");
   };
 
   const handleOpen = () => setOpen(true);
@@ -20,15 +23,14 @@ export const Home = () => {
     <Box
       sx={{
         position: "relative",
-        height: { xs: "100vh", md: "80vh" },
+        height: { xs: "100vh", md: "100vh" },
         maxWidth: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        top: 60,
       }}
     >
-      <Box sx={{ paddingX: { xs: 2, md: 6 }, textAlign: { xs: "left", sm: "left", md: "left", lg: "left" } }}>
+      <Box sx={{ marginTop: { xs: 20, md: 0 }, paddingX: { xs: 2, md: 6 }, textAlign: { xs: "left", sm: "left", md: "center", lg: "left" } }}>
         <Typography
           variant='h3'
           sx={{
@@ -55,8 +57,10 @@ export const Home = () => {
             marginTop: { xs: 1, sm: 2, md: 4 },
           }}
         >
-          <span className=''>
-            Descubre cómo Fidelidapp puede ayudarte a generar promociones y tarjetas de fidelidad virtuales ajustadas a las necesidades de tu negocio.
+          <span className=' leading-9'>
+            Programas de Lealtad y Fidelización Personalizados Lleva la fidelización de tus clientes al siguiente nivel con Fidelidapp. Diseña promociones
+            exclusivas y tarjetas de fidelidad virtuales adaptadas a tu negocio. ¡<span className='underline font-bold'>Sin costo inicial</span>! Descubre cómo
+            puedes aumentar la lealtad de tus clientes hoy mismo.{" "}
           </span>
         </Typography>
         <Box sx={{ marginTop: { xs: 1, sm: 2, md: 4 }, display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
@@ -67,7 +71,7 @@ export const Home = () => {
               position: "relative",
               bottom: { xs: 60, sm: 100, md: 100, lg: 0 },
 
-              minHeight: { xs: "50px", md: "60px", lg: "80px" },
+              minHeight: { xs: "50px", md: "60px", lg: "60px" },
               zIndex: 1,
               width: { xs: "100%", sm: "70%", md: "16vw", lg: "14vw" },
               marginRight: { md: 2 },
@@ -75,7 +79,7 @@ export const Home = () => {
               fontSize: { xs: 14, sm: 14, lg: 12, xl: 14 },
             }}
           >
-            Agenda una demo.
+            Registrate Gratis Ahora
           </Button>
           <Button
             variant='contained'
@@ -83,7 +87,7 @@ export const Home = () => {
               position: "relative",
               zIndex: 1,
               width: { xs: "100%", sm: "70%", md: "16vw", lg: "14vw" },
-              minHeight: { xs: "50px", md: "60px", lg: "80px" },
+              minHeight: { xs: "50px", md: "60px", lg: "60px" },
               marginBottom: { xs: 2, md: 0 },
               bottom: { xs: 60, sm: 100, md: 100, lg: 0 },
               fontSize: { xs: 14, sm: 14, lg: 12, xl: 14 },
@@ -115,6 +119,12 @@ export const Home = () => {
         className='absolute top-0 left-[-600px] md:left-0  md:h-[100px] lg:h-full right-0 bottom-0 md:bottom-[300px] lg:bottom-0 bg-cover bg-left filter blur-sm brightness-[50%] z-0'
         style={{ backgroundImage: `url(${background2})` }}
       />
+      <span
+        onClick={() => handleScrollTo(refs)}
+        className='absolute bg-main rounded-md  bottom-6 animate-bounce duration-1000 p-4 cursor-pointer group hover:bg-white'
+      >
+        <FaArrowDown className='text-white group-hover:text-main' />
+      </span>
     </Box>
   );
 };

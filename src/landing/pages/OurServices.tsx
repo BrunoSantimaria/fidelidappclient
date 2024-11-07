@@ -7,7 +7,7 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 export const OurServices = () => {
   return (
     <Container
-      sx={{ marginTop: { xs: "120px", md: "-180px", lg: "120px" }, justifyContent: "center", textAlign: "center", display: "flex", minWidth: "100vw" }}
+      sx={{ marginTop: { xs: "120px", md: "-180px", lg: "160px" }, justifyContent: "center", textAlign: "center", display: "flex", minWidth: "100vw" }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", marginTop: "40px", margin: "0 auto", justifyContent: "center", textAlign: "center" }}>
         <Typography

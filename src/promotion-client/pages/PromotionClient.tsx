@@ -82,6 +82,11 @@ export const PromotionClient = () => {
       setClientEmail("");
       setClientName("");
       setPhoneNumber("");
+      console.log(promotion.id);
+
+      if (id === "672b9d62dc9c051bc3c313ef") {
+        handleNavigate("/promotionQrLanding");
+      }
     } catch (error) {
       console.log(error.response.data.error);
       if (error.response.data.error === "Client already has this promotion") {
@@ -132,9 +137,9 @@ export const PromotionClient = () => {
       <Helmet>
         <title>{promotion.title || "Fidelidapp"}</title>
       </Helmet>
-      <section className='relative mt-10 flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
+      <section className='relative mt-6 flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
         <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
-          <div className='relative z-10 w-[100%] md:w-[100%] space-y-6 m-0 text-left p-6 rounded-md'>
+          <div className='relative z-10 w-[95%]  md:w-[100%] space-y-6 m-0 text-left p-4 rounded-md'>
             <div className='space-y-2 flex flex-col mb-6'>
               {/* <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p> */}
 
@@ -186,8 +191,8 @@ export const PromotionClient = () => {
 
           {/* Imagen de la promoción */}
           {promotion.imageUrl && (
-            <div className='relative w-[95%]  md:w-full mb-6 mx-auto md:mx-0 '>
-              <img src={promotion.imageUrl} alt='Promoción' className=' scale-90  object-contain w-full h-full' />
+            <div className='relative w-[95%] ml-1  md:w-full mb-6 mx-auto md:mx-0 '>
+              <img src={promotion.imageUrl} alt='Promoción' className=' scale-90 rounded-md  object-contain w-full h-full' />
             </div>
           )}
         </div>

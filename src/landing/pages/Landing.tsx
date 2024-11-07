@@ -1,6 +1,6 @@
 import React from "react";
-import { Box } from "@mui/material";
-import { Faqs, Home, OurServices, Pattern, Plans, Steps, Testimonials } from "./";
+import { Box, Divider } from "@mui/material";
+import { EmailMarketing, Faqs, Home, OurServices, Pattern, Plans, Promotions, Steps, Testimonials } from "./";
 import { HowItWorks } from "./HowItWorks";
 import ContactForm from "./ContactForm";
 import { motion } from "framer-motion";
@@ -21,12 +21,20 @@ export const Landing = ({ refs }) => {
         width: "100%",
         padding: 0,
         margin: 0,
+        overflowX: "hidden",
+        overflowY: "hidden",
       }}
     >
       <motion.div ref={refs.homeRef} initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
-        <Home />
+        <Home refs={refs.promotionRef} />
       </motion.div>
 
+      <motion.div ref={refs.promotionRef} initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
+        <Promotions />
+      </motion.div>
+      <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
+        <EmailMarketing />
+      </motion.div>
       <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
         <OurServices />
       </motion.div>

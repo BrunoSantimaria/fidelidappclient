@@ -139,10 +139,10 @@ export const Promotion = () => {
   }
 
   return (
-    <main className='flex flex-col p-10 ml-0 md:ml-20 lg:ml-20 h-fit w-full gap-5'>
-      <main className=' flex flex-col  justify-center place-items-center space-y-4 w-full md:w-[95%] h-1/3 md:h-1/3 lg:h-1/3  rounded-md p-6 bg-gradient-to-br from-gray-50 to-main/50'>
-        <section className='flex flex-col md:flex-row  justify-between w-full md:w-[95%] lg:max-w-[95%] mx-auto'>
-          <div className='h-1/3 md:h-1/3 z-10 w-[95%] md:w-[60%] space-y-6  text-left p-6 rounded-md'>
+    <main className='flex flex-col p-0 ml-2 md:p-10  md:ml-20 lg:ml-20 h-fit  gap-5'>
+      <main className=' flex flex-col  justify-center place-items-center space-y-4 w-screen md:w-[95%] h-1/3 md:h-1/3 lg:h-1/3  rounded-md p-6 bg-gradient-to-br from-gray-50 to-main/50'>
+        <section className='flex flex-col md:flex-row  justify-between w-screen  md:w-[95%] lg:max-w-[95%] mx-0'>
+          <div className='h-1/3 md:h-1/3 z-10 w-[95%] md:w-[60%] space-y-6  text-left p-4 rounded-md'>
             <h1 className='font-poppins font-bold text-2xl md:text-5xl'>{activePromotion.title}</h1>
             <p className='font-medium'>{activePromotion.description}</p>
             <div>
@@ -164,8 +164,8 @@ export const Promotion = () => {
           </div>
 
           <div className='relative z-10 h-[300px] md:h-[450px] w-[95%] md:w-[40%] flex justify-center'>
-            <div className='w-full ml-6 rounded-md overflow-hidden bg-gray-200 shadow-md'>
-              <img src={imagePreview} alt='Promotion' className='object-cover w-full h-full' />
+            <div className='w-full ml-0 p-2  rounded-md overflow-hidden  shadow-md'>
+              <img src={imagePreview} alt='Promotion' className='object-cover rounded-md w-full h-full' />
             </div>
           </div>
         </section>

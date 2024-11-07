@@ -1,67 +1,66 @@
-import React from "react";
-import { Box } from "@mui/material";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import React, { useEffect, useState } from "react";
+import { FloatingWhatsApp } from "react-floating-whatsapp";
 import { useLocation } from "react-router";
 
 const FloatingWhatsAppButton = () => {
-  const whatsappNumber = "56996706983";
-  const message = "¡Hola! Me gustaría obtener más información sobre Fidelizarte y sus servicios de programas de fidelización. ¡Gracias!";
-
-  const handleClick = (e) => {
-    // Obtén el elemento que disparó el evento
-    const buttonElement = e.currentTarget;
-
-    // Accede al id y clases del botón
-    const buttonId = buttonElement.id;
-    const buttonClasses = buttonElement.className;
-
-    console.log("Button ID:", buttonId);
-    console.log("Button Classes:", buttonClasses);
-
-    // Solo se envía el evento a Google Analytics si está definido
-    if (window.gtag) {
-      window.gtag("event", "gtm.click", {
-        event_category: "engagement",
-        event_label: "Floating WhatsApp Button",
-        value: 1,
-        button_id: buttonId, // Puedes agregarlo al evento
-        button_classes: buttonClasses, // También aquí
-      });
-    }
-
-    // Abre WhatsApp con el número y mensaje especificados
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
-  };
+  const whatsappNumber = "3415822526";
+  const message = "¡Hola! ¿En qué puedo ayudarte?";
 
   const location = useLocation();
   const allowedRoutes = ["/", "/auth"];
+
+  // Estado para manejar la apertura automática
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [showNotification, setShowNotification] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsOpen(true), 3000); // Abre el chat automáticamente a los 3 segundos
+    const notificationTimer = setTimeout(() => setShowNotification(true), 3000); // Muestra la notificación a los 6 segundos
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(notificationTimer);
+    };
+  }, []);
 
   if (!allowedRoutes.includes(location.pathname)) {
     return null;
   }
 
+  const handleClick = () => {
+    if (window.gtag) {
+      window.gtag("event", "gtm.click", {
+        event_category: "engagement",
+        event_label: "Floating WhatsApp Button",
+        value: 1,
+      });
+    }
+  };
+
   return (
-    <Box
+    <FloatingWhatsApp
+      phoneNumber={whatsappNumber}
+      accountName='Álvaro'
+      chatMessage={message}
+      notificationDelay={5}
       onClick={handleClick}
-      id='whatsapp-button'
-      aria-label='whatsapp'
-      sx={{
-        zIndex: 10,
-        position: "fixed",
-        bottom: 20,
+      avatar='https://lh3.googleusercontent.com/a-/ALV-UjVHZSdcoLdxtMrMu30bQ2Mofs8hAgn1MU5BV1YP7x-ivg0O0CSimw=s64-p-k-rw-no'
+      allowClickAway
+      notification={true}
+      notificationSound
+      messageDelay={2}
+      allowEsc
+      placeholder='Escribe tu mensaje...'
+      chatboxHeight={400}
+      statusMessage='Responde típicamente en media hora'
+      isOpen={isOpen} // Controla la apertura del chat
+      styles={{
+        bottom: 40,
         right: 50,
-        backgroundColor: "green",
-        borderRadius: "50%",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
-        cursor: "pointer",
-        p: 2,
-        "&:hover": {
-          backgroundColor: "darkgreen",
-        },
+        zIndex: 10,
       }}
-    >
-      <WhatsAppIcon sx={{ color: "white", fontSize: 55 }} />
-    </Box>
+    />
   );
 };
 

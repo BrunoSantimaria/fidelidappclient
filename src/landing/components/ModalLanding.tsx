@@ -123,7 +123,7 @@ export const ModalLanding = ({ open, handleClose }: { open: boolean; handleClose
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>Déjanos tus datos para que nos contactemos contigo.</DialogTitle>
       <DialogContent>
-        <form onSubmit={handleSubmit}>
+        <form id='modal-form' onSubmit={handleSubmit}>
           <TextField
             margin='dense'
             label='Nombre'

@@ -104,7 +104,7 @@ const ContactForm = () => {
           error={!!errors.message}
           helperText={errors.message ? errors.message.message : ""}
         />
-        <Button variant={isSubmitting ? "disabled" : "contained"} type='submit' sx={{ backgroundColor: "primary.main" }}>
+        <Button id='formulario' variant={isSubmitting ? "disabled" : "contained"} type='submit' sx={{ backgroundColor: "primary.main" }}>
           ENVIAR CONSULTA
         </Button>
       </Box>
