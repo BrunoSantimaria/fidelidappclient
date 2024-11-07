@@ -22,10 +22,6 @@ export const NavBar = ({ refs }) => {
   const allowedRoutes = ["/", "/auth/login"];
   const isAgendasRoute = location.pathname.startsWith("/agendas/");
 
-  if (!allowedRoutes.includes(location.pathname) && !isAgendasRoute) {
-    return null;
-  }
-
   const isHome = location.pathname === "/";
 
   // Cambiar el estado sticky cuando se haga scroll
@@ -44,6 +40,11 @@ export const NavBar = ({ refs }) => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // Renderizar el NavBar siempre, pero realizar condiciones solo sobre el contenido.
+  if (!allowedRoutes.includes(location.pathname) && !isAgendasRoute) {
+    return null; // No renderizar nada si no está permitido
+  }
 
   return (
     <div className={`w-full max-w-full z-50`}>
