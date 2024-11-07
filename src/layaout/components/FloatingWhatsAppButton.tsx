@@ -3,7 +3,7 @@ import { FloatingWhatsApp } from "react-floating-whatsapp";
 import { useLocation } from "react-router";
 
 const FloatingWhatsAppButton = () => {
-  const whatsappNumber = "3415822526";
+  const whatsappNumber = "56 9 9670 6983";
   const message = "¡Hola! ¿En qué puedo ayudarte?";
 
   const location = useLocation();
