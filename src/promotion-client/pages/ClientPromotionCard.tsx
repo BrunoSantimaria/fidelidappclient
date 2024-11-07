@@ -69,11 +69,15 @@ export const ClientPromotionCard = () => {
   const handleScan = async (result) => {
     setProcessing(true);
     if (result) {
+      const accountQr = await result[0].rawValue;
+      console.log(client.email, pid, accountQr);
+
       try {
         console.log(result);
 
         const accountQr = await result[0].rawValue;
         await api.post("/api/promotions/visit", { clientEmail: client.email, promotionId: pid, accountQr });
+
         toast.success("Visita registrada con éxito. La página se refrescará en 3 segundos.");
         const audio = new Audio(marioCoinSound);
         audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
