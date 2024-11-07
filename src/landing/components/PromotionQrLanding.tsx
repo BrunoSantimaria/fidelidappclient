@@ -8,7 +8,7 @@ export const PromotionQrLanding = () => {
         <span className='text-xl'>
           Escanea el QR desde la <span className='font-bold'>FidelidCard</span> que acaba de llegar a tu correo.
         </span>
-        <div className='text-center justify-center m-auto'>
+        <div className='text-center justify-center m-auto p-6'>
           <QRCode value='8c01109f-cfb8-4d82-a0b8-4a744c874ff3' size={256} />
         </div>
         <span className='mt-10'>Una vez escaneado exitosamente puedes cerrar esta ventana con el botón debajo.</span>
