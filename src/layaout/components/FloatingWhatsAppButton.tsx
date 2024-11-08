@@ -3,20 +3,16 @@ import { FloatingWhatsApp } from "react-floating-whatsapp";
 import { useLocation } from "react-router";
 
 const FloatingWhatsAppButton = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const location = useLocation();
+  const allowedRoutes = ["/", "/auth"];
   const whatsappNumber = "56996706983";
   const message = "¡Hola! ¿En qué puedo ayudarte?";
 
-  const location = useLocation();
-  const allowedRoutes = ["/", "/auth"];
-
-  // Estado para manejar la apertura automática
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [showNotification, setShowNotification] = useState(false);
-
   useEffect(() => {
-    const timer = setTimeout(() => setIsOpen(true), 3000); // Abre el chat automáticamente a los 3 segundos
-    const notificationTimer = setTimeout(() => setShowNotification(true), 3000); // Muestra la notificación a los 6 segundos
+    const timer = setTimeout(() => setIsOpen(true), 3000);
+    const notificationTimer = setTimeout(() => setShowNotification(true), 3000);
 
     return () => {
       clearTimeout(timer);
@@ -54,7 +50,7 @@ const FloatingWhatsAppButton = () => {
       placeholder='Escribe tu mensaje...'
       chatboxHeight={400}
       statusMessage='Responde típicamente en media hora'
-      isOpen={isOpen} // Controla la apertura del chat
+      isOpen={isOpen}
       styles={{
         bottom: 40,
         right: 50,

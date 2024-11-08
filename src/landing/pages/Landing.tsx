@@ -4,6 +4,7 @@ import { EmailMarketing, Faqs, Home, OurServices, Pattern, Plans, Promotions, St
 import { HowItWorks } from "./HowItWorks";
 import ContactForm from "./ContactForm";
 import { motion } from "framer-motion";
+import { CallAndEmail } from "../components/CallAndEmail";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -34,6 +35,9 @@ export const Landing = ({ refs }) => {
       </motion.div>
       <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
         <EmailMarketing />
+      </motion.div>
+      <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
+        <CallAndEmail />
       </motion.div>
       <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
         <OurServices />

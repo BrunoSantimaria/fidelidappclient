@@ -12,7 +12,7 @@ export const contactInfo: ContactInfo = {
     {
       text: "FidelidApp",
       icon: IoLogoLinkedin,
-      link: "https://www.linkedin.com/in/fidelidapp",
+      link: "https://www.linkedin.com/company/fidelidappcl/posts/?feedView=all",
     },
     {
       text: "@fidelidApp",

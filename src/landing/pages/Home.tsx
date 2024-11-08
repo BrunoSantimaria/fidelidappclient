@@ -23,19 +23,19 @@ export const Home = ({ refs }) => {
     <Box
       sx={{
         position: "relative",
-        height: { xs: "100vh", md: "100vh" },
+        height: { xs: "fit", md: "100vh" },
         maxWidth: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      <Box sx={{ marginTop: { xs: 20, md: 0 }, paddingX: { xs: 2, md: 6 }, textAlign: { xs: "left", sm: "left", md: "center", lg: "left" } }}>
+      <Box sx={{ marginTop: { xs: 30, md: 0 }, paddingX: { xs: 2, md: 6 }, textAlign: { xs: "left", sm: "left", md: "left", lg: "left" } }}>
         <Typography
           variant='h3'
           sx={{
             fontWeight: "bold",
-            fontSize: { xs: 40, sm: 28, md: 32, lg: 32, xl: "3em" },
+            fontSize: { xs: 36, sm: 28, md: 32, lg: 32, xl: "3em" },
             color: "white",
             position: "relative",
             bottom: { xs: 80, sm: 120, md: 150, lg: 0 },
@@ -43,7 +43,7 @@ export const Home = ({ refs }) => {
             width: { xs: "100%", sm: "90%", md: "70%", lg: "60%" },
           }}
         >
-          Programas de Lealtad y Fidelidad
+          ¡Convierte tus visitas en clientes frecuentes desde hoy!
         </Typography>
         <Typography
           variant='h5'
@@ -53,14 +53,16 @@ export const Home = ({ refs }) => {
             position: "relative",
             bottom: { xs: 70, sm: 120, md: 150, lg: 0 },
             zIndex: 1,
-            width: { xs: "100%", sm: "90%", md: "50%", lg: "40%" }, // Ajustando ancho
+            width: { xs: "100%", sm: "90%", md: "70%", lg: "60%" }, // Ajustando ancho
             marginTop: { xs: 1, sm: 2, md: 4 },
           }}
         >
-          <span className=' leading-9'>
-            Programas de Lealtad y Fidelización Personalizados Lleva la fidelización de tus clientes al siguiente nivel con Fidelidapp. Diseña promociones
-            exclusivas y tarjetas de fidelidad virtuales adaptadas a tu negocio. ¡<span className='underline font-bold'>Sin costo inicial</span>! Descubre cómo
-            puedes aumentar la lealtad de tus clientes hoy mismo.{" "}
+          <span className='w-full leading-6'>
+            Con Fidelidapp podrás <span className='font-bold'>crear, implementar y monitorear programas de lealtad y fidelización personalizados</span> a la
+            medida de tu empresa. Crea tu <span className='font-bold'>comunidad de clientes frecuentes</span> , implementa sistemas de{" "}
+            <span className='font-bold'>fidelización por programa de puntos, promociones y tarjetas de fidelidad virtuales</span> adaptadas a tu negocio.
+            Utiliza nuestra plataforma de envío de <span className='font-bold'>email marketing masivo</span> a tu base de datos de clientes. ¡Prueba nuestra
+            versión gratuita ahora y aumenta la lealtad de tus clientes desde hoy!
           </span>
         </Typography>
         <Box sx={{ marginTop: { xs: 1, sm: 2, md: 4 }, display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
@@ -94,34 +96,20 @@ export const Home = ({ refs }) => {
             }}
             onClick={handleOpen}
           >
-            Escríbenos para conocer más.
+            Escríbenos para conocer más
           </Button>
         </Box>
-        <Typography
-          sx={{
-            color: "white",
-            position: "relative",
-            zIndex: 1,
-            bottom: { xs: 60, md: 60, lg: 0 },
-            width: { xs: "100%", sm: "90%", md: "50%", lg: "40%" }, // Ajustando ancho
-            marginTop: { xs: 1, sm: 2, md: 4 },
-            fontStyle: "italic",
-            fontSize: { xs: 14, sm: 12, md: "inherit" }, // Ajustando tamaño de fuente
-          }}
-        >
-          Sin compromiso. Conoce cómo podemos ayudarte a fidelizar a tus clientes.
-        </Typography>
       </Box>
 
       <ModalLanding open={open} handleClose={handleClose} />
 
       <Box
-        className='absolute top-0 left-[-600px] md:left-0  md:h-[100px] lg:h-full right-0 bottom-0 md:bottom-[300px] lg:bottom-0 bg-cover bg-left filter blur-sm brightness-[50%] z-0'
+        className='absolute top-0 left-[-600px] md:left-0  md:h-[100px] lg:h-full right-0 bottom-0 md:bottom-[300px] lg:bottom-0 bg-cover bg-left filter blur-sm brightness-[30%] z-0'
         style={{ backgroundImage: `url(${background2})` }}
       />
       <span
         onClick={() => handleScrollTo(refs)}
-        className='absolute bg-main rounded-md  bottom-6 animate-bounce duration-1000 p-4 cursor-pointer group hover:bg-white'
+        className='absolute bg-main rounded-md  bottom-2 animate-bounce duration-1000 p-4 cursor-pointer group hover:bg-white'
       >
         <FaArrowDown className='text-white group-hover:text-main' />
       </span>

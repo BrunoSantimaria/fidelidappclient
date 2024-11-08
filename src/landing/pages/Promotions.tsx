@@ -67,7 +67,7 @@ export const Promotions = () => {
                   transition: { ...animationProps.transition, delay: 1.2 },
                 }}
               >
-                Ver promoción
+                Mira como funciona{" "}
               </motion.div>
             </motion.div>
           </>
