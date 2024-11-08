@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Divider } from "@mui/material";
-import { EmailMarketing, Faqs, Home, OurServices, Pattern, Plans, Promotions, Steps, Testimonials } from "./";
+import { EmailMarketing, Faqs, Home, OurServices, Pattern, Plans, PointsAndVisits, Promotions, Steps, Testimonials } from "./";
 import { HowItWorks } from "./HowItWorks";
 import ContactForm from "./ContactForm";
 import { motion } from "framer-motion";
@@ -29,8 +29,12 @@ export const Landing = ({ refs }) => {
       <motion.div ref={refs.homeRef} initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
         <Home refs={refs.promotionRef} />
       </motion.div>
-
       <motion.div ref={refs.promotionRef} initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
+        <PointsAndVisits />
+      </motion.div>
+      <div className='w-[70%] md:w-[50%] border-[0.5px] opacity-20 my-16 border-black flex justify-center m-auto bg-black ' />
+
+      <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
         <Promotions />
       </motion.div>
       <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>

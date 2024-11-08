@@ -8,3 +8,4 @@ export * from "./Plans";
 export * from "./Faqs";
 export * from "./Promotions";
 export * from "./EmailMarketing";
+export * from "./PointsAndVisits";

@@ -60,14 +60,13 @@ export const Promotions = () => {
               </motion.div>
 
               <motion.div
-                onClick={togglePromotion} // Alternar la promoción al hacer clic
-                className=' justify-center w-2/3 m-auto text-center transform transition duration-300 hover:scale-105 p-2 mt-6 bg-main rounded-md text-white cursor-pointer'
-                {...{
-                  ...animationProps,
-                  transition: { ...animationProps.transition, delay: 1.2 },
-                }}
+                onClick={togglePromotion}
+                className='justify-center w-2/3 m-auto text-center transform transition duration-300 hover:scale-105 p-2 mt-6 bg-main rounded-md text-white cursor-pointer'
+                initial={{ x: 200, opacity: 0 }}
+                animate={isInView ? { x: 0, opacity: 1 } : {}}
+                transition={{ duration: 0.8, delay: 1.2 }}
               >
-                Mira como funciona{" "}
+                Mira cómo funciona
               </motion.div>
             </motion.div>
           </>

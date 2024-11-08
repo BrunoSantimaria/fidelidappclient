@@ -21,6 +21,7 @@ export const CallAndEmail = () => {
         <a
           href={`mailto:${contactInfo.email}`}
           className='flex items-center space-x-2 appearance-none bg-white text-main font-main uppercase px-4 py-2 rounded shadow-md hover:bg-gray-100 transition no-underline'
+          id='email-us'
         >
           <span>Mándanos un correo</span>
           <FaEnvelope className='w-20 md:w-auto' />
