@@ -80,7 +80,7 @@ export const Navigation = () => {
         initial='close'
         className={`${
           isOpen ? "fixed" : "hidden"
-        } md:flex bg-main min-h-screen lg:h-screen md:h-screen flex-col justify-between z-10 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
+        } md:flex bg-main min-h-screen lg:h-screen md:h-screen flex-col justify-between z-50 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
       >
         <div className='flex flex-row w-full justify-between place-items-center'>
           <div

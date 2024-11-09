@@ -139,9 +139,9 @@ export const Promotion = () => {
   }
 
   return (
-    <main className='flex flex-col p-0 ml-2 md:p-10  md:ml-20 lg:ml-20 h-fit  gap-5'>
+    <main className='flex flex-col p-0 ml-2 md:p-10  md:ml-20 lg:ml-20 h-fit    gap-5'>
       <main className=' flex flex-col  justify-center place-items-center space-y-4 w-screen md:w-[95%] h-1/3 md:h-1/3 lg:h-1/3  rounded-md p-6 bg-gradient-to-br from-gray-50 to-main/50'>
-        <section className='flex flex-col md:flex-row  justify-between w-screen  md:w-[95%] lg:max-w-[95%] mx-0'>
+        <section className='flex flex-col md:flex-row   justify-between w-screen  md:w-[95%] lg:max-w-[95%] mx-0'>
           <div className='h-1/3 md:h-1/3 z-10 w-[95%] md:w-[60%] space-y-6  text-left p-4 rounded-md'>
             <h1 className='font-poppins font-bold text-2xl md:text-5xl'>{activePromotion.title}</h1>
             <p className='font-medium'>{activePromotion.description}</p>
