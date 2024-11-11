@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Container, Dialog, DialogTitle, DialogContent } from "@mui/material";
+import { Button, Container, Dialog, DialogTitle, DialogContent, FormControlLabel, Switch, Divider } from "@mui/material";
 import { toast } from "react-toastify";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import Lottie from "react-lottie";
@@ -12,10 +12,11 @@ import api from "../../utils/api";
 const marioCoinSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav";
 const marioStarSound = "https://themushroomkingdom.net/sounds/wav/smb2/smb2_grow.wav";
 const marioNewLifeSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_1-up.wav";
-
+import { motion, AnimatePresence } from "framer-motion";
 export const ClientPromotionCard = () => {
   const { cid, pid } = useParams();
   const [promotion, setPromotion] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
   const [promotionDetails, setPromotionDetails] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [client, setClient] = useState(null);
@@ -23,8 +24,13 @@ export const ClientPromotionCard = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
+  const [isRewardView, setIsRewardView] = useState(true);
+  const [showRewards, setShowRewards] = useState(true);
 
+  const [showScanner, setShowScanner] = useState(false);
+  const handleSwitchChange = (event) => {
+    setShowRewards(event.target.checked);
+  };
   // Updated generateIcons function for 5-icon rows
   const generateIcons = (actualVisits, visitsRequired) => {
     if (visitsRequired > 15) {
@@ -252,7 +258,8 @@ export const ClientPromotionCard = () => {
       </Container>
     );
   }
-
+  console.log("esto es promotion", promotion);
+  console.log("esto es promotion detail", promotionDetails);
   return (
     <>
       <Helmet>
@@ -262,45 +269,87 @@ export const ClientPromotionCard = () => {
         <meta property='og:description' content={promotionDetails.description || "Detalles de la promoción"} />
         <meta property='og:url' content={`https://www.fidelidapp.cl/promotions/${pid}`} />
       </Helmet>
-      <Container className='flex flex-col items-center p-8 min-h-screen'>
-        <div className='relative w-[95%] mb-6 md:w-2/3 p-10 bg-white border border-main/60 rounded-lg shadow-lg overflow-hidden'>
-          <img src={keyUrl} alt='Background' className='absolute inset-0 w-full h-full object-cover opacity-30' />
+      <Container className='flex flex-col items-center  min-h-screen'>
+        <div className='w-screen md:w-screen mb-6 p-10 bg-gradient-to-r from-gray-600 to-gray-900 rounded-b-lg shadow-lg shadow-black/40 overflow-hidden'>
           <div className='relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='flex flex-col items-center'>
-              <span className='text-lg font-bold'>Visitas:</span>
-              <div className='space-y-2'>{generateIcons(promotion.actualVisits, promotionDetails.visitsRequired)}</div>
+              <div className='space-y-2'>
+                {promotionDetails.systemType === "points" ? (
+                  <div className='flex flex-col text-center'>
+                    <span className='text-lg font-bold text-white'>Puntos:</span>
+                    <span className='font-bold text-white'>{promotion.pointsEarned}</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className='text-lg font-bold text-white'>Visitas:</span>
+                    {generateIcons(promotion.actualVisits, promotionDetails.visitsRequired)}
+                  </>
+                )}
+              </div>
             </div>
-            <div className='flex flex-col items-center'>
+
+            <div className='flex flex-col items-center text-white'>
               <span className='text-lg font-bold'>Estado:</span>
               {promotion.status === "Pending" ? (
                 <p className='text-green-500'>Pendiente</p>
               ) : promotion.status === "Active" ? (
-                <p className='text-blue-500'>Activa</p>
+                <p className='text-green-500'>Activa</p>
               ) : promotion.status === "Expired" ? (
                 <p className='text-red-500'>Expirada</p>
               ) : (
                 <p className='text-green-500'>Completada</p>
               )}
             </div>
-            <div className='flex flex-col items-center'>
-              <span className='text-lg font-bold'>Canjes Realizados:</span>
-              <p>{promotion.redeemCount}</p>
-            </div>
-            <div className='flex flex-col items-center'>
+
+            <div className='flex flex-col items-center text-white'>
               <span className='text-lg font-bold'>Email del Cliente:</span>
               <p>{client.email}</p>
             </div>
-            <div className='flex flex-col items-center'>
-              <span className='text-lg font-bold'>Fecha de Registro:</span>
-              <p>{formatDate(promotion.addedDate)}</p>
-            </div>
-            <div className='flex flex-col items-center'>
-              <span className='text-lg font-bold'>Fin de Vigencia:</span>
-              <p>{formatDate(promotion.endDate)}</p>
-            </div>
           </div>
-        </div>
 
+          {/* Flecha para mostrar/ocultar detalles, visible en todos los dispositivos */}
+          <div className='flex justify-center mt-4'>
+            <motion.div
+              className='cursor-pointer text-white'
+              onClick={() => setShowDetails(!showDetails)}
+              animate={{ rotate: showDetails ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Flecha hacia abajo */}
+              <svg xmlns='http://www.w3.org/2000/svg' className='h-8 w-8' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' />
+              </svg>
+            </motion.div>
+          </div>
+
+          {/* Detalles adicionales que se muestran u ocultan */}
+          <AnimatePresence>
+            {showDetails && (
+              <motion.div
+                className='flex flex-col justify-center space-y-6 md:flex md:flex-row md:space-x-16 md:space-y-0  mt-4'
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className='flex flex-col items-center text-white'>
+                  <span className='text-lg font-bold'>Canjes Realizados:</span>
+                  <p>{promotion.redeemCount}</p>
+                </div>
+
+                <div className='flex flex-col items-center text-white'>
+                  <span className='text-lg font-bold'>Fecha de Registro:</span>
+                  <p>{formatDate(promotion.addedDate)}</p>
+                </div>
+
+                <div className='flex flex-col items-center text-white'>
+                  <span className='text-lg font-bold'>Fin de Vigencia:</span>
+                  <p>{formatDate(promotion.endDate)}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         {promotion.status === "Pending" && (
           <div className='shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 p-6 rounded-md mb-4 w-[80%] flex'>
             <span className='p-6 font-bold text-2xl'>
@@ -308,7 +357,6 @@ export const ClientPromotionCard = () => {
             </span>
           </div>
         )}
-
         {promotion.status === "Redeemed" || promotion.status === "Expired" ? (
           <Button
             variant='contained'
@@ -330,41 +378,134 @@ export const ClientPromotionCard = () => {
             <Button
               variant='contained'
               onClick={() => setShowScanner(true)}
-              className='mt-12 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+              className='mt-12 w-[95%] md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
             >
-              Abrir Escáner QR para sumar visitas
+              {promotionDetails.systemType === "points" ? "Abrir Escáner QR para sumar puntos" : " Abrir Escáner QR para sumar visitas"}
             </Button>
-            <Button
+            {/* <Button
               variant='contained'
               onClick={() => redeemPromotion()}
               className='mt-12 md:mb-6 lg:mb-6 w-1/2 md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
             >
               Canjear Visitas por Beneficios
-            </Button>
+            </Button> */}
           </div>
         ) : (
           <Button
             variant='contained'
             onClick={() => setShowScanner(true)}
-            className='mt-12 w-[95%] md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+            className='mt-12  md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
           >
             Abrir Escáner QR para sumar visitas
           </Button>
         )}
+        <section className='flex flex-col w-[95%] mx-6 md:mx-60  m-auto min-h-[500px]'>
+          {promotionDetails.systemType === "points" ? (
+            <>
+              {/* Botones para cambiar entre Recompensas y Detalles */}
+              <div className='flex flex-col md:flex-row md:space-y-0  md:space-x-6 md:m-auto justify-between items-center mb-4 space-y-4'>
+                <Button variant={showRewards ? "contained" : "outlined"} color='primary' onClick={() => setShowRewards(true)} className='w-full'>
+                  Recompensas
+                </Button>
+                <Button variant={!showRewards ? "contained" : "outlined"} color='primary' onClick={() => setShowRewards(false)} className='w-full'>
+                  Detalles de la Promoción
+                </Button>
+              </div>
 
-        <section className='flex flex-col md:flex md:flex-row mx-6 md:mx-60 w-5/6 m-auto  '>
-          <div className='mt-4 w-full md:w-1/2 space-y-6'>
-            <h1 className='mt-4  font-bold text-left font-poppins text-4xl w-full md:w-2/3 md:text-5xl'>{promotionDetails.title}</h1>
-            <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
-            <p className='mt-2 w-full md:w-2/3' dangerouslySetInnerHTML={{ __html: promotionDetails.description.replace(/\r\n|\r|\n/g, "<br />") }} />
-            <p className='mt-2'>Tipo: {promotionDetails.promotionType}</p>
-          </div>
+              {/* Si el botón está en Recompensas, mostrar solo las recompensas */}
+              {showRewards ? (
+                <section className='flex flex-col w-full gap-6 h-full'>
+                  <div className='flex flex-col w-full space-y-6'>
+                    {/* Mostrar las recompensas sin imagen */}
+                    <div className='w-full mt-4'>
+                      {promotionDetails.rewards.map((reward) => {
+                        const progress = (promotion.pointsEarned / reward.points) * 100;
+                        const canRedeem = promotion.pointsEarned >= reward.points;
 
-          <div className='mt-4 w-3/3 md:w-3/6 md:h-[600px] text-center border rounded-xl mb-12'>
-            <div className='relative w-full h-full aspect-[16/9]'>
-              <img src={imageUrl} alt='Promotion' className='w-full h-full object-cover rounded-xl' />
+                        return (
+                          <div key={reward._id} className='flex flex-col w-full px-4 py-4 bg-white rounded-lg shadow-lg mb-6'>
+                            {/* Título y descripción de la recompensa */}
+                            <div className='flex justify-between items-center'>
+                              <span className='font-bold text-lg text-gray-800'>
+                                {reward.points} puntos - {reward.description}
+                              </span>
+                            </div>
+
+                            {/* Barra de progreso con porcentaje */}
+                            <div className='relative w-full bg-gray-300 rounded-full h-4 mt-2'>
+                              <div
+                                className={`absolute top-0 left-0 h-4 rounded-full ${progress >= 100 ? "bg-green-500" : "bg-main"}`}
+                                style={{ width: `${Math.min(progress, 100)}%` }}
+                              ></div>
+
+                              {/* Mostrar el porcentaje en el centro de la barra */}
+                              <span className='absolute inset-0 flex items-center justify-center text-white font-semibold'>
+                                {Math.min(progress, 100).toFixed(0)}%
+                              </span>
+                            </div>
+
+                            {/* Botón de canjear */}
+                            <div className='mt-4'>
+                              {canRedeem ? (
+                                <Button
+                                  variant='contained'
+                                  onClick={() => console.log("Redeem")}
+                                  className='w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition ease-in-out duration-300'
+                                >
+                                  Canjear
+                                </Button>
+                              ) : (
+                                <span className='text-sm text-gray-500 block text-center mt-2'>Faltan {reward.points - promotion.pointsEarned} puntos</span>
+                              )}
+                            </div>
+
+                            {/* Divisor */}
+                            <div className='w-full border-t border-gray-600 mt-6'></div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </section>
+              ) : (
+                // Si el botón está en Detalles, mostrar los detalles completos
+                <div className='mt-4 w-full md:w-1/2 space-y-6'>
+                  <h1 className='mt-4 font-bold text-left font-poppins text-4xl'>{promotionDetails.title}</h1>
+                  <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
+                  <p
+                    className='mt-2 w-full'
+                    dangerouslySetInnerHTML={{
+                      __html: promotionDetails.description.replace(/\r\n|\r|\n/g, "<br />"),
+                    }}
+                  />
+                  <p className='mt-2'>Tipo: {promotionDetails.systemType === "points" ? "Puntos" : "Visitas"}</p>
+                  <div className='w-full text-center border rounded-xl'>
+                    <div className='relative w-full h-full aspect-[16/9]'>
+                      <img src={promotionDetails.imageUrl} alt='Promotion' className='w-full h-full object-cover rounded-xl' />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            // Si no es "points", mostrar solo los detalles de la promoción
+            <div className='mt-4 w-full md:w-1/2 space-y-6'>
+              <h1 className='mt-4 font-bold text-left font-poppins text-4xl'>{promotionDetails.title}</h1>
+              <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
+              <p
+                className='mt-2 w-full'
+                dangerouslySetInnerHTML={{
+                  __html: promotionDetails.description.replace(/\r\n|\r|\n/g, "<br />"),
+                }}
+              />
+              <p className='mt-2'>Tipo: {promotionDetails.systemType === "points" ? "Puntos" : "Visitas"}</p>
+              <div className='w-full text-center border rounded-xl'>
+                <div className='relative w-full h-full aspect-[16/9]'>
+                  <img src={promotionDetails.imageUrl} alt='Promotion' className='w-full h-full object-cover rounded-xl' />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </section>
         <Dialog open={showPopup} onClose={closePopup}>
           <DialogTitle>¡Promoción Completada!</DialogTitle>
@@ -386,7 +527,6 @@ export const ClientPromotionCard = () => {
             </Button>
           </DialogContent>
         </Dialog>
-
         <Dialog open={showScanner} onClose={() => setShowScanner(false)}>
           {processing ? (
             <p>Procesando...</p>
@@ -405,7 +545,6 @@ export const ClientPromotionCard = () => {
             </>
           )}
         </Dialog>
-
         <Dialog open={showPopup} onClose={closePopup}>
           <DialogTitle>¡Promoción Completada!</DialogTitle>
           <DialogContent>

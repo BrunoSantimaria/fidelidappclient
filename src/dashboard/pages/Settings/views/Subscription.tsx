@@ -130,7 +130,7 @@ export const Subscription = () => {
         <div className='mb-4'>
           <p className='text-lg'>
             <strong>Plan activo:</strong>
-            <span className={`ml-2 ${user.plan.planStatus === "pro" ? "text-green-500" : "text-black"}`}>
+            <span className={`ml-2 ${user.plan.planStatus === "pro" || user.plan.planStatus === "pro2" ? "text-green-500" : "text-black"}`}>
               {
                 user.plan.planStatus === "pro"
                   ? user.plan.planStatus.toUpperCase() // Convierte "pro" a mayúsculas

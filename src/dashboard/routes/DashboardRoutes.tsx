@@ -15,6 +15,8 @@ import { useAuthSlice } from "../../hooks/useAuthSlice";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress"; // Importa el indicador de carga
+import { StepperPromotion } from "../pages/Promotions/StepperPromotion";
+import { Stepper } from "../pages/Promotions/Stepper";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -80,6 +82,7 @@ export const DashboardRoutes = () => {
         <Route path='/clients/list' element={<Clients />} />
         <Route path='/qr' element={<AccountQr />} />
         <Route path='/settings' element={<Settings />} />
+        <Route path='/stepper-promotion' element={<Stepper />} />
         <Route path='/*' element={<Navigate to='/' replace />} />
       </Routes>
 
