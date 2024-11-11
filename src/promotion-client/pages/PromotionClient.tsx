@@ -137,9 +137,9 @@ export const PromotionClient = () => {
       <Helmet>
         <title>{promotion.title || "Fidelidapp"}</title>
       </Helmet>
-      <section className='relative mt-6 flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
-        <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto'>
-          <div className='relative z-10 w-[95%]  md:w-[100%] space-y-6 m-0 text-left p-4 rounded-md'>
+      <section className=' md:pr-40 mt-6 flex flex-col justify-center place-items-center space-y-6  w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
+        <div className='flex flex-col md:flex-row md:justify-around w-full max-w-6xl mx-auto'>
+          <div className='relative z-10 w-[95%]  md:w-[90%] space-y-6 m-0 text-left p-4 rounded-md'>
             <div className='space-y-2 flex flex-col mb-6'>
               {/* <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p> */}
 
@@ -179,8 +179,8 @@ export const PromotionClient = () => {
               </Button>
             </div>
 
-            <h1 className='font-poppins font-bold text-3xl md:text-5xl'>{promotion.title}</h1>
-            <p className='font-poppins text-lg white-space-pre-line'>
+            <h1 className='w-full md:w-[100%] font-poppins font-bold text-3xl md:text-5xl'>{promotion.title}</h1>
+            <p className='w-full md:w-[100%] font-poppins text-lg '>
               {formatTextWithLineBreaks(promotion.description).map((line, index) => (
                 <p key={index} className='font-poppins text-lg'>
                   {line}
@@ -191,8 +191,8 @@ export const PromotionClient = () => {
 
           {/* Imagen de la promoción */}
           {promotion.imageUrl && (
-            <div className='relative w-[95%] ml-1  md:w-full mb-6 mx-auto md:mx-0 '>
-              <img src={promotion.imageUrl} alt='Promoción' className=' scale-90 rounded-md  object-contain w-full h-full' />
+            <div className=' md:w-[60%] md:ml-12 mb-6 mx-auto md:mx-0 '>
+              <img src={promotion.imageUrl} alt='Promoción' className=' scale-90 rounded-md ml-40 object-contain w-full h-full' />
             </div>
           )}
         </div>
