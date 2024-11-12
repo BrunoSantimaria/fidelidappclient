@@ -58,7 +58,6 @@ export const Home = ({ refs }) => {
           }}
         >
           <span className='w-full leading-6'>
-            <span className='font-bold'>¡Convierte tus visitas en clientes frecuentes!</span>
             <br></br> Con Fidelidapp crea y gestiona <span className='font-bold'>programas de lealtad</span> con puntos, promociones, tarjetas virtuales y
             campañas de <span className='font-bold'>email marketing</span> masivo. Aumenta la lealtad de tus clientes. <br></br>
             <span className='font-bold'>¡Prueba gratis hoy!</span>
