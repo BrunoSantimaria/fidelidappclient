@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router";
 import { motion } from "framer-motion";
 import { Dashboard } from "../pages";
+import { Report } from "../pages/report/Report";
 import { CreatePromotion } from "../pages/Promotions/CreatePromotion";
 import { Navigation } from "../components/sidebar/Navigation";
 import { useDashboard } from "../../hooks";
@@ -52,6 +53,14 @@ export const DashboardRoutes = () => {
           element={
             <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
               <Dashboard />
+            </motion.div>
+          }
+        />
+        <Route
+          path='/report'
+          element={
+            <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
+              <Report />
             </motion.div>
           }
         />

@@ -46,6 +46,7 @@ export const ClientList = ({ clients, promotion }) => {
             <TableRow>
               <TableCell>Nombre</TableCell> {/* Nueva columna para el nombre */}
               <TableCell>Correo</TableCell>
+              <TableCell>Teléfono</TableCell>
               <TableCell>Estado</TableCell>
               <TableCell>Fidelicard</TableCell>
             </TableRow>
@@ -55,6 +56,7 @@ export const ClientList = ({ clients, promotion }) => {
               <TableRow key={index}>
                 <TableCell>{client.name}</TableCell> {/* Renderizado del nombre */}
                 <TableCell>{client.email}</TableCell>
+                <TableCell>{client.phoneNumber}</TableCell>
                 <TableCell>{statusMap[client.status]}</TableCell> {/* Traducción del estado */}
                 <TableCell className=''>
                   <div
