@@ -1,29 +1,51 @@
 import { useEffect, useState } from 'react';
 import { LineChart } from '@mui/x-charts';
-import { Box, Stack, Typography, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Box, Stack, Typography, CircularProgress } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, TablePagination } from '@mui/material';
 import api from '../../../utils/api';
 
-const ClientMetricsTable = ({ title, data, dataType }) => (
-  <TableContainer component={Paper} sx={{ my: 2 }}>
-    <Typography variant="h6" align="center" gutterBottom>{title}</Typography>
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>Cliente</TableCell>
-          <TableCell align="right">{dataType}</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {data.map((item, index) => (
-          <TableRow key={index}>
-            <TableCell>{item.client}</TableCell>
-            <TableCell align="right">{item.value}</TableCell>
+const ClientMetricsTable = ({ title, data, dataType }) => {
+  const [page, setPage] = useState(0); // Current page
+  const rowsPerPage = 10; // Number of rows per page
+
+  // Handle page change
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  return (
+    <TableContainer component={Paper} sx={{ my: 2 }}>
+      <Typography variant="h6" align="center" gutterBottom>{title}</Typography>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Cliente</TableCell>
+            <TableCell align="right">{dataType}</TableCell>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </TableContainer>
-);
+        </TableHead>
+        <TableBody>
+          {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
+            <TableRow key={index}>
+              <TableCell>{item.client}</TableCell>
+              <TableCell align="right">{item.value}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TablePagination
+              rowsPerPageOptions={[10]} // Only allow 10 rows per page
+              count={data.length} // Total number of rows
+              rowsPerPage={rowsPerPage} // Rows per page
+              page={page} // Current page
+              onPageChange={handleChangePage} // Handle page change
+            />
+          </TableRow>
+        </TableFooter>
+      </Table>
+    </TableContainer>
+  );
+};
 
 export const Report = () => {
   const [data, setData] = useState(null);
@@ -75,7 +97,7 @@ export const Report = () => {
         alignItems: "center"
       }}
     >
-      <Typography variant="h5" align="center" gutterBottom>Tus clientes en los últimos 7 días:</Typography>
+      
       <Stack direction="flex" justifyContent="center" flexWrap="wrap">
         {metrics.map((metric, index) => (
           <Box
@@ -94,7 +116,7 @@ export const Report = () => {
       </Stack>
 
 
-
+      <Typography variant="h5" align="center" gutterBottom>Tus clientes en los últimos 7 días:</Typography>
       <Box sx={{ mt: 4, 
         width: { xs: '100%', sm: '82%' }, // 100% width on mobile, 180px on larger screens
        }}>
