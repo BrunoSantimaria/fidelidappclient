@@ -93,47 +93,56 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
   };
   return (
     <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
-      <div>
-        <label htmlFor='title'>Título de la promoción</label>
+      <h2 className='text-2xl font-bold text-main mb-4'>Detalles de la promoción</h2>
+
+      <div className='mt-4 space-y-2'>
+        <label htmlFor='title' className='font-bold'>
+          Título de la promoción
+        </label>
+        <p className='italic text-gray-500 pb-2 text-xs'>Ej. Obtén un 15% de descuento en tu primer pedido.</p>
         <input
           id='title'
           name='title'
           type='text'
           value={promotionDetails.title || ""}
           onChange={handleChange}
-          className='w-full p-2 border  bg-white border-main rounded-md'
+          className='w-full p-4 h-14 border  bg-white border-main rounded-md'
           placeholder='Escribe el título'
         />
         {/* {error.title && <p className='text-red-500 text-sm'>{error.title}</p>} */}
       </div>
 
-      <div className='mt-4'>
+      <div className='mt-4 space-y-2'>
         <label htmlFor='description'>Descripción</label>
+        <p className='italic text-gray-500 pb-2 text-xs'>
+          Ej. Por cada compra de $10.000 consigues 1 {promotionDetails.systemType === "points" ? "punto" : "visita"}.
+        </p>{" "}
         <textarea
           id='description'
           name='description'
           value={promotionDetails.description || ""}
           onChange={handleChange}
-          className='w-full p-2 border  bg-white border-main rounded-md'
+          className='w-full p-4 h-16 border  bg-white border-main rounded-md'
           placeholder='Describe tu promoción'
         />
         {/* {error.description && <p className='text-red-500 text-sm'>{error.description}</p>} */}
       </div>
 
-      <div className='mt-4'>
+      <div className='mt-4 space-y-2'>
         <label htmlFor='conditions'>Condiciones de la promoción</label>
+        <p className='italic text-gray-500 pb-2 text-xs'>Ej. Cuando expira la promocion o si aplica a ciertos productos.</p>{" "}
         <textarea
           id='conditions'
           name='conditions'
           value={promotionDetails.conditions || ""}
           onChange={handleChange}
-          className='w-full p-2 border  bg-white border-main rounded-md'
+          className='w-full p-4 h-24 border  bg-white border-main rounded-md'
           placeholder='Escribe las condiciones de la promoción'
         />
         {/* {error.conditions && <p className='text-red-500 text-sm'>{error.conditions}</p>} */}
       </div>
 
-      <div className='mt-4'>
+      <div className='mt-4 space-y-2'>
         <label htmlFor='image'>Imagen de la promoción</label>
         <input id='image' name='image' type='file' accept='image/*' onChange={handleImageChange} className='w-full p-2 border rounded' />
         {/* {error.image && <p className='text-red-500 text-sm'>{error.image}</p>} */}
@@ -141,7 +150,7 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
 
       {imagePreview && (
         <div className='mt-4'>
-          <img src={imagePreview} alt='Vista previa' className='w-32 h-32 object-cover' />
+          <img src={imagePreview} alt='Vista previa' className='w-32 h-32 object-cover text-center m-auto' />
         </div>
       )}
     </motion.div>

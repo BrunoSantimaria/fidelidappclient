@@ -160,11 +160,11 @@ export const Stepper = () => {
   const isNextDisabled = !validateStep();
 
   return (
-    <div className='md:w-[90%] h-full mx-auto shadow-xl p-4 rounded-2xl pb-2 md:ml-36 md:mt-20 bg-white'>
+    <div className='md:w-[90%] h-full mx-auto shadow-xl p-0 md:p-6 rounded-2xl pb-2  mt-0 md:ml-24  xl:ml-32 md:mt-6 xl:mt-20 bg-white'>
       <div className='container horizontal mt-5'>
         <StepperPromotion steps={steps} currentStep={currentStep} />
       </div>
-      <div className='mt-4 p-4'>{displayStepContent()}</div>
+      <div className='mt-12 p-4'>{displayStepContent()}</div>
       <StepperControl
         handleClick={handleClick}
         currentStep={currentStep}

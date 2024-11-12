@@ -10,7 +10,7 @@ export const PromotionInfo = () => {
     },
   };
   return (
-    <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='p-6 bg-white shadow-lg rounded-lg animate__fadeInLeft'>
+    <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='p-6 bg-white mt-6 h-fit   animate__fadeInLeft'>
       <h2 className='text-2xl font-bold text-main mb-4'>Cómo crear una promoción</h2>
       <p className='mb-4 text-gray-700'>
         Bienvenido al sistema de promociones. Aquí puedes configurar promociones personalizadas para tus clientes y elegir entre dos tipos de sistemas:

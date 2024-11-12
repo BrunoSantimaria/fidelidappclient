@@ -11,7 +11,7 @@ export const PromotionSystem = ({ setSelectedSystem, selectedSystem }) => {
     },
   };
   return (
-    <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='p-6 bg-white shadow-lg rounded-lg animate__fadeInLeft'>
+    <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='p-6  animate__fadeInLeft'>
       <h2 className='text-2xl font-bold text-main mb-4'>Sistema de Promoción</h2>
       <p className='mb-4 text-gray-700'>Selecciona el tipo de sistema para tu promoción:</p>
       <div className='space-y-4'>

@@ -69,6 +69,7 @@ export const PromotionRequirements = ({
 
   return (
     <motion.form initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='space-y-4'>
+      <h2 className='text-2xl font-bold text-main mb-4'>Requisitos de la promoción</h2>
       {system === "visits" && (
         <div className='flex items-center space-x-2'>
           <input
@@ -103,45 +104,51 @@ export const PromotionRequirements = ({
       )}
 
       <div>
-        <label htmlFor='promotionDuration' className='block text-sm font-medium'>
+        <label htmlFor='promotionDuration' className='block text-sm font-medium mb-2'>
           Duración de la promoción
         </label>
         <input
           id='promotionDuration'
           name='promotionDuration'
-          type='text'
+          type='number'
           value={promotionRequirements.promotionDuration}
           onChange={handleChange}
-          className='w-full p-2 border bg-white border-main rounded-md'
+          className='w-full p-4 h-12 border bg-white border-main rounded-md'
           placeholder='Duración en días'
+          min='0'
         />
       </div>
 
       {system === "points" && (
-        <div className='space-y-2'>
-          <label htmlFor='rewardPoints' className='block text-sm font-medium'>
+        <div className='flex flex-col mt-4 space-y-2 mb-2 m-auto justify-center text-center'>
+          <label htmlFor='rewardPoints' className='block mb-2 text-sm font-medium text-left'>
             Cantidad de puntos - Descripción recompensa
           </label>
-          <div className='flex gap-2'>
-            <input
-              name='points'
-              type='number'
-              value={newReward.points}
-              onChange={handleRewardChange}
-              className='w-1/2 p-2 border border-main bg-white rounded-md'
-              placeholder='Puntos'
-            />
-            <input
-              name='description'
-              type='text'
-              value={newReward.description}
-              onChange={handleRewardChange}
-              className='w-1/2 p-2 border border-main bg-white rounded-md'
-              placeholder='Descripción de la recompensa'
-            />
-            <button type='button' onClick={addReward} className='bg-main text-white px-4 py-2 rounded-md'>
-              Añadir recompensa
-            </button>
+          <div className='flex flex-col w-full gap-2 justify-center m-auto'>
+            <div className='space-x-0'>
+              <input
+                name='points'
+                type='number'
+                value={newReward.points}
+                onChange={handleRewardChange}
+                className='w-full  mr-6  p-4 h-12 border  bg-white border-main rounded-md'
+                placeholder='Puntos'
+                min='0'
+              />
+              <textarea
+                name='description'
+                type='text'
+                value={newReward.description}
+                onChange={handleRewardChange}
+                className='w-full mr-6 mt-2 p-4 h-12 border  bg-white border-main rounded-md'
+                placeholder='Descripción de la recompensa'
+              />
+            </div>
+            <div>
+              <button type='button' onClick={addReward} className='bg-main text-white px-4 w-full py-2 rounded-md'>
+                Añadir recompensa
+              </button>
+            </div>
           </div>
 
           <ul className='space-y-2 mt-4'>
@@ -150,7 +157,11 @@ export const PromotionRequirements = ({
                 <span>
                   {reward.points} puntos - {reward.description}
                 </span>
-                <button type='button' onClick={() => removeReward(index)} className='text-red-500 hover:text-red-700'>
+                <button
+                  type='button'
+                  onClick={() => removeReward(index)}
+                  className='border-2 bg-white border-main hover:boder-none hover:bg-main hover:text-white transition transform duration-500'
+                >
                   Eliminar
                 </button>
               </li>

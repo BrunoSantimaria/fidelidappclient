@@ -70,7 +70,7 @@ export const DashboardRoutes = () => {
           element={
             metrics?.activePromotions < plan?.promotionLimit ? (
               <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
-                <CreatePromotion />
+                <Stepper />
               </motion.div>
             ) : (
               <Navigate to='/dashboard' replace />
