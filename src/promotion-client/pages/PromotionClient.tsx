@@ -192,7 +192,7 @@ export const PromotionClient = () => {
           {/* Imagen de la promoción */}
           {promotion.imageUrl && (
             <div className=' md:w-[60%] md:ml-12 mb-6 mx-auto md:mx-0 '>
-              <img src={promotion.imageUrl} alt='Promoción' className=' scale-90 rounded-md ml-40 object-contain w-full h-full' />
+              <img src={promotion.imageUrl} alt='Promoción' className=' scale-90 rounded-md md:ml-40 object-contain w-full h-full' />
             </div>
           )}
         </div>
