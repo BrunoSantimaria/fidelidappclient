@@ -58,11 +58,9 @@ export const Home = ({ refs }) => {
           }}
         >
           <span className='w-full leading-6'>
-            Con Fidelidapp podrás <span className='font-bold'>crear, implementar y monitorear programas de lealtad y fidelización personalizados</span> a la
-            medida de tu empresa. Crea tu <span className='font-bold'>comunidad de clientes frecuentes</span> , implementa sistemas de{" "}
-            <span className='font-bold'>fidelización por programa de puntos, promociones y tarjetas de fidelidad virtuales</span> adaptadas a tu negocio.
-            Utiliza nuestra plataforma de envío de <span className='font-bold'>email marketing masivo</span> a tu base de datos de clientes. ¡Prueba nuestra
-            versión gratuita ahora y aumenta la lealtad de tus clientes desde hoy!
+            ¡Convierte tus visitas en clientes frecuentes! Con Fidelidapp crea y gestiona programas de lealtad con puntos, promociones, tarjetas virtuales y
+            campañas de email marketing masivo. Aumenta la lealtad de tus clientes. <br></br>
+            <span className='font-bold'>¡Prueba gratis hoy!</span>
           </span>
         </Typography>
         <Box sx={{ marginTop: { xs: 1, sm: 2, md: 4 }, display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center" }}>
