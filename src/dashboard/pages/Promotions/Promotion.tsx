@@ -19,7 +19,7 @@ export const Promotion = () => {
   const { getPromotionsAndMetrics } = useDashboard();
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
-  const [imagePreview, setImagePreview] = useState(""); // Para previsualizar la imagen
+  const [imagePreview, setImagePreview] = useState("");
   const [promotionData, setPromotionData] = useState({
     title: "",
     description: "",
@@ -28,7 +28,7 @@ export const Promotion = () => {
     promotionRecurrent: "",
     visitsRequired: 0,
     promotionDuration: 0,
-    image: null, // Para manejar el archivo de imagen
+    image: null,
   });
   const { handleNavigate } = useNavigateTo();
   // Abrir el modal de modificación
