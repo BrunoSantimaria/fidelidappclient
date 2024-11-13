@@ -107,17 +107,21 @@ export const Stepper = () => {
     formData.append("promotionDetails[conditions]", promotionDetails.conditions);
     formData.append("promotionRequirements[visitsRequired]", promotionRequirements.visitsRequired);
     formData.append("promotionRequirements[promotionDuration]", promotionRequirements.promotionDuration);
+    formData.append("promotionRequirements[isRecurrent]", promotionRequirements.isRecurrent);
 
     // Asegurarse de que `promotionRequirements.rewards` sea un array de objetos
-    if (promotionRequirements.rewards && Array.isArray(promotionRequirements.rewards) && promotionRequirements.rewards.length > 0) {
-      // No convertir a JSON, dejar como un array de objetos
-      promotionRequirements.rewards.forEach((reward, index) => {
-        formData.append(`promotionRequirements[rewards][${index}][points]`, reward.points);
-        formData.append(`promotionRequirements[rewards][${index}][description]`, reward.description);
-      });
-    } else {
-      alert("Por favor, completa los premios.");
-      return;
+    console.log(selectedSystem);
+    if (selectedSystem === "points") {
+      if (promotionRequirements.rewards && Array.isArray(promotionRequirements.rewards) && promotionRequirements.rewards.length > 0) {
+        // No convertir a JSON, dejar como un array de objetos
+        promotionRequirements.rewards.forEach((reward, index) => {
+          formData.append(`promotionRequirements[rewards][${index}][points]`, reward.points);
+          formData.append(`promotionRequirements[rewards][${index}][description]`, reward.description);
+        });
+      } else {
+        toast.error("Por favor, completa los premios.");
+        return;
+      }
     }
 
     formData.append("systemType", selectedSystem);
@@ -141,7 +145,9 @@ export const Stepper = () => {
       alert("Por favor, completa todos los campos.");
       return;
     }
-
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
     try {
       const response = await api.post("/api/promotions/create", formData, {
         headers: {
@@ -153,7 +159,6 @@ export const Stepper = () => {
       handleNavigate(`/dashboard/promotion/${response.data._id}`);
     } catch (error) {
       console.error("Error al crear la promoción:", error);
-      alert("Hubo un error al crear la promoción.");
     }
   };
 

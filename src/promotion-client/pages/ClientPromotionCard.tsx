@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Container, Dialog, DialogTitle, DialogContent, FormControlLabel, Switch, Divider } from "@mui/material";
+import { Button, Container, Dialog, DialogTitle, DialogContent, FormControlLabel, Switch, Divider, DialogActions } from "@mui/material";
 import { toast } from "react-toastify";
-import { Favorite, FavoriteBorder } from "@mui/icons-material";
+import { Facebook, Favorite, FavoriteBorder, Instagram, WhatsApp } from "@mui/icons-material";
 import Lottie from "react-lottie";
 import celebrationAnimation from "../../assets/celebration.json"; // Add your celebration animation JSON file here
 import keyUrl from "../../assets/fondocandado2.png";
@@ -26,8 +26,43 @@ export const ClientPromotionCard = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [isRewardView, setIsRewardView] = useState(true);
   const [showRewards, setShowRewards] = useState(true);
-
+  const [socialMedia, setSocialMedia] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
+
+  // Estado para controlar la confirmación de canje
+
+  // Manejo de la apertura y cierre de diálogos
+  const handleOpenConfirmDialog = () => setOpenConfirmDialog(true);
+  const handleCloseConfirmDialog = () => setOpenConfirmDialog(false);
+
+  const handleOpenSuccessDialog = () => setOpenSuccessDialog(true);
+  const handleCloseSuccessDialog = () => {
+    setOpenSuccessDialog(false);
+    window.location.reload(); // Recargar la página después de cerrar el diálogo
+  };
+
+  const handleRedeem = async (reward) => {
+    console.log(reward);
+    try {
+      // Realizar la petición POST para canjear la promoción
+      const response = await api.post("/api/promotions/redeemPromotion", {
+        promotionId: pid,
+        clientEmail: client.email,
+        rewardId: reward._id,
+      });
+
+      // Mostrar el diálogo de éxito
+      handleCloseConfirmDialog();
+      handleOpenSuccessDialog();
+
+      toast.success("Promoción canjeada con éxito!");
+    } catch (error) {
+      console.error("Fetch error:", error);
+      toast.error("Hubo un error al canjear la promoción. Inténtalo de nuevo.");
+    }
+  };
   const handleSwitchChange = (event) => {
     setShowRewards(event.target.checked);
   };
@@ -74,32 +109,50 @@ export const ClientPromotionCard = () => {
 
   const handleScan = async (result) => {
     setProcessing(true);
-    if (result) {
-      const accountQr = await result[0].rawValue;
-      console.log(client.email, pid, accountQr);
 
-      try {
-        console.log(result);
-
-        const accountQr = await result[0].rawValue;
-        await api.post("/api/promotions/visit", { clientEmail: client.email, promotionId: pid, accountQr });
-
-        toast.success("Visita registrada con éxito. La página se refrescará en 3 segundos.");
-        const audio = new Audio(marioCoinSound);
-        audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-      } catch (error) {
-        console.log(error);
-
-        toast.error("Error al validar la visita!");
-      }
-    } else {
+    if (!result) {
       toast.error("No se pudo leer el código QR");
+      setProcessing(false);
+      setShowScanner(false);
+      return;
     }
-    setProcessing(false);
-    setShowScanner(false);
+
+    const accountQr = result[0].rawValue;
+    console.log(client.email, pid, accountQr);
+
+    try {
+      if (promotion.systemType === "points") {
+        await api.post("/api/promotions/redeem-points", {
+          clientEmail: client.email,
+          promotionId: pid,
+          accountQr,
+        });
+      } else {
+        await api.post("/api/promotions/visit", {
+          clientEmail: client.email,
+          promotionId: pid,
+          accountQr,
+        });
+      }
+
+      toast.success("Visita registrada con éxito. La página se refrescará en 3 segundos.");
+      const audio = new Audio(marioCoinSound);
+      audio.play().catch((error) => console.error("Error al reproducir el audio:", error));
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } catch (error) {
+      const errorMessage = error.response?.data?.error;
+      if (errorMessage === "Point already redeemed today") return toast.info("Ya visitaste el día de hoy. ¡Vuelve mañana para más!");
+
+      toast.error("Error al validar la visita!");
+      console.error("Error al registrar la visita o puntos:", error);
+      toast.error("Error al validar la visita!");
+    } finally {
+      setProcessing(false);
+      setShowScanner(false);
+    }
   };
 
   const handleScanComplete = async (result) => {
@@ -115,7 +168,8 @@ export const ClientPromotionCard = () => {
         window.location.reload();
       }, 3000);
     } catch (error) {
-      console.log(error);
+      const errorMessage = error.response?.data?.error;
+      if (errorMessage === "Point already redeemed today") return toast.info("Ya visitaste el día de hoy. ¡Vuelve mañana para más!");
 
       toast.error("Error al validar la visita!");
     }
@@ -128,8 +182,9 @@ export const ClientPromotionCard = () => {
     const fetchPromotionDetails = async () => {
       try {
         const response = await api.get(`/api/promotions/${cid}/${pid}`);
-
+        console.log(response.data.socialMedia);
         setPromotion(response.data.promotion);
+        setSocialMedia(response.data.socialMedia);
         setPromotionDetails(response.data.promotionDetails);
         setClient(response.data.client);
         setImageUrl(response.data.promotionDetails.imageUrl);
@@ -357,7 +412,7 @@ export const ClientPromotionCard = () => {
             </span>
           </div>
         )}
-        {promotion.status === "Redeemed" || promotion.status === "Expired" ? (
+        {promotion.status === "Redeemed" ? (
           <Button
             variant='contained'
             onClick={() => restartPromotion()}
@@ -374,14 +429,19 @@ export const ClientPromotionCard = () => {
             Canjear Regalo
           </Button>
         ) : promotionDetails.pointSystem ? (
-          <div className='flex flex-col space-y-4 w-full items-center justify-center'>
-            <Button
-              variant='contained'
-              onClick={() => setShowScanner(true)}
-              className='mt-12 w-[95%] md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
-            >
-              {promotionDetails.systemType === "points" ? "Abrir Escáner QR para sumar puntos" : " Abrir Escáner QR para sumar visitas"}
-            </Button>
+          <div className='flex flex-col space-y-4 mb-6 w-full items-center justify-center'>
+            {promotion.status !== "Expired" && (
+              <>
+                <Button
+                  variant='contained'
+                  onClick={() => setShowScanner(true)}
+                  className='mt-16 w-[95%] md:w-1/4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition duration-300'
+                >
+                  {promotionDetails.systemType === "points" ? "Abrir Escáner QR para sumar puntos" : "Abrir Escáner QR para sumar visitas"}
+                </Button>
+                <hr></hr>
+              </>
+            )}
             {/* <Button
               variant='contained'
               onClick={() => redeemPromotion()}
@@ -404,10 +464,10 @@ export const ClientPromotionCard = () => {
             <>
               {/* Botones para cambiar entre Recompensas y Detalles */}
               <div className='flex flex-col md:flex-row md:space-y-0  md:space-x-6 md:m-auto justify-between items-center mb-4 space-y-4'>
-                <Button variant={showRewards ? "contained" : "outlined"} color='primary' onClick={() => setShowRewards(true)} className='w-full'>
+                <Button variant={showRewards ? "contained" : "outlined"} color='primary' onClick={() => setShowRewards(true)} className='w-full md:min-h-20'>
                   Recompensas
                 </Button>
-                <Button variant={!showRewards ? "contained" : "outlined"} color='primary' onClick={() => setShowRewards(false)} className='w-full'>
+                <Button variant={!showRewards ? "contained" : "outlined"} color='primary' onClick={() => setShowRewards(false)} className='w-full md:min-h-20'>
                   Detalles de la Promoción
                 </Button>
               </div>
@@ -447,20 +507,56 @@ export const ClientPromotionCard = () => {
                             {/* Botón de canjear */}
                             <div className='mt-4'>
                               {canRedeem ? (
-                                <Button
-                                  variant='contained'
-                                  onClick={() => console.log("Redeem")}
-                                  className='w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition ease-in-out duration-300'
-                                >
-                                  Canjear
-                                </Button>
+                                <>
+                                  <Button
+                                    variant='contained'
+                                    onClick={handleOpenConfirmDialog}
+                                    className='w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition ease-in-out duration-300'
+                                  >
+                                    Canjear
+                                  </Button>
+
+                                  {/* Confirmación de canje */}
+                                  <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+                                    <DialogTitle>Confirmar Canje</DialogTitle>
+                                    <DialogContent>
+                                      <p>
+                                        Estás a punto de canjear {reward.points} puntos por la promoción: "{reward.description}".
+                                      </p>
+                                      <p>¿Estás seguro de que quieres continuar?</p>
+                                    </DialogContent>
+                                    <DialogActions>
+                                      <Button onClick={handleCloseConfirmDialog} color='primary'>
+                                        Cancelar
+                                      </Button>
+                                      <Button onClick={() => handleRedeem(reward)} color='primary'>
+                                        Confirmar
+                                      </Button>
+                                    </DialogActions>
+                                  </Dialog>
+
+                                  {/* Diálogo de éxito */}
+                                  <Dialog open={openSuccessDialog} onClose={handleCloseSuccessDialog}>
+                                    <DialogTitle>¡Felicidades!</DialogTitle>
+                                    <DialogContent>
+                                      <p>
+                                        Has canjeado {reward.points} puntos por la promoción: "{reward.description}".
+                                      </p>
+                                      <p>Este mensaje será mostrado al vendedor para validar el canje.</p>
+                                    </DialogContent>
+                                    <DialogActions>
+                                      <Button onClick={handleCloseSuccessDialog} color='primary'>
+                                        OK
+                                      </Button>
+                                    </DialogActions>
+                                  </Dialog>
+                                </>
                               ) : (
                                 <span className='text-sm text-gray-500 block text-center mt-2'>Faltan {reward.points - promotion.pointsEarned} puntos</span>
                               )}
                             </div>
 
                             {/* Divisor */}
-                            <div className='w-full border-t border-gray-600 mt-6'></div>
                           </div>
                         );
                       })}
@@ -469,7 +565,7 @@ export const ClientPromotionCard = () => {
                 </section>
               ) : (
                 // Si el botón está en Detalles, mostrar los detalles completos
-                <div className='mt-4 w-full md:w-1/2 space-y-6'>
+                <div className='mt-4 md:mt-0 w-full md:w-1/2 space-y-6'>
                   <h1 className='mt-4 font-bold text-left font-poppins text-4xl'>{promotionDetails.title}</h1>
                   <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
                   <p
@@ -489,21 +585,24 @@ export const ClientPromotionCard = () => {
             </>
           ) : (
             // Si no es "points", mostrar solo los detalles de la promoción
-            <div className='mt-4 w-full md:w-1/2 space-y-6'>
-              <h1 className='mt-4 font-bold text-left font-poppins text-4xl'>{promotionDetails.title}</h1>
-              <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
-              <p
-                className='mt-2 w-full'
-                dangerouslySetInnerHTML={{
-                  __html: promotionDetails.description.replace(/\r\n|\r|\n/g, "<br />"),
-                }}
-              />
-              <p className='mt-2'>Tipo: {promotionDetails.systemType === "points" ? "Puntos" : "Visitas"}</p>
-              <div className='w-full text-center border rounded-xl'>
+            <div className='mt-4 w-full flex flex-col md:flex-row md:w-[95%] space-y-6 justify-center m-auto pb-20'>
+              <div>
+                <h1 className='mt-4 font-bold text-left font-poppins text-4xl'>{promotionDetails.title}</h1>
+                <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
+                <p
+                  className='mt-2 w-full'
+                  dangerouslySetInnerHTML={{
+                    __html: promotionDetails.description.replace(/\r\n|\r|\n/g, "<br />"),
+                  }}
+                />
+                <p className='mt-2'>Tipo: {promotionDetails.systemType === "points" ? "Puntos" : "Visitas"}</p>
+              </div>
+              <div className='w-full  text-center border rounded-xl'>
                 <div className='relative w-full h-full aspect-[16/9]'>
                   <img src={promotionDetails.imageUrl} alt='Promotion' className='w-full h-full object-cover rounded-xl' />
                 </div>
               </div>
+              <hr></hr>
             </div>
           )}
         </section>
@@ -536,9 +635,9 @@ export const ClientPromotionCard = () => {
               <DialogContent>
                 <div className='w-full h-[500px] max-w-md mx-auto bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800'>
                   {promotion.status === "Pending" ? (
-                    <Scanner onScan={handleScanComplete} components={{ audio: false }} className='w-full h-full' />
+                    <Scanner scanDelay={1000} onScan={handleScanComplete} components={{ audio: false }} className='w-full h-full' />
                   ) : (
-                    <Scanner onScan={handleScan} components={{ audio: false }} className='w-full h-full' />
+                    <Scanner scanDelay={1000} onScan={handleScan} components={{ audio: false }} className='w-full h-full' />
                   )}
                 </div>
               </DialogContent>
@@ -564,6 +663,47 @@ export const ClientPromotionCard = () => {
             </Button>
           </DialogContent>
         </Dialog>
+
+        <footer className='flex flex-col w-full md:flex-row items-center justify-center space-y-6 md:space-x-20 mt-2 p-6'>
+          <div>{socialMedia && <div className='bg-gray-600/20 w-full border-1 h-1' />}</div>
+          {/* Logo */}
+          {socialMedia.logo && (
+            <div className='flex justify-center md:justify-start'>
+              <img
+                src={socialMedia.logo}
+                alt='Logo'
+                className='max-w-full max-h-20 md:max-h-36 mb-4 object-contain'
+                style={{ width: "auto", height: "auto" }}
+              />
+            </div>
+          )}
+
+          {/* Social Media Links */}
+          {(socialMedia.instagram || socialMedia.facebook || socialMedia.whatsapp) && (
+            <div className='flex space-x-4 justify-center md:justify-start'>
+              {/* Instagram */}
+              {socialMedia.instagram && (
+                <a href={socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
+                  <Instagram sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300' />
+                </a>
+              )}
+
+              {/* Facebook */}
+              {socialMedia.facebook && (
+                <a href={socialMedia.facebook} target='_blank' rel='noopener noreferrer'>
+                  <Facebook sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300' />
+                </a>
+              )}
+
+              {/* WhatsApp */}
+              {socialMedia.whatsapp && (
+                <a href={`https://wa.me/${socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
+                  <WhatsApp sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300' />
+                </a>
+              )}
+            </div>
+          )}
+        </footer>
       </Container>
     </>
   );

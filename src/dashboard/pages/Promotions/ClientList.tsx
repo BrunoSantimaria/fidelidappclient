@@ -3,6 +3,7 @@ import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
 import { useState } from "react";
 
+// Mapa de estado traducido
 const statusMap = {
   Active: "Activo",
   Redeemed: "Canjeado",
@@ -12,6 +13,8 @@ const statusMap = {
 
 export const ClientList = ({ clients, promotion }) => {
   const { handleNavigate } = useNavigateTo();
+  console.log("Clientes:", clients); // Log para ver los datos de los clientes
+  console.log("Promoción:", promotion); // Log para ver los datos de la promoción
 
   // Estado para paginación
   const [page, setPage] = useState(0);
@@ -27,6 +30,14 @@ export const ClientList = ({ clients, promotion }) => {
   };
 
   const paginatedClients = clients.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  // Verificamos el tipo de promoción al principio
+  const isPointsBased = promotion.systemType === "points";
+  const isVisitsBased = promotion.systemType === "visits";
+
+  // Agregar logs para verificar los tipos
+  console.log("isPointsBased:", isPointsBased); // Log para verificar si es un sistema de puntos
+  console.log("isVisitsBased:", isVisitsBased); // Log para verificar si es un sistema de visitas
 
   if (!clients.length)
     return (
@@ -44,18 +55,26 @@ export const ClientList = ({ clients, promotion }) => {
         <Table aria-label='client list table'>
           <TableHead>
             <TableRow>
-              <TableCell>Nombre</TableCell> {/* Nueva columna para el nombre */}
+              <TableCell>Nombre</TableCell>
               <TableCell>Correo</TableCell>
               <TableCell>Estado</TableCell>
+              {isPointsBased && <TableCell>Puntos</TableCell>} {/* Mostrar columna de Puntos */}
+              {isVisitsBased && <TableCell>Visitas</TableCell>} {/* Mostrar columna de Visitas */}
               <TableCell>Fidelicard</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedClients.map((client, index) => (
               <TableRow key={index}>
-                <TableCell>{client.name}</TableCell> {/* Renderizado del nombre */}
+                <TableCell>{client.name}</TableCell>
                 <TableCell>{client.email}</TableCell>
-                <TableCell>{statusMap[client.status]}</TableCell> {/* Traducción del estado */}
+                <TableCell>{statusMap[client.status]}</TableCell>
+                {isPointsBased && (
+                  <TableCell>{client.totalPoints}</TableCell> // Mostrar puntos si el sistema es por puntos
+                )}
+                {isVisitsBased && (
+                  <TableCell>{client.totalVisits || "0"}</TableCell> // Mostrar visitas si el sistema es por visitas
+                )}
                 <TableCell className=''>
                   <div
                     onClick={() => {
@@ -66,8 +85,7 @@ export const ClientList = ({ clients, promotion }) => {
                     <CreditCardRoundedIcon className='group' />
                     <span className='relative top-0.5 ml-2 group'>Ver</span>
                   </div>
-                </TableCell>{" "}
-                {/* Columna Tarjeta (ID) */}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

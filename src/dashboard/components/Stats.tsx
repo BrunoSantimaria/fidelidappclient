@@ -5,7 +5,7 @@ import BeenhereRoundedIcon from "@mui/icons-material/BeenhereRounded";
 import { useDashboard } from "../../hooks";
 export const Stats = () => {
   const { plan, metrics } = useDashboard();
-
+  console.log("esto es metrics y plan", plan, metrics);
   return (
     <section className='flex flex-col md:flex md:flex-row lg:flex lg:flex-row justify-between xs:flex xs:flex-col w-full gap-6'>
       <div className='w-full md:min-w-[20%] lg:min-w-[20%] relative flex flex-col shadow-md shadow-neutral-200 bg-gradient-to-br from-gray-50 to-main/40 space-y-4 p-6 rounded-md m-0 text-left'>
