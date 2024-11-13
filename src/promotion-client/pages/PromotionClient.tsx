@@ -98,9 +98,9 @@ export const PromotionClient = () => {
       setTimeout(() => {
         window.location.reload();
       }, 3000);
-      
+
       console.log(promotion.id);
-      
+
 
     } catch (error) {
       console.log(error.response.data.error);
@@ -109,7 +109,6 @@ export const PromotionClient = () => {
 
         const cookies = document.cookie.split(";").map(cookie => cookie.trim());
         const clientIdCookie = cookies.find(cookie => cookie.startsWith("clientId"));
-        console.log("clientIdCookie", clientIdCookie);
 
         if (clientIdCookie) {
           const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
@@ -118,7 +117,9 @@ export const PromotionClient = () => {
           return; // Exit the effect to avoid unnecessary API calls
         }
       }
-      toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
+      else {
+        toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
+      }
     } finally {
       setIsSubmitting(false);
     }
