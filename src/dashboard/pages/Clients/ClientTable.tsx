@@ -319,6 +319,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
                   <TableRow>
                     <TableCell>Nombre</TableCell>
                     <TableCell>Email</TableCell>
+                    <TableCell>Telefóno</TableCell>
                     <TableCell>Promociones</TableCell> {/* Nueva columna de promociones */}
                   </TableRow>
                 </TableHead>
@@ -332,6 +333,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
                         <TableRow hover key={client.email}>
                           <TableCell>{client.name}</TableCell>
                           <TableCell>{client.email}</TableCell>
+                          <TableCell>{client.phoneNumber}</TableCell>
                           <TableCell>
                             {clientPromotions ? (
                               <Select value='' displayEmpty>
