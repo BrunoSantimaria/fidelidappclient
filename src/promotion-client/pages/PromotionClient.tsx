@@ -29,6 +29,18 @@ export const PromotionClient = () => {
   };
 
   useEffect(() => {
+    // Check if 'clientid' cookie exists
+    const cookies = document.cookie.split(";").map(cookie => cookie.trim());
+    const clientIdCookie = cookies.find(cookie => cookie.startsWith("clientId"));
+    console.log("clientIdCookie", clientIdCookie);
+
+    if (clientIdCookie) {
+      const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
+      console.log(`/promotions/${clientId}/${id}`)
+      handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
+      return; // Exit the effect to avoid unnecessary API calls
+    }
+
     const fetchPromotion = async () => {
       try {
         const response = await api.get(`/api/promotions/${id}`);
@@ -43,7 +55,7 @@ export const PromotionClient = () => {
     };
 
     fetchPromotion();
-  }, [id]); // Agregar user.accounts.socialMedia a las dependencias
+  }, [id]);
   console.log(promotion);
 
   const handleEmailChange = (event) => {
@@ -78,19 +90,33 @@ export const PromotionClient = () => {
         clientPhone: phoneNumber.trim(),
         accountId: accountId,
       });
-      toast.success("Has sido agregado a la promoción exitosamente. Enviaremos tu Fidelicard a tu correo!.");
+      toast.success("Has sido agregado a la promoción exitosamente. Cargaremos tu Fidelicard y enviaremos una copia a tu correo!.");
       setClientEmail("");
       setClientName("");
       setPhoneNumber("");
+      //Set 3 second timeout
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+      
       console.log(promotion.id);
+      
 
-      if (id === "672b9d62dc9c051bc3c313ef") {
-        handleNavigate("/promotionQrLanding");
-      }
     } catch (error) {
       console.log(error.response.data.error);
       if (error.response.data.error === "Client already has this promotion") {
-        return toast.info("Ya te encuentras en esta promoción.");
+        toast.info("Ya te encuentras en esta promoción. Serás redirigido a tu Fidelicard.");
+
+        const cookies = document.cookie.split(";").map(cookie => cookie.trim());
+        const clientIdCookie = cookies.find(cookie => cookie.startsWith("clientId"));
+        console.log("clientIdCookie", clientIdCookie);
+
+        if (clientIdCookie) {
+          const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
+          console.log(`/promotions/${clientId}/${id}`)
+          handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
+          return; // Exit the effect to avoid unnecessary API calls
+        }
       }
       toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
     } finally {
