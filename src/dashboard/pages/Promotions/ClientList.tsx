@@ -57,6 +57,7 @@ export const ClientList = ({ clients, promotion }) => {
             <TableRow>
               <TableCell>Nombre</TableCell>
               <TableCell>Correo</TableCell>
+              <TableCell>Teléfono</TableCell>
               <TableCell>Estado</TableCell>
               {isPointsBased && <TableCell>Puntos</TableCell>} {/* Mostrar columna de Puntos */}
               {isVisitsBased && <TableCell>Visitas</TableCell>} {/* Mostrar columna de Visitas */}
@@ -68,6 +69,7 @@ export const ClientList = ({ clients, promotion }) => {
               <TableRow key={index}>
                 <TableCell>{client.name}</TableCell>
                 <TableCell>{client.email}</TableCell>
+
                 <TableCell>{statusMap[client.status]}</TableCell>
                 {isPointsBased && (
                   <TableCell>{client.totalPoints}</TableCell> // Mostrar puntos si el sistema es por puntos
@@ -75,6 +77,10 @@ export const ClientList = ({ clients, promotion }) => {
                 {isVisitsBased && (
                   <TableCell>{client.totalVisits || "0"}</TableCell> // Mostrar visitas si el sistema es por visitas
                 )}
+
+                <TableCell>{client.phoneNumber}</TableCell>
+                <TableCell>{statusMap[client.status]}</TableCell> {/* Traducción del estado */}
+
                 <TableCell className=''>
                   <div
                     onClick={() => {

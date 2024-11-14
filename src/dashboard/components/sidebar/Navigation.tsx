@@ -9,6 +9,7 @@ import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import MenuIcon from "@mui/icons-material/Menu";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import { AddAdmin } from "./AddAdmin";
@@ -111,8 +112,12 @@ export const Navigation = () => {
             <HomeRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
           </NavigationLink> */}
 
-          <NavigationLink name='Dashboard' link='/dashboard'>
+          <NavigationLink name='Home' link='/dashboard'>
             <SpaceDashboardRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
+          </NavigationLink>
+
+          <NavigationLink name='Reporte' link='/dashboard/report'>
+            <AssessmentIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
           </NavigationLink>
 
           {metrics?.activePromotions < plan?.promotionLimit ? (

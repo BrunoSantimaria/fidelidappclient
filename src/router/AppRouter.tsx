@@ -16,6 +16,7 @@ import CancelAppointment from "../agenda-client/CancelAppointment";
 import ConfirmAppointment from "../agenda-client/ConfirmAppointment";
 import ThankYou from "../agenda-client/ThankYou";
 import { PromotionQrLanding } from "../landing/components/PromotionQrLanding";
+import { Report } from "../dashboard/pages/report/Report";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
