@@ -1,11 +1,10 @@
 import React from "react";
 import { motion, useInView } from "framer-motion"; // Importamos Framer Motion y useInView
 import emailmarketing from "../../assets/emailmarketing.png";
-import { Divider } from "@mui/material";
+
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 
 export const EmailMarketing = () => {
-  // Ref y configuración para animar al hacer scroll
   const containerRef = React.useRef(null);
   const isInView = useInView(containerRef, { once: false });
   const { handleNavigate } = useNavigateTo();

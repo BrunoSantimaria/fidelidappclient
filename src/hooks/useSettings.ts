@@ -38,6 +38,7 @@ export const useSettings = () => {
         instagram: settings.instagram || "", // Asegúrate de que sean cadenas
         facebook: settings.facebook || "",
         whatsapp: settings.whatsapp || "",
+        website: settings.website || "",
       })
     );
 
