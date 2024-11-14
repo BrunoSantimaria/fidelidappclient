@@ -21,8 +21,9 @@ export const useDashboard = () => {
       console.log(resp.data);
       dispatch(setLoading(true));
       dispatch(setPromotions(resp.data.promotions));
+      console.log("esto es lo que trae", resp.data.promotions);
       dispatch(setMetrics(resp.data.metrics));
-
+      console.log("esto es lo que trae", resp.data.metrics);
       const agendas = await api.get("/api/agenda");
       dispatch(setAgendas(agendas.data));
       console.log(accounts);
@@ -101,6 +102,7 @@ export const useDashboard = () => {
     }
   };
   const getSubscription = async () => {
+    console.log("plan", accounts);
     try {
       const response = await api.get(`/api/mercadopago/check_and_update_subscription/${accounts._id}`);
       console.log(response);

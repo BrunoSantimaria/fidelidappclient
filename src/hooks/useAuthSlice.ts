@@ -39,26 +39,26 @@ export const useAuthSlice = () => {
       console.error("Error signing in:", error);
       toast.error("No se ha podido iniciar sesión");
     } finally {
-      if (token) {
-        try {
-          const currentUserResponse = await api.get("/auth/current");
-          const { accounts, plan } = currentUserResponse.data;
+      try {
+        const currentUserResponse = await api.get("/auth/current");
+        console.log(currentUserResponse);
+        const { accounts, plan } = currentUserResponse.data;
 
-          localStorage.setItem("accounts", JSON.stringify(accounts));
-          localStorage.setItem("plan", JSON.stringify(plan));
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+        localStorage.setItem("plan", JSON.stringify(plan));
 
-          const user = decodeToken(token);
-          const userWithAccountAndPlan = {
-            ...user,
-            accounts: accounts,
-            plan: plan,
-          };
+        const user = decodeToken(token);
+        console.log(plan);
+        const userWithAccountAndPlan = {
+          ...user,
+          accounts: accounts,
+          plan: plan,
+        };
 
-          dispatch(onLogin(userWithAccountAndPlan));
-        } catch (error) {
-          console.error("Error fetching current user details:", error);
-          toast.error("No se han podido obtener las cuentas y el plan.");
-        }
+        dispatch(onLogin(userWithAccountAndPlan));
+      } catch (error) {
+        console.error("Error fetching current user details:", error);
+        toast.error("No se han podido obtener las cuentas y el plan.");
       }
     }
   };

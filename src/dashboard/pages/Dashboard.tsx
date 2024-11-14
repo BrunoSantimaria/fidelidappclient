@@ -1,8 +1,8 @@
 import React from "react";
-import { motion } from "framer-motion";
+
 import { Stats, TablePromotions, Welcome } from "../components";
 import { TableAgenda } from "./Agenda/TableAgenda";
-
+import { motion } from "framer-motion";
 const pageTransition = {
   hidden: { opacity: 0, y: 50 },
   visible: {
