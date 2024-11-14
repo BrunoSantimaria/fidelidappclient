@@ -14,20 +14,20 @@ export const Customization = () => {
   }
 
   const initialLogo = user.accounts.logo || "";
-  console.log();
 
   const socialMedia = user.accounts.socialMedia || {}; // Cambia aquí
+  console.log(socialMedia);
   const initialInstagram = socialMedia.instagram || "";
   const initialFacebook = socialMedia.facebook || "";
   const initialWhatsapp = socialMedia.whatsapp || "";
-
+  const initialWebsite = socialMedia.website || ""; // Cambia aquí
   const [logo, setLogo] = useState(initialLogo);
   const [logoPreview, setLogoPreview] = useState(initialLogo);
   const [instagram, setInstagram] = useState(initialInstagram);
   const [facebook, setFacebook] = useState(initialFacebook);
   const [whatsapp, setWhatsapp] = useState(initialWhatsapp);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
-
+  const [website, setWebsite] = useState(initialWebsite);
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -53,15 +53,17 @@ export const Customization = () => {
       instagram,
       facebook,
       whatsapp,
+      website,
     };
     handleCustomization(settings);
     await refreshAccount();
   };
 
   useEffect(() => {
-    const isSame = logo === initialLogo && instagram === initialInstagram && facebook === initialFacebook && whatsapp === initialWhatsapp;
+    const isSame =
+      logo === initialLogo && instagram === initialInstagram && facebook === initialFacebook && whatsapp === initialWhatsapp && website === initialWebsite;
     setIsSaveDisabled(isSame);
-  }, [logo, instagram, facebook, whatsapp]);
+  }, [logo, instagram, facebook, whatsapp, website]);
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -109,6 +111,16 @@ export const Customization = () => {
             placeholder='Número de WhatsApp'
             value={whatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
+          />
+        </div>
+        <div className='mb-4'>
+          <label className='block mb-2'>Página web</label>
+          <Input
+            type='text'
+            className='w-full border rounded p-2'
+            placeholder='https://tusitio.com'
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
           />
         </div>
 

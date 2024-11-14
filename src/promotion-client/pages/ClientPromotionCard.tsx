@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button, Container, Dialog, DialogTitle, DialogContent, FormControlLabel, Switch, Divider, DialogActions } from "@mui/material";
 import { toast } from "react-toastify";
-import { Facebook, Favorite, FavoriteBorder, Instagram, WhatsApp } from "@mui/icons-material";
+import { Facebook, Favorite, FavoriteBorder, Instagram, WhatsApp, LanguageRounded } from "@mui/icons-material";
+
 import Lottie from "react-lottie";
 import celebrationAnimation from "../../assets/celebration.json"; // Add your celebration animation JSON file here
 import keyUrl from "../../assets/fondocandado2.png";
@@ -313,8 +314,7 @@ export const ClientPromotionCard = () => {
       </Container>
     );
   }
-  console.log("esto es promotion", promotion);
-  console.log("esto es promotion detail", promotionDetails);
+  console.log(socialMedia.website);
   return (
     <>
       <Helmet>
@@ -699,6 +699,11 @@ export const ClientPromotionCard = () => {
               {socialMedia.whatsapp && (
                 <a href={`https://wa.me/${socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
                   <WhatsApp sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300' />
+                </a>
+              )}
+              {socialMedia.website && (
+                <a href={socialMedia.website} target='_blank' rel='noopener noreferrer'>
+                  <LanguageRounded sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300' />
                 </a>
               )}
             </div>
