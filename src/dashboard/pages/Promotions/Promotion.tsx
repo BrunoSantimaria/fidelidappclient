@@ -180,6 +180,7 @@ export const Promotion = () => {
               <Button variant='contained' color='primary' onClick={handleOpenModal}>
                 Modificar Promoción
               </Button>
+
               <Button variant='contained' color='primary' onClick={() => handleNavigate(`/promotion/${id}`)}>
                 Ver Promoción
               </Button>
@@ -267,27 +268,14 @@ export const Promotion = () => {
 
       {/* Modal de modificación */}
       <Modal open={openModal} onClose={handleCloseModal}>
-        <Box className='flex flex-col space-y-4 p-5 bg-white shadow-md rounded-md w-[90%] sm:w-[60%] md:w-[40%]'>
-          <h2 className='text-xl font-bold'>Modificar Promoción</h2>
-          <TextField label='Título' name='title' value={promotionData.title} onChange={handleInputChange} />
-          <TextField label='Descripción' name='description' value={promotionData.description} onChange={handleInputChange} />
-          <TextField label='Condiciones' name='conditions' value={promotionData.conditions} onChange={handleInputChange} />
-
-          <Divider />
-
-          {/* Recompensas */}
-          <FormControl fullWidth>
-            <InputLabel>Recompensas</InputLabel>
-            <Select value={promotionData.rewards || []} label='Recompensas' onChange={handleInputChange}>
-              {promotionData.rewards.map((reward, index) => (
-                <MenuItem key={index} value={reward}>
-                  {reward.description}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Button onClick={handleSubmit} variant='contained' color='primary'>
+        <Box className='flex flex-col space-y-4 p-5 bg-white shadow-md rounded-md max-w-xl mx-auto mt-20'>
+          <h2>Modificar Promoción</h2>
+          <TextField label='Título' name='title' value={promotionData.title} onChange={handleInputChange} fullWidth />
+          <TextField label='Descripción' name='description' value={promotionData.description} onChange={handleInputChange} fullWidth />
+          <TextField label='Condiciones' name='conditions' value={promotionData.conditions} onChange={handleInputChange} fullWidth />
+          <input type='file' accept='image/*' onChange={handleImageChange} />
+          {imagePreview && <img src={imagePreview} alt='Preview' className='w-full  object-cover mt-4' />}
+          <Button variant='contained' color='primary' onClick={handleSubmit}>
             Guardar cambios
           </Button>
         </Box>
