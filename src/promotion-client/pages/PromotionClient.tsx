@@ -30,13 +30,13 @@ export const PromotionClient = () => {
 
   useEffect(() => {
     // Check if 'clientid' cookie exists
-    const cookies = document.cookie.split(";").map(cookie => cookie.trim());
-    const clientIdCookie = cookies.find(cookie => cookie.startsWith("clientId"));
+    const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
+    const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
     console.log("clientIdCookie", clientIdCookie);
 
     if (clientIdCookie) {
       const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
-      console.log(`/promotions/${clientId}/${id}`)
+      console.log(`/promotions/${clientId}/${id}`);
       handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
       return; // Exit the effect to avoid unnecessary API calls
     }
@@ -100,24 +100,21 @@ export const PromotionClient = () => {
       }, 3000);
 
       console.log(promotion.id);
-
-
     } catch (error) {
       console.log(error.response.data.error);
       if (error.response.data.error === "Client already has this promotion") {
         toast.info("Ya te encuentras en esta promoción. Serás redirigido a tu Fidelicard.");
 
-        const cookies = document.cookie.split(";").map(cookie => cookie.trim());
-        const clientIdCookie = cookies.find(cookie => cookie.startsWith("clientId"));
-
+        const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
+        const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
+        console.log(clientIdCookie);
         if (clientIdCookie) {
           const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
-          console.log(`/promotions/${clientId}/${id}`)
+          console.log(`/promotions/${clientId}/${id}`);
           handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
           return; // Exit the effect to avoid unnecessary API calls
         }
-      }
-      else {
+      } else {
         toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
       }
     } finally {
