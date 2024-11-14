@@ -31,7 +31,8 @@ import { useDashboard } from "../../../hooks";
 import { toast } from "react-toastify";
 import EmailEditor, { EditorRef, EmailEditorProps } from "react-email-editor";
 import { useDropzone } from "react-dropzone"; // Importa el hook de Dropzone
-import { UploadFile } from "@mui/icons-material";
+import { UploadFile, SaveAlt } from "@mui/icons-material";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import howtouse from "../../../assets/Mi video-1.gif";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import { set } from "react-hook-form";
@@ -66,6 +67,11 @@ export const EmailSender = () => {
   const emailEditorRef = useRef<EditorRef>(null); // Referencia al editor de email
   const { refreshAccount } = useAuthSlice();
   const { getPromotionsAndMetrics } = useDashboard();
+  const [templates, setTemplates] = useState([]); // Para almacenar las plantillas
+  const [templateName, setTemplateName] = useState(""); // Nombre de la plantilla
+  const [openSaveDialog, setOpenSaveDialog] = useState(false); // Dialog para guardar plantilla
+  const [openTemplatesDialog, setOpenTemplatesDialog] = useState(false); // Dialog para ver plantillas
+
   useEffect(() => {
     getPromotionsAndMetrics();
   }, []);
@@ -275,6 +281,53 @@ export const EmailSender = () => {
       ? selectedCsvData.length > 0 && selectedCsvData.length === csvData.length
       : selectedClients.length > 0 && selectedClients.length === clients.length;
 
+  // Función para guardar una plantilla
+  const handleSaveTemplate = async () => {
+    try {
+      const design = await new Promise((resolve) => {
+        emailEditorRef.current.editor.saveDesign((design) => {
+          resolve(design);
+        });
+      });
+
+      const templateData = {
+        name: templateName,
+        design: design,
+        subject: subject,
+        userId: accounts._id,
+      };
+
+      const response = await api.post("/api/template/create", templateData);
+      toast.success("Plantilla guardada correctamente");
+      setOpenSaveDialog(false);
+      setTemplateName("");
+    } catch (error) {
+      toast.error("Error al guardar la plantilla");
+    }
+  };
+  console.log("esto es accounts ", accounts);
+  // Función para cargar las plantillas
+  const loadTemplates = async () => {
+    try {
+      const response = await api.get(`/api/template/${accounts._id}`);
+      setTemplates(response.data);
+    } catch (error) {
+      toast.error("Error al cargar las plantillas");
+    }
+  };
+
+  // Función para cargar una plantilla específica
+  const loadTemplate = (template) => {
+    emailEditorRef.current.editor.loadDesign(template.design);
+    setSubject(template.subject);
+    setOpenTemplatesDialog(false);
+  };
+
+  // Cargar plantillas al montar el componente
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
   return (
     <motion.main
       initial='hidden'
@@ -480,6 +533,16 @@ export const EmailSender = () => {
             </div>
           </div>
 
+          {/* Agregar botones para gestionar plantillas cerca del editor de email */}
+          <div className='flex gap-4 my-4'>
+            <Button variant='contained' startIcon={<SaveAlt />} onClick={() => setOpenSaveDialog(true)}>
+              Guardar como plantilla
+            </Button>
+            <Button variant='outlined' startIcon={<DescriptionRoundedIcon />} onClick={() => setOpenTemplatesDialog(true)}>
+              Cargar plantilla
+            </Button>
+          </div>
+
           {/* Asunto del Email */}
 
           {/* Botón para enviar el correo */}
@@ -523,6 +586,54 @@ export const EmailSender = () => {
           <Button onClick={() => setOpenWarningDialog(false)} color='primary'>
             Cerrar
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para guardar plantilla */}
+      <Dialog open={openSaveDialog} onClose={() => setOpenSaveDialog(false)}>
+        <DialogTitle>Guardar Plantilla</DialogTitle>
+        <DialogContent>
+          <TextField autoFocus margin='dense' label='Nombre de la plantilla' fullWidth value={templateName} onChange={(e) => setTemplateName(e.target.value)} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenSaveDialog(false)}>Cancelar</Button>
+          <Button onClick={handleSaveTemplate} disabled={!templateName}>
+            Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para mostrar y seleccionar plantillas */}
+      <Dialog open={openTemplatesDialog} onClose={() => setOpenTemplatesDialog(false)} maxWidth='md' fullWidth>
+        <DialogTitle>Mis Plantillas</DialogTitle>
+        <DialogContent>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Asunto</TableCell>
+                  <TableCell>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {templates.map((template) => (
+                  <TableRow key={template._id}>
+                    <TableCell>{template.name}</TableCell>
+                    <TableCell>{template.subject}</TableCell>
+                    <TableCell>
+                      <Button variant='contained' size='small' onClick={() => loadTemplate(template)}>
+                        Usar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenTemplatesDialog(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 
