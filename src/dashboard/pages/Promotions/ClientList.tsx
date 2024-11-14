@@ -50,7 +50,7 @@ export const ClientList = ({ clients, promotion }) => {
 
   return (
     <div className='w-[90%] m-auto'>
-      <span className='flex text-lg mb-6'>Lista de clientes.</span>
+      <span className='flex text-lg mb-6'>Lista de clientes</span>
       <TableContainer component={Paper}>
         <Table aria-label='client list table'>
           <TableHead>
@@ -69,18 +69,14 @@ export const ClientList = ({ clients, promotion }) => {
               <TableRow key={index}>
                 <TableCell>{client.name}</TableCell>
                 <TableCell>{client.email}</TableCell>
-
-                <TableCell>{statusMap[client.status]}</TableCell>
+                <TableCell>{client.phoneNumber}</TableCell>
+                <TableCell>{statusMap[client.status]}</TableCell> {/* Traducción del estado */}
                 {isPointsBased && (
                   <TableCell>{client.totalPoints}</TableCell> // Mostrar puntos si el sistema es por puntos
                 )}
                 {isVisitsBased && (
                   <TableCell>{client.totalVisits || "0"}</TableCell> // Mostrar visitas si el sistema es por visitas
                 )}
-
-                <TableCell>{client.phoneNumber}</TableCell>
-                <TableCell>{statusMap[client.status]}</TableCell> {/* Traducción del estado */}
-
                 <TableCell className=''>
                   <div
                     onClick={() => {

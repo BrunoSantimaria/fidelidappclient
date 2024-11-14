@@ -565,7 +565,7 @@ export const ClientPromotionCard = () => {
                 </section>
               ) : (
                 // Si el botón está en Detalles, mostrar los detalles completos
-                <div className='mt-4 md:mt-0 w-full md:w-1/2 space-y-6'>
+                <div className='mt-4 md:m-auto md:mt-0 w-full md:w-1/2 space-y-6'>
                   <h1 className='mt-4 font-bold text-left font-poppins text-4xl'>{promotionDetails.title}</h1>
                   <h2 className='text-lg font-normal'>Detalles de la Promoción</h2>
                   <p
