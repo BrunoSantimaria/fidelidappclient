@@ -9,7 +9,7 @@ import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
-import AssessmentIcon from '@mui/icons-material/Assessment';
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import { AddAdmin } from "./AddAdmin";
@@ -147,7 +147,7 @@ export const Navigation = () => {
           </NavigationLink>
 
           <div>
-            <NavigationLink name='Correos' link='/dashboard/email-sender'>
+            <NavigationLink name='Correos' link='/dashboard/email-sender' isOpen={isOpen}>
               <MailRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
             </NavigationLink>
           </div>
