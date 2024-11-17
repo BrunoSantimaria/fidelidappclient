@@ -20,6 +20,10 @@ import { toast } from "react-toastify";
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 import { Divider } from "@mui/material";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
+import { AppBar, Toolbar, IconButton, Menu, MenuItem, Badge } from "@mui/material";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import { NotificationBell } from "../NotificationBell";
+import { useNavigate } from "react-router-dom";
 const containerVariants = {
   close: {
     width: "5rem",
@@ -56,6 +60,9 @@ export const Navigation = () => {
   const iconControl = useAnimationControls();
   const { plan, metrics } = useDashboard();
   const { user } = useAuthSlice();
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+
   useEffect(() => {
     if (isOpen) {
       containerControls.start("open");
@@ -68,6 +75,25 @@ export const Navigation = () => {
 
   const handleOpen = () => setIsOpen(!isOpen);
   const handleModal = () => setOpenModal(!openModal);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    startLoggingOut();
+    handleClose();
+  };
+
+  const handleSettings = () => {
+    navigate("/dashboard/settings");
+    handleClose();
+  };
+
   return (
     <>
       {/* Ícono de menú para mobile */}
@@ -172,6 +198,52 @@ export const Navigation = () => {
         <div className='flex justify-center items-center'>
           <img src={logo} alt='Logo' className='w-16 mt-6 scale-90 md:scale-150 lg:scale-150 h-auto mb-4' />
         </div>
+        <AppBar position='fixed' className='bg-main'>
+          <Toolbar className='justify-between'>
+            {/* Menú hamburguesa */}
+            <div className='flex items-center'>
+              <IconButton edge='start' color='inherit' aria-label='menu' onClick={handleOpen} className='mr-2'>
+                <MenuIcon />
+              </IconButton>
+              <span className='text-lg font-semibold hidden md:block'>{user?.accounts?.name || "Dashboard"}</span>
+            </div>
+
+            {/* Área derecha con notificaciones y perfil */}
+            <div className='flex items-center space-x-4'>
+              {/* Notificaciones */}
+              <NotificationBell />
+
+              {/* Perfil */}
+              <div>
+                <IconButton aria-label='account of current user' aria-controls='menu-appbar' aria-haspopup='true' onClick={handleMenu} color='inherit'>
+                  <AccountCircle />
+                </IconButton>
+                <Menu
+                  id='menu-appbar'
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem className='text-sm'>
+                    <span className='font-semibold'>{user?.email}</span>
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem onClick={handleSettings}>Configuración</MenuItem>
+                  <MenuItem onClick={handleLogout}>Cerrar sesión</MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </Toolbar>
+        </AppBar>
       </motion.nav>
     </>
   );

@@ -18,6 +18,9 @@ import MuiAlert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress"; // Importa el indicador de carga
 import { StepperPromotion } from "../pages/Promotions/StepperPromotion";
 import { Stepper } from "../pages/Promotions/Stepper";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { EventNotifications } from "../../components/EventNotifications";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -48,6 +51,8 @@ export const DashboardRoutes = () => {
   }, []);
   return (
     <>
+      <ToastContainer />
+      <EventNotifications />
       <Navigation />
       <Routes>
         <Route

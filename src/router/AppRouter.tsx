@@ -17,6 +17,7 @@ import ConfirmAppointment from "../agenda-client/ConfirmAppointment";
 import ThankYou from "../agenda-client/ThankYou";
 import { PromotionQrLanding } from "../landing/components/PromotionQrLanding";
 import { Report } from "../dashboard/pages/report/Report";
+import { NotificationProvider } from "../context/NotificationContext";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
@@ -43,42 +44,44 @@ export const AppRouter = () => {
   }, []); // El useEffect se ejecuta solo una vez al cargar
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
-      <FloatingWhatsAppButton />
-      <ToastContainer position='bottom-center' autoClose={5000} />
-      <NavBar refs={refs} />
-      <Box sx={{ flexGrow: 1 }}>
-        <Routes>
-          {/* Ruta de promoción accesible para todos */}
-          <Route path='/agendas/:agendaId' element={<Agenda />} />
-          <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
-          <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
-          <Route path='/promotions/:id' element={<PromotionClient />} />
-          <Route path='/promotion/:id' element={<PromotionClient />} />
-          <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
-          <Route path='/thankyou' element={<ThankYou />} />
-          {status === "non-authenticated" ? (
-            <>
-              <Route path='/agendas/:agendaId' element={<Agenda />} />
-              <Route path='/' element={<Landing refs={refs} />} />
-              <Route path='/thankyou' element={<ThankYou />} />
-              <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
-              <Route path='/auth/*' element={<AuthRoutes />} />
-              <Route path='/dashboard' element={<Navigate to='/' replace />} />
-            </>
-          ) : (
-            <>
-              <Route path='/' element={<Landing refs={refs} />} />
+    <NotificationProvider>
+      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
+        <FloatingWhatsAppButton />
+        <ToastContainer position='bottom-center' autoClose={5000} />
+        <NavBar refs={refs} />
+        <Box sx={{ flexGrow: 1 }}>
+          <Routes>
+            {/* Ruta de promoción accesible para todos */}
+            <Route path='/agendas/:agendaId' element={<Agenda />} />
+            <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
+            <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
+            <Route path='/promotions/:id' element={<PromotionClient />} />
+            <Route path='/promotion/:id' element={<PromotionClient />} />
+            <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
+            <Route path='/thankyou' element={<ThankYou />} />
+            {status === "non-authenticated" ? (
+              <>
+                <Route path='/agendas/:agendaId' element={<Agenda />} />
+                <Route path='/' element={<Landing refs={refs} />} />
+                <Route path='/thankyou' element={<ThankYou />} />
+                <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
+                <Route path='/auth/*' element={<AuthRoutes />} />
+                <Route path='/dashboard' element={<Navigate to='/' replace />} />
+              </>
+            ) : (
+              <>
+                <Route path='/' element={<Landing refs={refs} />} />
 
-              <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
-              <Route path='/thankyou' element={<ThankYou />} />
-              <Route path='/dashboard/*' element={<DashboardRoutes />} />
-            </>
-          )}
-          <Route path='*' element={<Navigate to='/' replace />} />
-        </Routes>
+                <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
+                <Route path='/thankyou' element={<ThankYou />} />
+                <Route path='/dashboard/*' element={<DashboardRoutes />} />
+              </>
+            )}
+            <Route path='*' element={<Navigate to='/' replace />} />
+          </Routes>
+        </Box>
+        <Footer refs={refs} />
       </Box>
-      <Footer refs={refs} />
-    </Box>
+    </NotificationProvider>
   );
 };
