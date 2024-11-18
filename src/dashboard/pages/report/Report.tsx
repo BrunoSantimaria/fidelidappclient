@@ -71,20 +71,23 @@ export const Report = () => {
   if (error) return <Typography color="error">{error}</Typography>;
   if (!data) return null;
 
-  const dailyLabels = Object.keys(data.dailyData);
-  const dailyVisits = dailyLabels.map(date => data.dailyData[date].visits);
-  const dailyRegistrations = dailyLabels.map(date => data.dailyData[date].registrations);
-  const dailyRedeems = dailyLabels.map(date => data.dailyData[date].redeems);
+  // Extract the labels (dates) from dailyData
+  const dailyLabels = data.dailyData.map((entry) => entry.date);
+
+  // Extract values for visits, registrations, and points
+  const dailyVisits = data.dailyData.map((entry) => entry.visits);
+  const dailyRegistrations = data.dailyData.map((entry) => entry.registrations);
+  const dailyPoints = data.dailyData.map((entry) => entry.points); 
 
   const clientVisitsData = data.visitDataByClient.map(client => ({ client: client.client, value: client.visits }));
-  const clientRedeemsData = data.visitDataByClient.map(client => ({ client: client.client, value: client.redeems }));
+  const clientPointsData = data.pointDataByClient.map(client => ({ client: client.client, value: client.points }));
 
   const metrics = [
     { label: 'Clientes Totales', value: data.totalClients },
-    { label: 'Puntos Acumulados', value: data.totalVisits },
-    { label: 'Promociones Canjeadas', value: data.promotionsRedeemed },
-    { label: 'Visitas Promedio', value: data.visitFrequency },
-    { label: 'Canjes Promedio', value: data.redemptionFrequency },
+    { label: 'Puntos Acumulados', value: data.totalPoints },
+    { label: 'Visitas Totales', value: data.totalVisits },
+    { label: 'Canjes Realizados', value: data.totalRedeemCount },
+    { label: 'Promociones Activas', value: data.totalPromotions }, 
   ];
 
 
@@ -97,7 +100,7 @@ export const Report = () => {
         alignItems: "center"
       }}
     >
-      
+
       <Stack direction="flex" justifyContent="center" flexWrap="wrap">
         {metrics.map((metric, index) => (
           <Box
@@ -117,20 +120,21 @@ export const Report = () => {
 
 
       <Typography variant="h5" align="center" gutterBottom>Tus clientes en los últimos 7 días:</Typography>
-      <Box sx={{ mt: 4, 
+      <Box sx={{
+        mt: 4,
         width: { xs: '100%', sm: '82%' }, // 100% width on mobile, 180px on larger screens
-       }}>
+      }}>
 
         <LineChart
           height={400}
           series={[
-            { label: 'Visitas', data: dailyVisits, color:"lightgreen" },
-            { label: 'Registros', data: dailyRegistrations, color:"pink" },
-            { label: 'Canjes', data: dailyRedeems, color:"gold" },
+            { label: 'Visitas', data: dailyVisits, color: "lightgreen" },
+            { label: 'Registros', data: dailyRegistrations, color: "pink" },
+            { label: 'Puntos', data: dailyPoints, color: "gold" },
           ]}
-          xAxis={[{ 
-            scaleType: 'band', 
-            data: dailyLabels 
+          xAxis={[{
+            scaleType: 'band',
+            data: dailyLabels
 
           }]}
         />
@@ -141,7 +145,7 @@ export const Report = () => {
             <ClientMetricsTable title="Visitas por Cliente" data={clientVisitsData} dataType="Visitas" />
           </Box>
           <Box sx={{ width: { xs: "100%", sm: "45%", md: "40%" }, p: 2 }}>
-            <ClientMetricsTable title="Canjes por Cliente" data={clientRedeemsData} dataType="Canjes" />
+            <ClientMetricsTable title="Puntos por Cliente" data={clientPointsData} dataType="Canjes" />
           </Box>
         </Stack>
       </Box>
