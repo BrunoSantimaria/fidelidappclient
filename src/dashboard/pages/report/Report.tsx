@@ -77,17 +77,18 @@ export const Report = () => {
   // Extract values for visits, registrations, and points
   const dailyVisits = data.dailyData.map((entry) => entry.visits);
   const dailyRegistrations = data.dailyData.map((entry) => entry.registrations);
-  const dailyPoints = data.dailyData.map((entry) => entry.points); 
+  const dailyPoints = data.dailyData.map((entry) => entry.points);
 
   const clientVisitsData = data.visitDataByClient.map(client => ({ client: client.client, value: client.visits }));
   const clientPointsData = data.pointDataByClient.map(client => ({ client: client.client, value: client.points }));
+  const clientRedeemData = data.pointDataByClient.map(client => ({ client: client.client, value: client.redeemCount }));
 
   const metrics = [
     { label: 'Clientes Totales', value: data.totalClients },
     { label: 'Puntos Acumulados', value: data.totalPoints },
     { label: 'Visitas Totales', value: data.totalVisits },
     { label: 'Canjes Realizados', value: data.totalRedeemCount },
-    { label: 'Promociones Activas', value: data.totalPromotions }, 
+    { label: 'Promociones Activas', value: data.totalPromotions },
   ];
 
 
@@ -100,7 +101,7 @@ export const Report = () => {
         alignItems: "center"
       }}
     >
-
+      <Typography variant="h5" align="center" gutterBottom>Tus métricas globales:</Typography>
       <Stack direction="flex" justifyContent="center" flexWrap="wrap">
         {metrics.map((metric, index) => (
           <Box
@@ -139,13 +140,17 @@ export const Report = () => {
           }]}
         />
       </Box>
+      <Typography variant="h5" align="center" gutterBottom>Tienes {data.registeredClients} clientes inscritos en promociones:</Typography>
       <Box sx={{ mt: 4, width: "100%" }}>
         <Stack direction="flex" justifyContent="center" spacing={4} flexWrap="wrap">
-          <Box sx={{ width: { xs: "100%", sm: "45%", md: "40%" }, p: 2 }}>
+          <Box sx={{ width: { xs: "100%", sm: "45%", md: "30%" }, p: 2 }}>
             <ClientMetricsTable title="Visitas por Cliente" data={clientVisitsData} dataType="Visitas" />
           </Box>
-          <Box sx={{ width: { xs: "100%", sm: "45%", md: "40%" }, p: 2 }}>
+          <Box sx={{ width: { xs: "100%", sm: "45%", md: "30%" }, p: 2 }}>
             <ClientMetricsTable title="Puntos por Cliente" data={clientPointsData} dataType="Canjes" />
+          </Box>
+          <Box sx={{ width: { xs: "100%", sm: "45%", md: "30%" }, p: 2 }}>
+            <ClientMetricsTable title="Canjes por Cliente" data={clientRedeemData} dataType="Canjes" />
           </Box>
         </Stack>
       </Box>
