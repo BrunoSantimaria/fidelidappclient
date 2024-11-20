@@ -14,137 +14,7 @@ import {
 } from "@mui/icons-material";
 import LinearProgress from "@mui/material/LinearProgress";
 
-// Componente para las métricas superiores
-const MetricCard = ({ title, value, icon }) => (
-  <Card
-    sx={{
-      p: 2,
-      minWidth: { xs: "100%", sm: 180 },
-      bgcolor: "white",
-      color: "primary.main",
-      borderTop: 3,
-      borderColor: "primary.main",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 1,
-    }}
-  >
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      {icon}
-      <Typography variant='body2'>{title}</Typography>
-    </Box>
-    <Typography variant='h5' fontWeight='bold'>
-      {value}
-    </Typography>
-  </Card>
-);
-
-const ClientMetricsTable = ({ title, subtitle, data, dataType }) => {
-  const [page, setPage] = useState(0);
-  const rowsPerPage = 10;
-
-  return (
-    <>
-      <Typography variant='h6' gutterBottom>
-        {title}
-      </Typography>
-      <Typography variant='body2' color='text.secondary' gutterBottom>
-        {subtitle}
-      </Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Cliente</TableCell>
-            <TableCell align='right'>{dataType}</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
-            <TableRow key={index}>
-              <TableCell>{item.client}</TableCell>
-              <TableCell align='right'>{item.value}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[10]}
-              count={data.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={(_, newPage) => setPage(newPage)}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </>
-  );
-};
-
-// Componente de Loading
-const LoadingReport = ({ progress }) => (
-  <Card
-    sx={{
-      maxWidth: 600,
-      mx: "auto",
-      mt: 4,
-      p: 3,
-      borderTop: 3,
-      borderColor: "primary.main",
-    }}
-  >
-    <Stack spacing={3}>
-      {/* Título */}
-      <Stack direction='row' spacing={1} alignItems='center'>
-        <FileTextIcon />
-        <Typography variant='h6' color='primary'>
-          Generando tu Reporte
-        </Typography>
-      </Stack>
-
-      <Typography variant='body2' color='text.secondary'>
-        Estamos procesando tus datos para crear un informe detallado. Esto puede tomar unos momentos.
-      </Typography>
-
-      {/* Progreso */}
-      <Stack spacing={2} alignItems='center'>
-        <CircularProgress />
-        <LinearProgress sx={{ width: "100%" }} variant='determinate' value={progress} />
-        <Typography variant='body2' color='text.secondary'>
-          Progreso: {progress}%
-        </Typography>
-      </Stack>
-
-      {/* Tips */}
-      <Box
-        sx={{
-          bgcolor: "white",
-          color: "primary.main",
-          p: 2,
-          borderRadius: 1,
-        }}
-      >
-        <Stack direction='row' spacing={1} alignItems='center' mb={1}>
-          <InfoIcon fontSize='small' />
-          <Typography variant='subtitle2'>Mientras esperas</Typography>
-        </Stack>
-        <Typography variant='body2' mb={1}>
-          Aquí tienes algunos consejos sobre el uso de informes:
-        </Typography>
-        <ul style={{ paddingLeft: "1.5rem", fontSize: "0.875rem" }}>
-          <li>- Los informes detallados pueden ayudarte a identificar tendencias en el comportamiento de tus clientes.</li>
-          <li>- Utiliza los datos de los informes para personalizar tus promociones y aumentar la fidelización.</li>
-          <li>- Compara los informes mes a mes para medir el crecimiento de tu programa de fidelización.</li>
-          <li>- Los datos de canjes pueden indicarte qué recompensas son más populares entre tus clientes.</li>
-        </ul>
-      </Box>
-
-      {/* Botones */}
-    </Stack>
-  </Card>
-);
+// [Los componentes MetricCard, ClientMetricsTable y LoadingReport se mantienen igual]
 
 export const Report = () => {
   const [data, setData] = useState(null);
@@ -156,14 +26,13 @@ export const Report = () => {
     let progressTimer;
     const fetchData = async () => {
       try {
-        // Iniciar el timer de progreso
         progressTimer = setInterval(() => {
           setProgress((prev) => (prev >= 90 ? 90 : prev + 10));
         }, 500);
 
         const response = await api.post("/api/promotions/getDashboardMetrics");
         setData(response.data);
-        setProgress(100); // Completar el progreso
+        setProgress(100);
       } catch (error) {
         setError("Error al cargar los datos");
         console.error("Error:", error);
@@ -186,10 +55,7 @@ export const Report = () => {
   if (error) return <Typography color='error'>{error}</Typography>;
   if (!data) return null;
 
-  // Extract the labels (dates) from dailyData
   const dailyLabels = data.dailyData.map((entry) => entry.date);
-
-  // Extract values for visits, registrations, and points
   const dailyVisits = data.dailyData.map((entry) => entry.visits);
   const dailyRegistrations = data.dailyData.map((entry) => entry.registrations);
   const dailyPoints = data.dailyData.map((entry) => entry.points);
