@@ -25,6 +25,8 @@ export interface DashboardState {
   metrics: Metrics | null;
   loading: boolean;
   errorMessage: string | null;
+  lastUpdate: number | null;
+  cacheExpiration: number;
 }
 
 // Estado inicial
@@ -36,6 +38,8 @@ const initialState: DashboardState = {
   loading: false,
   activePromotion: [],
   errorMessage: null,
+  lastUpdate: null,
+  cacheExpiration: 60000, // 1 minuto en milisegundos
 };
 
 export const dashboardSlice = createSlice({
@@ -57,15 +61,23 @@ export const dashboardSlice = createSlice({
     setErrorMessage: (state, action: PayloadAction<string | null>) => {
       state.errorMessage = action.payload;
     },
+
+    setLastUpdate: (state, action: PayloadAction<number>) => {
+      state.lastUpdate = action.payload;
+    },
+
     setActivePromotion: (state, action) => {
       state.activePromotion = action.payload;
     },
+
     setAgendas: (state, action) => {
       state.agendas = action.payload;
     },
+
     setClients: (state, action) => {
       state.clients = action.payload;
     },
+
     cleanActivePromotion: (state) => {
       state.activePromotion = [];
     },
@@ -78,11 +90,22 @@ export const dashboardSlice = createSlice({
       state.activePromotion = [];
       state.agendas = [];
       state.clients = [];
+      state.lastUpdate = null;
     },
   },
 });
 
-export const { setPromotions, setMetrics, setLoading, setErrorMessage, setClients, setActivePromotion, cleanActivePromotion, setAgendas } =
-  dashboardSlice.actions;
+export const {
+  setPromotions,
+  setMetrics,
+  setLoading,
+  setErrorMessage,
+  setActivePromotion,
+  setLastUpdate,
+  setAgendas,
+  setClients,
+  cleanActivePromotion,
+  cleanUser,
+} = dashboardSlice.actions;
 
 export default dashboardSlice.reducer;

@@ -1,7 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../utils/api";
-import { cleanActivePromotion, setActivePromotion, setAgendas, setClients, setLoading, setMetrics, setPromotions } from "../store/dashboard/dashboardSlice";
+import {
+  cleanActivePromotion,
+  setActivePromotion,
+  setAgendas,
+  setClients,
+  setLoading,
+  setMetrics,
+  setPromotions,
+  setLastUpdate,
+} from "../store/dashboard/dashboardSlice";
 import { toast } from "react-toastify";
 import { onLogOut } from "../store/auth/authSlice";
 import { useNavigateTo } from "./useNavigateTo";
@@ -10,12 +19,17 @@ import { log } from "console";
 
 export const useDashboard = () => {
   const { accounts, plan } = useSelector((state) => state.auth.user);
-  const { metrics, promotions, activePromotion, agendas, clients, loading } = useSelector((state) => state.dashboard);
+  const { metrics, promotions, activePromotion, agendas, clients, loading, lastUpdate, cacheExpiration } = useSelector((state) => state.dashboard);
   const { refreshAccount } = useAuthSlice();
   const dispatch = useDispatch();
   const { handleNavigate } = useNavigateTo();
 
-  const getPromotionsAndMetrics = async () => {
+  const getPromotionsAndMetrics = async (forceUpdate = false) => {
+    // Si no ha pasado el tiempo de caché y no es una actualización forzada, no actualizar
+    if (!forceUpdate && lastUpdate && Date.now() - lastUpdate < cacheExpiration) {
+      return;
+    }
+
     try {
       dispatch(setLoading(true));
       const [promotionsResp, clientsResp, agendasResp] = await Promise.all([
@@ -30,6 +44,7 @@ export const useDashboard = () => {
       dispatch(setClients(clientsResp.data.clients));
       dispatch(setMetrics(promotionsResp.data.metrics));
       dispatch(setAgendas(agendasResp.data));
+      dispatch(setLastUpdate(Date.now()));
     } catch (error) {
       console.log(error);
       if (error.response?.status === 401) {

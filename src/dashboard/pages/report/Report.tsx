@@ -21,7 +21,9 @@ interface DailyData {
 
 interface ClientData {
   client: string;
-  value: number;
+  visits: number;
+  points: number;
+  redeemCount: number;
 }
 
 interface ReportData {
@@ -33,6 +35,7 @@ interface ReportData {
   dailyData: DailyData[];
   visitDataByClient: ClientData[];
   pointDataByClient: ClientData[];
+  registeredClients: number;
 }
 
 // Componente para mostrar durante la carga
@@ -59,8 +62,8 @@ const MetricCard = ({ title, value, icon }: { title: string; value: number; icon
   </Card>
 );
 
-// Componente para las tablas de métricas de clientes
-const ClientMetricsTable = ({ title, subtitle, data, dataType }: { title: string; subtitle: string; data: ClientData[]; dataType: string }) => (
+// Componente actualizado para las tablas de métricas
+const ClientMetricsTable = ({ title, subtitle, data, dataType }: { title: string; subtitle: string; data: ClientData[]; dataType: "visits" | "points" }) => (
   <>
     <Typography variant='h6' gutterBottom>
       {title}
@@ -68,19 +71,23 @@ const ClientMetricsTable = ({ title, subtitle, data, dataType }: { title: string
     <Typography variant='body2' color='text.secondary' gutterBottom>
       {subtitle}
     </Typography>
-    <Box sx={{ maxHeight: 400, overflow: "auto" }}>
+    <Box sx={{ maxHeight: { xs: 300, md: 400 }, overflow: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={{ textAlign: "left", padding: "8px" }}>Cliente</th>
-            <th style={{ textAlign: "right", padding: "8px" }}>{dataType}</th>
+            <th style={{ textAlign: "left", padding: "8px", position: "sticky", top: 0, background: "white" }}>Cliente</th>
+            <th style={{ textAlign: "right", padding: "8px", position: "sticky", top: 0, background: "white" }}>
+              {dataType === "visits" ? "Visitas" : "Puntos"}
+            </th>
+            <th style={{ textAlign: "right", padding: "8px", position: "sticky", top: 0, background: "white" }}>Canjes</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
             <tr key={index}>
               <td style={{ padding: "8px" }}>{item.client}</td>
-              <td style={{ textAlign: "right", padding: "8px" }}>{item.value}</td>
+              <td style={{ textAlign: "right", padding: "8px" }}>{dataType === "visits" ? item.visits : item.points}</td>
+              <td style={{ textAlign: "right", padding: "8px" }}>{item.redeemCount}</td>
             </tr>
           ))}
         </tbody>
@@ -112,6 +119,7 @@ export const Report = () => {
             signal: controller.signal,
           }
         );
+        console.log(response.data);
         setData(response.data);
         setProgress(100);
       } catch (error) {
@@ -143,32 +151,32 @@ export const Report = () => {
   const dailyPoints = data.dailyData.map((entry) => entry.points);
 
   return (
-    <div className='w-[80%] ml-0 md:ml-48'>
-      <Stack spacing={4} sx={{ p: 2, pt: { xs: 2, md: 6 } }}>
+    <Box className='w-full px-4 md:w-[80%] md:ml-48'>
+      <Stack spacing={4} sx={{ py: { xs: 2, md: 6 } }}>
         <Stack
           direction='row'
           spacing={2}
           sx={{
             flexWrap: "wrap",
             gap: 2,
-            justifyContent: "center",
+            justifyContent: { xs: "space-around", md: "center" },
           }}
         >
-          <MetricCard title='Clientes Totales' value={data.totalClients} icon={<PeopleIcon />} />
+          <MetricCard title='Clientes Registrados' value={data.registeredClients} icon={<PeopleIcon />} />
           <MetricCard title='Puntos Acumulados' value={data.totalPoints} icon={<StarsIcon />} />
           <MetricCard title='Visitas Totales' value={data.totalVisits} icon={<VisibilityIcon />} />
           <MetricCard title='Canjes Realizados' value={data.totalRedeemCount} icon={<CardGiftcardIcon />} />
           <MetricCard title='Promociones Activas' value={data.totalPromotions} icon={<CampaignIcon />} />
         </Stack>
 
-        <Card sx={{ p: 3, borderTop: 3, borderColor: "primary.main" }}>
+        <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
           <Typography variant='h6' gutterBottom>
             Tus clientes en los últimos 7 días
           </Typography>
           <Typography variant='body2' color='text.secondary' gutterBottom>
             Análisis de visitas, registros y puntos acumulados
           </Typography>
-          <Box sx={{ height: 400, mt: 2 }}>
+          <Box sx={{ height: { xs: 300, md: 400 }, mt: 2 }}>
             <LineChart
               series={[
                 { data: dailyVisits, label: "Visitas", color: "#4ade80" },
@@ -182,20 +190,31 @@ export const Report = () => {
                   tickLabelStyle: { fontSize: 12 },
                 },
               ]}
+              margin={{ left: 50, right: 20, top: 20, bottom: 30 }}
             />
           </Box>
         </Card>
 
         <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ width: "100%" }}>
-          <Card sx={{ flex: 1, borderTop: 3, borderColor: "primary.main", p: 3 }}>
-            <ClientMetricsTable title='Visitas por Cliente' subtitle='Registro de visitas de cada cliente' data={data.visitDataByClient} dataType='Visitas' />
+          <Card sx={{ flex: 1, borderTop: 3, borderColor: "primary.main", p: { xs: 2, md: 3 } }}>
+            <ClientMetricsTable
+              title='Visitas por Cliente'
+              subtitle='Registro de visitas y canjes de cada cliente'
+              data={data.visitDataByClient}
+              dataType='visits'
+            />
           </Card>
 
-          <Card sx={{ flex: 1, borderTop: 3, borderColor: "primary.main", p: 3 }}>
-            <ClientMetricsTable title='Puntos por Cliente' subtitle='Puntos acumulados por cada cliente' data={data.pointDataByClient} dataType='Puntos' />
+          <Card sx={{ flex: 1, borderTop: 3, borderColor: "primary.main", p: { xs: 2, md: 3 } }}>
+            <ClientMetricsTable
+              title='Puntos por Cliente'
+              subtitle='Puntos acumulados y canjes por cada cliente'
+              data={data.pointDataByClient}
+              dataType='points'
+            />
           </Card>
         </Stack>
       </Stack>
-    </div>
+    </Box>
   );
 };

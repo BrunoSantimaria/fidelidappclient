@@ -26,7 +26,6 @@ import { toast } from "react-toastify";
 
 import { AutomationRulesPage } from "../pages/AutomationRules/AutomationRules";
 
-
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
 });
@@ -58,8 +57,23 @@ export const DashboardRoutes = () => {
 
   const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
-    getPromotionsAndMetrics();
+    const fetchData = async () => {
+      try {
+        await getPromotionsAndMetrics();
+      } catch (error) {
+        console.error("Error al obtener promociones y métricas:", error);
+        toast.error("Error al cargar los datos");
+      }
+    };
+
+    fetchData();
+    // Configurar un intervalo para actualizar cada 5 minutos
+    const interval = setInterval(fetchData, 5 * 60 * 1000);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(interval);
   }, []);
+
   useEffect(() => {
     getSubscription();
   }, []);

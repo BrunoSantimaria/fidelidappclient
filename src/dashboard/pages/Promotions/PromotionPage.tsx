@@ -29,7 +29,7 @@ const pageTransition = {
 export const PromotionPage = () => {
   const { user } = useAuthSlice();
   const { metrics, plan } = useDashboard();
-  console.log(plan);
+  console.log(metrics);
   const statsCards = [
     {
       title: "Programas activos",
@@ -39,7 +39,7 @@ export const PromotionPage = () => {
     },
     {
       title: "Clientes Registrados",
-      value: `${metrics?.registeredCustomers || 0} / ${plan?.clientLimit || "Ilimitado"}`,
+      value: `${metrics?.registeredClients || 0} / ${plan?.clientLimit || "Ilimitado"}`,
       icon: <UsersIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
       tooltip: "Total de clientes registrados en tus programas",
     },
