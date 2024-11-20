@@ -32,7 +32,7 @@ export const ImportantLinks = ({ refs }) => {
         handleScrollTo(refs.contactRef);
         break;
       case "Registrarse":
-        handleNavigate("/auth/login");
+        handleNavigate("/auth/login", { state: { showRegister: true } });
         break;
       default:
         break;

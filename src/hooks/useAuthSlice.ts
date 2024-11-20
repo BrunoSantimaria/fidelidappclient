@@ -108,11 +108,11 @@ export const useAuthSlice = () => {
         email: formData.email.toLowerCase(),
       };
 
-      await api.post("/auth/signup", modifiedFormData);
+      const response = await api.post("/auth/signup", modifiedFormData);
+      return { success: true, data: response.data };
     } catch (error) {
       console.log(error);
-
-      toast.error("No se ha podido crear el usuario");
+      throw error;
     }
   };
 

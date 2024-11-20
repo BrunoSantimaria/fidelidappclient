@@ -61,7 +61,7 @@ export const StepperPromotion = ({ steps, currentStep }) => {
         >
           {index + 1}
         </motion.div>
-        <div className='absolute top-0 text-center mt-16 w-26 md:w-36 text-xs font-medium uppercase'>{step.description}</div>
+        <div className='absolute text-main top-0 text-center mt-16 w-26 md:w-36 text-xs font-medium uppercase'>{step.description}</div>
       </div>
       {index !== newStep.length - 1 && (
         <div className={`flex-auto border-t-2 transition duration-500 ease-in-out ${step.completed ? "border-main" : "border-gray-300"}`}></div>

@@ -1,23 +1,34 @@
 import { Box, Button, Container, Typography } from "@mui/material";
 import background from "../../assets/Cover.jpeg";
 import background2 from "../../assets/Cover3.jpeg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ModalLanding } from "../components/ModalLanding";
 import { FaArrowCircleDown } from "react-icons/fa";
 import { FaArrowDown } from "react-icons/fa6";
 import { handleScrollTo } from "../../utils/handleScrollTo";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
+import { useLocation } from "react-router-dom";
+
 export const Home = ({ refs }) => {
   const [open, setOpen] = useState(false);
   const whatsappNumber = "56996706983"; // Reemplaza con tu número de WhatsApp
   const message = "¡Hola! Me gustaría obtener una demo de FidelidApp. ¿Cuándo podemos agendar una reunión?";
   const { handleNavigate } = useNavigateTo();
   const handleClick = () => {
-    handleNavigate("/auth/login");
+    handleNavigate("/auth/login", { state: { showRegister: true } });
   };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const { state } = location;
+    if (state?.scrollTo) {
+      document.querySelector(state.scrollTo)?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [location]);
 
   return (
     <Box

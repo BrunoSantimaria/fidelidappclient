@@ -1,185 +1,362 @@
-import React, { useEffect, useState } from "react";
-import { Button, TextField, Typography, Link, Grid, Box, Container, Backdrop, CircularProgress } from "@mui/material";
+"use client";
+
+import { Visibility, VisibilityOff, Email, Lock, Person } from "@mui/icons-material";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Typography from "@mui/material/Typography";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { validateEmail, validatePassword, validateName } from "../../utils/validations";
-import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { useNavigateTo } from "../../hooks/useNavigateTo";
-import { set } from "react-hook-form";
-import { Helmet } from "react-helmet-async";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 export const LoginPage = () => {
-  const { handleNavigate } = useNavigateTo();
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
-  const [isRegister, setIsRegister] = useState(true);
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const showRegister = location.state?.showRegister || searchParams.get("showRegister") === "true";
+  const [tabValue, setTabValue] = useState(showRegister ? 1 : 0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "", name: "" });
-  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para manejar la carga
 
   const { startLogin, startRegister, startGoogleSignIn } = useAuthSlice();
 
-  // Función para limpiar el formulario
-  const resetForm = () => {
-    setEmail("");
-    setPassword("");
-    setName("");
-    setErrors({ email: "", password: "", name: "" });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const emailError = validateEmail(email) ? "" : "Email no válido";
     const passwordError = validatePassword(password) ? "" : "La contraseña debe tener al menos 6 caracteres";
-    const nameError = validateName(isRegister, name);
+    const nameError = tabValue === 1 ? validateName(true, name) : "";
 
     setErrors({ email: emailError, password: passwordError, name: nameError });
 
     if (!emailError && !passwordError && !nameError) {
-      const formData = { email, password, ...(isRegister && { name }) };
-
-      setIsLoading(true); // Comenzar la carga
       try {
-        if (isRegister) {
-          await startRegister(formData);
-          resetForm();
-          toast.success("Registro exitoso");
-          setIsRegister(false);
+        const formData = { email, password, ...(tabValue === 1 && { name }) };
+        if (tabValue === 1) {
+          const response = await startRegister(formData);
+          if (response && response.success) {
+            toast.success("Registro exitoso");
+            setTabValue(0);
+          }
         } else {
           await startLogin(formData);
         }
-      } catch (error) {
-        toast.error("Hubo un error al iniciar sesión o registrarse");
-      } finally {
-        setIsLoading(false); // Finalizar la carga
+      } catch (error: any) {
+        if (error?.response?.status === 409) {
+          toast.error(error.response.data.message || "Este email ya está registrado");
+          setIsLoading(false);
+          return;
+        } else {
+          toast.error("Error en la autenticación");
+        }
       }
     }
+    setIsLoading(false);
   };
 
-  const handleGoogleSignInSuccess = async (response) => {
-    setIsLoading(true); // Comenzar la carga
+  const handleGoogleSignIn = async (response) => {
+    setIsLoading(true);
     try {
       await startGoogleSignIn(response);
     } catch (error) {
-      toast.error("No se ha podido iniciar sesión");
-    } finally {
-      setIsLoading(false); // Finalizar la carga
+      toast.error("Error al iniciar sesión con Google");
     }
+    setIsLoading(false);
   };
 
-  const toggleFormMode = () => {
-    resetForm();
-    setIsRegister((prev) => !prev);
+  const pageTransition = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
   };
 
   return (
-    <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
-      <Backdrop
-        className=' flex m-auto justify-center items-center'
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          borderRadius: "5%", // Hacerlo circular
-          width: "250px", // Cubre todo el ancho de la ventana
-          height: "250px", // Cubre todo el alto de la ventana
-          color: "#fff", // Color del progreso y texto
-          zIndex: (theme) => theme.zIndex.drawer + 1, // Por encima de otros elementos
-          margin: "auto", // Eliminar cualquier margen
-          padding: 0, // Eliminar cualquier padding
-          boxSizing: "border-box", // Asegura que el tamaño sea respetado
-        }}
-        open={isLoading} // Solo se mostrará si isLoading es true
-      >
-        <div className='flex flex-col justify-center items-center'>
-          <CircularProgress color='inherit' />
-          <span className='text-white text-lg text-center mt-2'>Accediendo...</span>
-        </div>
-      </Backdrop>
-      <Container component='main' maxWidth='xs' sx={{ margintop: "120px" }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            mt: { xs: 10, md: 35, lg: 20 },
-            mb: { xs: 10 },
-          }}
-        >
-          <Typography component='h1' variant='h5'>
-            {isRegister ? "Registrarse" : "Iniciar Sesión"}
-          </Typography>
-          <Box component='form' onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            {isRegister && (
-              <TextField
-                margin='normal'
-                fullWidth
-                id='name'
-                label='Nombre'
-                name='name'
-                autoComplete='name'
-                autoFocus
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                error={!!errors.name}
-                helperText={errors.name}
+    <Box className='h-full mt-44 mb-24 w-full flex items-center justify-center'>
+      <Card className='w-full max-w-md lg:max-w-[40%] overflow-visible mx-4'>
+        <Box className='border-t-4 border-[#5b7898]'>
+          {/* Tabs con más espaciado */}
+          <Box className='flex justify-between px-6 pt-6 border-b border-gray-200'>
+            <Typography
+              component='span'
+              className={`cursor-pointer px-4 py-2 border-b-2 transition-colors ${
+                tabValue === 0 ? "text-[#5b7898] border-[#5b7898] font-medium" : "text-gray-500 border-transparent"
+              }`}
+              onClick={() => setTabValue(0)}
+            >
+              Iniciar Sesión
+            </Typography>
+            <Typography
+              component='span'
+              className={`cursor-pointer px-4 py-2 border-b-2 transition-colors ${
+                tabValue === 1 ? "text-[#5b7898] border-[#5b7898] font-medium" : "text-gray-500 border-transparent"
+              }`}
+              onClick={() => setTabValue(1)}
+            >
+              Registrarse
+            </Typography>
+          </Box>
+
+          <Box className='p-8'>
+            <AnimatePresence mode='wait'>
+              {tabValue === 0 ? (
+                <motion.div key='login' initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
+                  {/* Contenido de Login */}
+                  <Typography variant='h5' className='text-[#5b7898] mb-3'>
+                    Bienvenido de nuevo
+                  </Typography>
+                  <span className='pb-2 text-sm text-gray-500'>Ingresa tus credenciales para acceder a tu cuenta</span>
+
+                  {/* Form */}
+                  <form onSubmit={handleSubmit} className='space-y-6 mt-6'>
+                    <TextField
+                      fullWidth
+                      label='Correo Electrónico'
+                      placeholder='ejemplo@correo.com'
+                      variant='outlined'
+                      type='email'
+                      autoComplete='email'
+                      name='email'
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <Email className='text-[#5b7898]' />
+                          </InputAdornment>
+                        ),
+                      }}
+                      className='bg-white'
+                      sx={{
+                        backgroundColor: "white",
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-focused": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-filled": {
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+
+                    <TextField
+                      fullWidth
+                      label='Contraseña'
+                      placeholder='Ingresa tu contraseña'
+                      variant='outlined'
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoComplete='new-password'
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <Lock className='text-[#5b7898]' />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge='end' className='text-[#5b7898]'>
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      className='bg-white'
+                      sx={{
+                        backgroundColor: "white",
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-focused": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-filled": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root:-webkit-autofill": {
+                          WebkitBoxShadow: "0 0 0 1000px white inset",
+                          WebkitTextFillColor: "inherit",
+                        },
+                        "& input:-webkit-autofill": {
+                          WebkitBoxShadow: "0 0 0 1000px white inset",
+                          WebkitTextFillColor: "inherit",
+                        },
+                      }}
+                    />
+
+                    <Button fullWidth variant='contained' type='submit' disabled={isLoading} className='bg-[#5b7898] hover:bg-[#4a6277] normal-case py-3'>
+                      {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                    </Button>
+                  </form>
+                </motion.div>
+              ) : (
+                <motion.div key='register' initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
+                  {/* Contenido de Registro */}
+                  <Typography variant='h5' className='text-[#5b7898] mb-3'>
+                    Crear una cuenta
+                  </Typography>
+                  <span className='pb-2 text-sm text-gray-500'>Completa tus datos para registrarte</span>
+                  {/* Aquí irían los campos de registro */}
+                  <form onSubmit={handleSubmit} className='space-y-4 mt-6'>
+                    <TextField
+                      fullWidth
+                      label='Nombre'
+                      placeholder='Ingresa tu nombre completo'
+                      variant='outlined'
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      error={!!errors.name}
+                      helperText={errors.name}
+                      required
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <Person className='text-[#5b7898]' />
+                          </InputAdornment>
+                        ),
+                      }}
+                      className='bg-white'
+                      sx={{
+                        backgroundColor: "white",
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-focused": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-filled": {
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+
+                    <TextField
+                      fullWidth
+                      label='Correo Electrónico'
+                      placeholder='ejemplo@correo.com'
+                      variant='outlined'
+                      type='email'
+                      autoComplete='email'
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      error={!!errors.email}
+                      helperText={errors.email}
+                      required
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <Email className='text-[#5b7898]' />
+                          </InputAdornment>
+                        ),
+                      }}
+                      className='bg-white'
+                      sx={{
+                        backgroundColor: "white",
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-focused": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-filled": {
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+
+                    <TextField
+                      fullWidth
+                      label='Contraseña'
+                      placeholder='Mínimo 6 caracteres'
+                      variant='outlined'
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoComplete='new-password'
+                      error={!!errors.password}
+                      helperText={errors.password}
+                      required
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <Lock className='text-[#5b7898]' />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge='end' className='text-[#5b7898]'>
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      className='bg-white'
+                      sx={{
+                        backgroundColor: "white",
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-focused": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root.Mui-filled": {
+                          backgroundColor: "white",
+                        },
+                        "& .MuiInputBase-root:-webkit-autofill": {
+                          WebkitBoxShadow: "0 0 0 1000px white inset",
+                          WebkitTextFillColor: "inherit",
+                        },
+                        "& input:-webkit-autofill": {
+                          WebkitBoxShadow: "0 0 0 1000px white inset",
+                          WebkitTextFillColor: "inherit",
+                        },
+                      }}
+                    />
+
+                    <Button fullWidth variant='contained' type='submit' disabled={isLoading} className='bg-[#5b7898] hover:bg-[#4a6277] normal-case py-3 mt-6'>
+                      {isLoading ? "Registrando..." : "Registrarse"}
+                    </Button>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Google Sign In con más espaciado */}
+            <Box className='mt-8 space-y-4'>
+              <div className='relative flex items-center justify-center'>
+                <div className='absolute border-b border-gray-300 w-full'></div>
+                <span className='relative px-4 bg-white text-sm text-gray-500'>o continúa con</span>
+              </div>
+
+              <GoogleLogin
+                size='large'
+                width='100%'
+                useOneTap={true}
+                onSuccess={handleGoogleSignIn}
+                onError={() => toast.error("Error al iniciar sesión con Google")}
               />
-            )}
-            <TextField
-              margin='normal'
-              fullWidth
-              id='email'
-              label='Correo Electrónico'
-              name='email'
-              autoComplete='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={!!errors.email}
-              helperText={errors.email}
-            />
-            <TextField
-              margin='normal'
-              fullWidth
-              name='password'
-              label='Contraseña'
-              type='password'
-              id='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={!!errors.password}
-              helperText={errors.password}
-            />
-            <Button disabled={isLoading} type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-              {isRegister ? "Registrarse" : "Iniciar Sesión"}
-            </Button>
-
-            <GoogleLogin
-              size='large'
-              width={140}
-              useOneTap={true}
-              onSuccess={handleGoogleSignInSuccess}
-              onError={() => toast.error("No se ha podido iniciar sesión")}
-            />
-
-            <Grid container sx={{ mt: 3, justifyContent: "center" }}>
-              <Grid item>
-                <Link href='#' variant='body2' onClick={toggleFormMode}>
-                  {isRegister ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
-                </Link>
-              </Grid>
-            </Grid>
+            </Box>
           </Box>
         </Box>
-      </Container>
-
-      {/* Backdrop y CircularProgress cuando isLoading sea verdadero */}
-    </motion.div>
+      </Card>
+    </Box>
   );
 };

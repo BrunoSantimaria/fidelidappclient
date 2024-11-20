@@ -2,6 +2,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import dayjs from "dayjs";
 
 export const VisitCharts = ({ promotions }) => {
+  console.log(promotions);
   const visitData =
     promotions?.map((item) => ({
       day: dayjs(item.date).format("DD/MM/YYYY"),

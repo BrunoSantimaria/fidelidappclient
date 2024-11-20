@@ -14,7 +14,11 @@ export const StepperControl = ({ handleClick, currentStep, steps, isNextDisabled
 
   return (
     <div className='flex justify-around mt-6 mb-6'>
-      <button className='w-32 py-2 bg-gray-300 rounded-lg text-main' onClick={() => handleClick("previous")} disabled={currentStep === 1}>
+      <button
+        className={`${currentStep === 1 ? "hidden" : "cursor-pointer"} w-32 py-2 bg-gray-300 cursor-pointer rounded-lg text-main`}
+        onClick={() => handleClick("previous")}
+        disabled={currentStep === 1}
+      >
         Anterior
       </button>
 

@@ -8,7 +8,7 @@ import { useAuthSlice } from "../hooks/useAuthSlice";
 import { useEffect, useRef } from "react";
 import { Landing } from "../landing/pages";
 import { PromotionClient } from "../promotion-client/pages";
-import { ToastContainer, toast } from "react-toastify";
+
 import "react-toastify/dist/ReactToastify.css";
 import { ClientPromotionCard } from "../promotion-client/pages/ClientPromotionCard";
 import Agenda from "../agenda-client/Agenda";
@@ -16,7 +16,9 @@ import CancelAppointment from "../agenda-client/CancelAppointment";
 import ConfirmAppointment from "../agenda-client/ConfirmAppointment";
 import ThankYou from "../agenda-client/ThankYou";
 import { PromotionQrLanding } from "../landing/components/PromotionQrLanding";
-import { Report } from "../dashboard/pages/report/Report";
+
+import { PromotionPage } from "../dashboard/pages/Promotions/PromotionPage";
+import { ToastContainer } from "react-toastify";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
@@ -43,42 +45,58 @@ export const AppRouter = () => {
   }, []); // El useEffect se ejecuta solo una vez al cargar
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
-      <FloatingWhatsAppButton />
-      <ToastContainer position='bottom-center' autoClose={5000} />
-      <NavBar refs={refs} />
-      <Box sx={{ flexGrow: 1 }}>
-        <Routes>
-          {/* Ruta de promoción accesible para todos */}
-          <Route path='/agendas/:agendaId' element={<Agenda />} />
-          <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
-          <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
-          <Route path='/promotions/:id' element={<PromotionClient />} />
-          <Route path='/promotion/:id' element={<PromotionClient />} />
-          <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
-          <Route path='/thankyou' element={<ThankYou />} />
-          {status === "non-authenticated" ? (
-            <>
-              <Route path='/agendas/:agendaId' element={<Agenda />} />
-              <Route path='/' element={<Landing refs={refs} />} />
-              <Route path='/thankyou' element={<ThankYou />} />
-              <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
-              <Route path='/auth/*' element={<AuthRoutes />} />
-              <Route path='/dashboard' element={<Navigate to='/' replace />} />
-            </>
-          ) : (
-            <>
-              <Route path='/' element={<Landing refs={refs} />} />
+    <>
+      <ToastContainer
+        position='bottom-center'
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme='light'
+        limit={3}
+      />
 
-              <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
-              <Route path='/thankyou' element={<ThankYou />} />
-              <Route path='/dashboard/*' element={<DashboardRoutes />} />
-            </>
-          )}
-          <Route path='*' element={<Navigate to='/' replace />} />
-        </Routes>
+      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
+        <FloatingWhatsAppButton />
+        <NavBar refs={refs} />
+        <Box sx={{ flexGrow: 1 }}>
+          <Routes>
+            {/* Ruta de promoción accesible para todos */}
+            <Route path='/agendas/:agendaId' element={<Agenda />} />
+            <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
+            <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
+            <Route path='/promotions/:id' element={<PromotionClient />} />
+            <Route path='/promotion/:id' element={<PromotionClient />} />
+            <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
+            <Route path='/thankyou' element={<ThankYou />} />
+            {status === "non-authenticated" ? (
+              <>
+                <Route path='/agendas/:agendaId' element={<Agenda />} />
+                <Route path='/' element={<Landing refs={refs} />} />
+                <Route path='/thankyou' element={<ThankYou />} />
+                <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
+                <Route path='/auth/*' element={<AuthRoutes />} />
+                <Route path='/dashboard' element={<Navigate to='/' replace />} />
+              </>
+            ) : (
+              <>
+                <Route path='/' element={<Landing refs={refs} />} />
+
+                <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
+                <Route path='/thankyou' element={<ThankYou />} />
+                <Route path='/dashboard/promotions' element={<PromotionPage />} />
+                <Route path='/dashboard/*' element={<DashboardRoutes />} />
+              </>
+            )}
+            <Route path='*' element={<Navigate to='/' replace />} />
+          </Routes>
+        </Box>
+        <Footer refs={refs} />
       </Box>
-      <Footer refs={refs} />
-    </Box>
+    </>
   );
 };

@@ -1,41 +1,146 @@
 import React from "react";
 import Logo from "../assets/LOGO-SIN-FONDO.png";
-import { ContactInfo } from "./components/ContactInfo";
-import { ImportantLinks } from "./components/ImportantLinks";
 import { useLocation } from "react-router-dom";
+import { Mail, MapPin, Phone, Facebook, Instagram, Linkedin } from "lucide-react";
+import { useNavigateTo } from "../hooks/useNavigateTo";
 
 export const Footer = ({ refs }) => {
   const location = useLocation();
-
+  const { handleNavigate } = useNavigateTo();
   const allowedRoutes = ["/", "/auth/login"];
-
-  // Verifica si la ruta actual empieza con "/agendas/"
   const isAgendasRoute = location.pathname.startsWith("/agendas/");
 
-  // Si la ruta actual no está en allowedRoutes o no empieza con "/agendas/", retorna null
+  const handleSectionClick = (sectionId: string) => {
+    if (location.pathname === "/") {
+      // Si estamos en home, solo hacemos scroll
+      document.querySelector(sectionId)?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // Si no estamos en home, navegamos a home con un callback para hacer scroll
+      handleNavigate("/", {
+        state: { scrollTo: sectionId },
+      });
+    }
+  };
+
   if (!allowedRoutes.includes(location.pathname) && !isAgendasRoute) {
     return null;
   }
 
   return (
-    <footer className='bg-main mt-0 pb-4 w-full'>
-      <div className='max-w-6xl mx-auto px-4 md:px-6 lg:px-8'>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4'>
-          {/* Logo */}
-          <div className='flex items-center justify-center md:justify-start'>
-            <img src={Logo} alt='Logo' className='w-40' />
+    <footer className='bg-[#5b7898] text-white'>
+      <div className='container mx-auto px-4 py-12'>
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
+          {/* Logo y Descripción */}
+          <div className='space-y-4'>
+            <img src={Logo} alt='Logo' className='w-40 brightness-0 invert' />
+            <p className='text-sm text-slate-200'>Soluciones de fidelización para hacer crecer tu negocio y mantener a tus clientes felices.</p>
           </div>
-          {/* Información de contacto */}
-          <div className='text-white'>
-            <ContactInfo />
+
+          {/* Información de Contacto */}
+          <div className='space-y-4'>
+            <h3 className='text-lg font-semibold'>Información de Contacto</h3>
+            <ul className='space-y-3'>
+              <li>
+                <a href='mailto:contacto@fidelidapp.cl' className='flex items-center gap-2 text-sm text-slate-200 hover:text-white transition-colors'>
+                  <Mail className='h-4 w-4' />
+                  contacto@fidelidapp.cl
+                </a>
+              </li>
+              <li>
+                <a href='tel:+56996706983' className='flex items-center gap-2 text-sm text-slate-200 hover:text-white transition-colors'>
+                  <Phone className='h-4 w-4' />
+                  +56996706983
+                </a>
+              </li>
+              <li>
+                <div className='flex items-center gap-2 text-sm text-slate-200'>
+                  <MapPin className='h-4 w-4' />
+                  Santiago, Chile
+                </div>
+              </li>
+            </ul>
           </div>
-          {/* Enlaces importantes */}
-          <div className='text-white'>
-            <ImportantLinks refs={refs} />
+
+          {/* Links Importantes */}
+          <div className='space-y-4'>
+            <h3 className='text-lg font-semibold'>Links Importantes</h3>
+            <ul className='space-y-2'>
+              <li>
+                <a onClick={() => navigate("/")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                  Home
+                </a>
+              </li>
+              <li>
+                <a onClick={() => handleSectionClick("#como-funciona")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                  Cómo Funciona
+                </a>
+              </li>
+              <li>
+                <a onClick={() => handleSectionClick("#planes")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                  Planes
+                </a>
+              </li>
+              <li>
+                <a onClick={() => handleSectionClick("#contacto")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                  Contacto
+                </a>
+              </li>
+              <li>
+                <a
+                  onClick={() => navigate("/auth/login", { state: { showRegister: true } })}
+                  className='text-sm text-slate-200 hover:text-white transition-colors'
+                >
+                  Registrarse
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Redes Sociales */}
+          <div className='space-y-4'>
+            <h3 className='text-lg font-semibold'>Síguenos</h3>
+            <div className='flex gap-4'>
+              <a
+                href='https://linkedin.com'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors'
+              >
+                <Linkedin className='h-4 w-4 text-white' />
+              </a>
+              <a
+                href='https://instagram.com'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors'
+              >
+                <Instagram className='h-4 w-4 text-white' />
+              </a>
+              <a
+                href='https://facebook.com'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors'
+              >
+                <Facebook className='h-4 w-4 text-white' />
+              </a>
+            </div>
           </div>
         </div>
-        <div className='border-t border-gray-700 mt-4 pt-4 text-center mb-6'>
-          <p className='text-sm text-gray-300'>&copy; {new Date().getFullYear()} FidelidApp. Todos los derechos reservados.</p>
+
+        {/* Separador y Copyright */}
+        <div className='border-t border-white/20 mt-8 pt-8'>
+          <div className='flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-200'>
+            <p>© {new Date().getFullYear()} FidelidApp. Todos los derechos reservados.</p>
+            <div className='flex gap-6'>
+              <a href='/privacidad' className='text-white hover:text-white/80 transition-colors'>
+                Política de Privacidad
+              </a>
+              <a href='/terminos' className='text-white hover:text-white/80 transition-colors'>
+                Términos y Condiciones
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

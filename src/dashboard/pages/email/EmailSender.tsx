@@ -1,49 +1,51 @@
 import React, { useState, useRef, useEffect } from "react";
+import EmailEditor, { EditorRef } from "react-email-editor";
+import { useDropzone } from "react-dropzone";
+import Papa from "papaparse";
+import { toast } from "react-toastify";
+import { useDashboard } from "../../../hooks";
+import { useAuthSlice } from "../../../hooks/useAuthSlice";
+import api from "../../../utils/api";
+import CircularProgress from "@mui/material/CircularProgress";
+
+// Material UI
 import {
-  Button,
-  TextField,
   Box,
+  Button,
+  Card,
+  CardContent,
   Typography,
+  LinearProgress,
+  Alert,
+  AlertTitle,
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
   Paper,
+  IconButton,
+  FormControl,
+  InputLabel,
   Select,
   MenuItem,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Backdrop,
-  CircularProgress,
   Checkbox,
+  TablePagination,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
-import translations from "../../../utils/translation.json";
-import api from "../../../utils/api";
-import { motion } from "framer-motion";
-import Papa from "papaparse";
-import { useDashboard } from "../../../hooks";
-import { toast } from "react-toastify";
-import EmailEditor, { EditorRef, EmailEditorProps } from "react-email-editor";
-import { useDropzone } from "react-dropzone"; // Importa el hook de Dropzone
-import { UploadFile, SaveAlt } from "@mui/icons-material";
-import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
-import howtouse from "../../../assets/Mi video-1.gif";
-import { useAuthSlice } from "../../../hooks/useAuthSlice";
-import { set } from "react-hook-form";
-const pageTransition = {
-  hidden: { opacity: 0, y: 50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
+
+// Icons
+import { Mail as MailIcon, Upload as UploadIcon, Bolt as BoltIcon, Save as SaveIcon, Description as DescriptionIcon } from "@mui/icons-material";
 
 export const EmailSender = () => {
   const [showHowToUse, setShowHowToUse] = useState(false);
@@ -71,12 +73,15 @@ export const EmailSender = () => {
   const [templateName, setTemplateName] = useState(""); // Nombre de la plantilla
   const [openSaveDialog, setOpenSaveDialog] = useState(false); // Dialog para guardar plantilla
   const [openTemplatesDialog, setOpenTemplatesDialog] = useState(false); // Dialog para ver plantillas
+  const [currentTab, setCurrentTab] = useState("design");
+  const [tempDesign, setTempDesign] = useState(null);
+  const [loadingDialog, setLoadingDialog] = useState(false);
 
   useEffect(() => {
     getPromotionsAndMetrics();
   }, []);
 
-  const handleClick = () => {
+  const handleWhatsAppClick = () => {
     const whatsappNumber = "56996706983";
     const message = "¡Hola! Me gustaría obtener más información sobre pasar mi cuenta a pro. ¡Gracias!";
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
@@ -90,10 +95,17 @@ export const EmailSender = () => {
 
   // Enviar correos (abre el diálogo de confirmación)
   const handleSendEmails = () => {
-    const totalEmails = contactSource === "csv" ? csvData.length : clients.length;
+    const totalEmails = contactSource === "csv" ? selectedCsvData.length : selectedClients.length;
     setEmailCount(totalEmails);
 
-    setOpenDialog(true); // Abrir el diálogo de confirmación
+    if (currentTab === "recipients") {
+      setCurrentTab("design");
+      if (tempDesign) {
+        emailEditorRef.current.editor.loadDesign(tempDesign);
+      }
+    } else {
+      setOpenDialog(true);
+    }
   };
   const handleSectionChange = (section) => {
     setSelectedSection(section);
@@ -137,6 +149,8 @@ export const EmailSender = () => {
   // Confirmar el envío de correos
   const handleConfirmSend = async () => {
     setLoading(true);
+    setLoadingDialog(true);
+    setOpenDialog(false);
 
     let recipients;
 
@@ -213,7 +227,7 @@ export const EmailSender = () => {
       toast.error("Hubo un problema enviando el correo.");
     } finally {
       setLoading(false);
-      setOpenDialog(false);
+      setLoadingDialog(false);
     }
   };
   useEffect(() => {
@@ -245,9 +259,10 @@ export const EmailSender = () => {
 
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
+    if (!file) return;
 
     // Validar que el archivo sea CSV
-    if (!file.name.endsWith(".csv")) {
+    if (!file.name.toLowerCase().endsWith(".csv")) {
       toast.error("El archivo debe ser un archivo CSV.");
       return;
     }
@@ -257,25 +272,47 @@ export const EmailSender = () => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      encoding: "UTF-8",
       complete: (results) => {
+        if (results.errors.length > 0) {
+          toast.error("Error al procesar el archivo CSV");
+          return;
+        }
+
         const filteredData = results.data
           .map((row) => ({
-            name: row.nombre || row.Name || row.name || row.Nombre,
-            email: row.email || row.Email || row.correo || row.Correo,
+            name: row.nombre || row.Name || row.name || row.Nombre || "",
+            email: row.email || row.Email || row.correo || row.Correo || "",
           }))
-          .filter((row) => row.name || row.email); // Filtrar filas sin nombre ni email
+          .filter((row) => row.email && row.email.includes("@")); // Filtrar emails inválidos
 
-        setCsvData(filteredData); // Si es menor a 500, cargar los datos
+        if (filteredData.length === 0) {
+          toast.error("No se encontraron datos válidos en el CSV");
+          return;
+        }
+
+        setCsvData(filteredData);
+        toast.success(`Se cargaron ${filteredData.length} contactos del CSV`);
+      },
+      error: (error) => {
+        toast.error("Error al leer el archivo CSV");
+        console.error(error);
       },
     });
   };
 
-  // Configurar el hook de react-dropzone
+  // Actualizar la configuración de dropzone
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "text/csv": [".csv"] },
+    accept: {
+      "text/csv": [".csv"],
+      "application/vnd.ms-excel": [".csv"],
+      "application/csv": [".csv"],
+    },
     multiple: false,
+    maxFiles: 1,
   });
+
   const isSelectedAll =
     contactSource === "csv"
       ? selectedCsvData.length > 0 && selectedCsvData.length === csvData.length
@@ -298,6 +335,7 @@ export const EmailSender = () => {
       };
 
       const response = await api.post("/api/template/create", templateData);
+      setTemplates((prevTemplates) => [...prevTemplates, response.data]);
       toast.success("Plantilla guardada correctamente");
       setOpenSaveDialog(false);
       setTemplateName("");
@@ -328,124 +366,219 @@ export const EmailSender = () => {
     loadTemplates();
   }, []);
 
+  // Configuración del editor de email para hacerlo más responsive
+  const emailEditorOptions = {
+    locale: "es-ES",
+    features: {
+      responsiveDesign: true,
+    },
+    appearance: {
+      theme: "light",
+    },
+    tools: {
+      // Herramientas existentes...
+      image: { enabled: true },
+      button: { enabled: true },
+      text: { enabled: true },
+      social: {
+        enabled: true,
+        networks: ["facebook", "twitter", "instagram", "linkedin", "youtube", "whatsapp"],
+      },
+      socialGroup: { enabled: true },
+      divider: { enabled: true },
+      html: { enabled: true },
+      menu: { enabled: true },
+      layout: { enabled: true },
+    },
+    translations: {
+      es: {
+        "tools.social.name": "Redes Sociales",
+        "tools.socialGroup.name": "Grupo de Redes Sociales",
+        // Otras traducciones si son necesarias
+      },
+    },
+    displayMode: "email",
+    projectId: 1234,
+    minHeight: "600px",
+    style: {
+      width: "100%",
+      height: "100%",
+    },
+    onReady: () => {
+      console.log("Editor listo");
+      if (tempDesign && currentTab === "design") {
+        emailEditorRef.current.editor.loadDesign(tempDesign);
+      }
+    },
+  };
+
+  const handleTabChange = async (_, newValue) => {
+    if (currentTab === "design" && newValue === "recipients") {
+      if (emailEditorRef.current?.editor) {
+        emailEditorRef.current.editor.saveDesign((design) => {
+          console.log("Guardando diseño:", design); // Para debugging
+          setTempDesign(design);
+        });
+      }
+    }
+    setCurrentTab(newValue);
+  };
+
+  // Añade este useEffect para manejar la carga inicial del editor
+  useEffect(() => {
+    let editorLoadedInterval;
+    if (currentTab === "design" && tempDesign) {
+      editorLoadedInterval = setInterval(() => {
+        if (emailEditorRef.current?.editor) {
+          emailEditorRef.current.editor.loadDesign(tempDesign);
+          clearInterval(editorLoadedInterval);
+        }
+      }, 100);
+    }
+    return () => clearInterval(editorLoadedInterval);
+  }, [currentTab, tempDesign]);
+
   return (
-    <motion.main
-      initial='hidden'
-      animate='visible'
-      exit='hidden'
-      variants={pageTransition}
-      className='md:p-10 ml-4 md:ml-20 lg:ml-20 w-[95%] gap-5 m-auto h-full flex flex-col justify-center  '
-    >
-      <div className='flex w-full m-auto flex-col justify-center mb-12 text-lg p-12  rounded-md shadow-md shadow-gray-600/40  bg-gradient-to-br from-gray-50 to-main/40'>
-        <div className='flex w-full space-y-2 md:space-y-0 flex-col md:flex-row md:space-x-6 justify-center m-auto'>
-          <span>Correos enviados en los últimos 30 días: {accounts?.emailsSentCount || 0}</span>
-          <span>Limite de correos al mes: {plan?.emailLimit}</span>
-        </div>
-        {!isWithinLimit ? (
-          <span className='m-auto mt-6'>
-            {plan?.planStatus === "free" ? (
-              <span
-                onClick={handleClick}
-                className='p-2 w-[95%]  md:w-2/6 bg-main text-white hover:bg-main/90 duration-300 cursor-pointer rounded-md shadow-md shadow-gray-600/40 text-center m-auto mt-6'
-              >
-                Limite alcanzado. Hazte PRO ahora y aumenta tu límite a <span className='font-bold'>10.000</span>.
-              </span>
-            ) : (
-              "Has alcanzado tu limite mensual"
-            )}
-          </span>
-        ) : (
-          <span className='flex m-auto'>
-            <span className='flex m-auto'>
-              Te quedan disponibles <span className='font-bold mx-1'> {plan.emailLimit - accounts.emailsSentCount} </span> emails.
-            </span>{" "}
-          </span>
-        )}
+    <div className=' w-[95%] md:ml-20 lg:ml-20 mx-auto p-8 space-y-8'>
+      {/* Estadísticas de uso de email */}
+      <Card className='border border-t-4 border-black/20 border-t-[#5b7898]'>
+        <CardContent className='space-y-6'>
+          <Typography variant='h5' className='text-[#5b7898]'>
+            Email Marketing
+          </Typography>
+          <Typography variant='body2' color='textSecondary'>
+            Diseña y envía correos personalizados a tus clientes
+          </Typography>
 
-        <div className='flex '>
-          {isFreePlan && isWithinLimit ? (
-            <span
-              onClick={handleClick}
-              className='p-2 w-[95%] md:w-2/6 bg-main text-white hover:bg-main/90 duration-300 cursor-pointer rounded-md shadow-md shadow-gray-600/40 text-center m-auto mt-6'
+          <Box className='space-y-2'>
+            <Box className='flex justify-between'>
+              <Typography variant='body2'>Correos enviados en los últimos 30 días: {accounts?.emailsSentCount || 0}</Typography>
+              <Typography variant='body2' fontWeight='medium'>
+                {accounts?.emailsSentCount || 0} de {plan?.emailLimit}
+              </Typography>
+            </Box>
+            <LinearProgress variant='determinate' value={(accounts?.emailsSentCount / plan?.emailLimit) * 100} className='h-2' />
+            <Typography variant='body2' color='textSecondary'>
+              Te quedan disponibles {plan?.emailLimit - accounts?.emailsSentCount} emails.
+            </Typography>
+          </Box>
+
+          {isFreePlan && isWithinLimit && (
+            <Alert
+              severity='info'
+              icon={<BoltIcon />}
+              action={
+                <Button color='inherit' size='small' onClick={handleWhatsAppClick}>
+                  Actualizar Plan
+                </Button>
+              }
             >
-              Hazte PRO ahora y aumenta tu límite a <span className='font-bold'>10.000</span>.
-            </span>
-          ) : (
-            <span></span>
+              <AlertTitle>Aumenta tu límite</AlertTitle>
+              Hazte PRO ahora y aumenta tu límite a 10.000 emails mensuales.
+            </Alert>
           )}
-        </div>
-      </div>
-      <div className=' w-full gap-5'>
-        <Box>
-          <span className='font-bold text-3xl pb-6 flex'>A continuación podrás crear emails y enviarlos masivamente.</span>
+        </CardContent>
+      </Card>
 
-          {/* Selección de fuente de contacto (CSV o Clientes) */}
-          <Select value={contactSource} onChange={handleContactSourceChange} fullWidth margin='normal'>
-            <MenuItem value='csv'>Cargar CSV</MenuItem>
-            <MenuItem value='clients'>Clientes</MenuItem>
-          </Select>
+      {/* Formulario de creación de email */}
+      <Card className='border border-t-4 border-black/20 border-t-[#5b7898]'>
+        <CardContent className='space-y-6'>
+          <Typography variant='h5' className='text-[#5b7898]'>
+            Crear Nuevo Email
+          </Typography>
+          <Typography variant='body2' color='textSecondary'>
+            Diseña y personaliza tus correos masivos
+          </Typography>
 
-          {/* Cargar archivo CSV usando react-dropzone */}
-          {contactSource === "csv" && (
-            <>
-              <div {...getRootProps()} style={{ border: "2px dashed #007BFF", padding: "20px", textAlign: "center", marginTop: "20px" }}>
-                <input {...getInputProps()} />
-                <div>
-                  <UploadFile fontSize='large' color='action' />
-                  <Typography variant='h6'>Arrastra y suelta tu archivo CSV aquí, o haz clic para seleccionar</Typography>
-                  <Button variant='contained' color='primary' sx={{ marginTop: 2 }}>
-                    Subir archivo
-                  </Button>
-                  <span className='flex m-auto justify-center mt-2'></span>
-                </div>{" "}
-              </div>
-              <div
-                onClick={() => setShowHowToUse(!showHowToUse)} // Mostrar al hacer hover
-                style={{ marginTop: "20px", textAlign: "center" }}
-              >
-                {showHowToUse ? (
-                  <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
-                    Cerrar video.
-                  </Typography>
-                ) : (
-                  <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
-                    ¿Cómo usar esta funcionalidad?
-                  </Typography>
-                )}
+          <Tabs value={currentTab} onChange={handleTabChange} className='border-b'>
+            <Tab label='Diseñar Email' value='design' />
+            <Tab label='Destinatarios' value='recipients' />
+          </Tabs>
 
-                {showHowToUse && (
-                  <div className='flex m-auto text-center justify-center' style={{ marginTop: "10px" }}>
-                    <img src={howtouse} alt='Cómo usar' style={{ maxWidth: "100%", height: "auto" }} />
-                  </div>
-                )}
-              </div>
-              {csvData.length > 0 && (
-                <Box mt={4}>
-                  <Typography variant='h6'>Vista previa del CSV:</Typography>
-                  <Paper>
-                    <TableContainer>
+          {currentTab === "design" && (
+            <Box className='space-y-4'>
+              <TextField
+                fullWidth
+                label='Asunto del Email'
+                value={subject}
+                onChange={handleSubjectChange}
+                placeholder='Ej: ¡Oferta especial para {nombreCliente}!'
+              />
+
+              <Box className='border rounded-md'>
+                <Alert severity='info'>
+                  <AlertTitle>Variables Disponibles</AlertTitle>
+                  Usa <code className='text-[#5b7898]'>{"{nombreCliente}"}</code> para personalizar tus correos.
+                </Alert>
+                <EmailEditor
+                  ref={emailEditorRef}
+                  options={emailEditorOptions}
+                  onLoad={() => {
+                    // Configuración adicional al cargar
+                    if (emailEditorRef.current) {
+                      emailEditorRef.current.editor.addEventListener("design:updated", () => {
+                        emailEditorRef.current.editor.exportHtml((data) => {
+                          // Aquí puedes manejar las actualizaciones del diseño
+                          console.log("Diseño actualizado");
+                        });
+                      });
+                    }
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
+
+          {currentTab === "recipients" && (
+            <Box className='space-y-4'>
+              {/* Selector de fuente de contactos */}
+              <Box className='mb-4'>
+                <FormControl fullWidth>
+                  <InputLabel>Fuente de Contactos</InputLabel>
+                  <Select value={contactSource} onChange={(e) => setContactSource(e.target.value)} label='Fuente de Contactos'>
+                    <MenuItem value='csv'>Cargar desde CSV</MenuItem>
+                    <MenuItem value='clients'>Seleccionar Clientes</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              {contactSource === "csv" && (
+                <Box className='space-y-4'>
+                  <Paper
+                    {...getRootProps()}
+                    className={`p-8 text-center border-2 border-dashed transition-colors cursor-pointer
+                      ${isDragActive ? "border-[#5b7898] bg-[#5b789815]" : "border-gray-300"}`}
+                  >
+                    <input {...getInputProps()} />
+                    <UploadIcon className='text-[#5b7898] text-4xl mb-2' />
+                    <Typography variant='h6'>Arrastra y suelta tu archivo CSV aquí</Typography>
+                    <Typography variant='body2' color='textSecondary'>
+                      o haz clic para seleccionar el archivo
+                    </Typography>
+                  </Paper>
+
+                  {/* Mostrar datos cargados del CSV */}
+                  {csvData.length > 0 && (
+                    <TableContainer component={Paper}>
                       <Table>
                         <TableHead>
                           <TableRow>
                             <TableCell padding='checkbox'>
                               <Checkbox
-                                checked={isSelectedAll} // Si está seleccionado todo
-                                onChange={handleSelectAllClick} // Función para seleccionar todo
-                                indeterminate={selectedCsvData.length > 0 && selectedCsvData.length < csvData.length} // Selección parcial
+                                checked={selectedCsvData.length > 0 && selectedCsvData.length === csvData.length}
+                                onChange={handleSelectAllClick}
+                                indeterminate={selectedCsvData.length > 0 && selectedCsvData.length < csvData.length}
                               />
                             </TableCell>
                             <TableCell>Nombre</TableCell>
-                            <TableCell>Correo Electrónico</TableCell>
+                            <TableCell>Email</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {csvData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                             <TableRow key={index} hover>
                               <TableCell padding='checkbox'>
-                                <Checkbox
-                                  checked={selectedCsvData.indexOf(row.email) !== -1} // Verifica si está seleccionado
-                                  onChange={(event) => handleCheckboxChange(event, row.email)} // Cambia el estado
-                                />
+                                <Checkbox checked={selectedCsvData.includes(row.email)} onChange={(event) => handleCheckboxChange(event, row.email)} />
                               </TableCell>
                               <TableCell>{row.name}</TableCell>
                               <TableCell>{row.email}</TableCell>
@@ -453,27 +586,24 @@ export const EmailSender = () => {
                           ))}
                         </TableBody>
                       </Table>
+                      <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component='div'
+                        count={csvData.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        labelRowsPerPage='Filas por página'
+                        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                      />
                     </TableContainer>
-                  </Paper>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component='div'
-                    count={csvData.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage='Filas por página'
-                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
-                  />
+                  )}
                 </Box>
               )}
-            </>
-          )}
-          {contactSource === "clients" && (
-            <>
-              <Typography variant='h6'>Lista de clientes:</Typography>
-              <Box mt={2}>
+
+              {contactSource === "clients" ? (
+                // Tabla de clientes
                 <TableContainer component={Paper}>
                   <Table>
                     <TableHead>
@@ -486,7 +616,8 @@ export const EmailSender = () => {
                           />
                         </TableCell>
                         <TableCell>Nombre</TableCell>
-                        <TableCell>Correo Electrónico</TableCell>
+                        <TableCell>Email</TableCell>
+                        <TableCell>Teléfono</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -497,99 +628,80 @@ export const EmailSender = () => {
                           </TableCell>
                           <TableCell>{client.name}</TableCell>
                           <TableCell>{client.email}</TableCell>
+                          <TableCell>{client.phone}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component='div'
+                    count={clients.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage='Filas por página'
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                  />
                 </TableContainer>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 25]}
-                  component='div'
-                  count={clients.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  labelRowsPerPage='Filas por página'
-                  labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
-                />
-              </Box>
-            </>
+              ) : (
+                // Resumen de selección
+                <Box className='mt-4 p-4 bg-gray-50 rounded-md'>
+                  <Typography variant='subtitle1' className='font-medium'>
+                    Destinatarios seleccionados: {contactSource === "csv" ? selectedCsvData.length : selectedClients.length}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
           )}
-          {/* Editor de Email */}
-          <TextField label='Asunto del Email' variant='outlined' fullWidth margin='normal' value={subject} onChange={handleSubjectChange} />
-          <div className='my-4'>
-            <div className='flex flex-col my-6'>
-              <span>
-                En el editor puedes usar <span className='font-bold'>{`{nombreCliente}`}</span> para personalizar tus correos.
-              </span>{" "}
-              <span className='italic'>
-                Ejemplo: Hola <span className='font-bold'>{`{nombreCliente}`}</span> nos contactamos contigo para contarte de nuestra nueva promoción.{" "}
-              </span>
-            </div>
-            <Typography variant='h6'>Editor de Email</Typography>
-            <div id='email-editor' ref={emailEditorRef} style={{ height: "600px" }}>
-              <EmailEditor ref={emailEditorRef} options={{ locale: "es-ES" }} />
-            </div>
-          </div>
+        </CardContent>
 
-          {/* Agregar botones para gestionar plantillas cerca del editor de email */}
-          <div className='flex gap-4 my-4'>
-            <Button variant='contained' startIcon={<SaveAlt />} onClick={() => setOpenSaveDialog(true)}>
-              Guardar como plantilla
+        <Box className='flex justify-between p-4 border-t'>
+          <Box className='flex gap-2'>
+            <Button variant='outlined' startIcon={<SaveIcon />} onClick={() => setOpenSaveDialog(true)}>
+              Guardar Plantilla
             </Button>
-            <Button variant='outlined' startIcon={<DescriptionRoundedIcon />} onClick={() => setOpenTemplatesDialog(true)}>
-              Cargar plantilla
+            <Button
+              variant='outlined'
+              startIcon={<DescriptionIcon />}
+              onClick={() => {
+                if (templates.length === 0) {
+                  toast.info("No tienes plantillas guardadas aún");
+                } else {
+                  setOpenTemplatesDialog(true);
+                }
+              }}
+            >
+              Cargar Plantilla
             </Button>
-          </div>
-
-          {/* Asunto del Email */}
-
-          {/* Botón para enviar el correo */}
+          </Box>
           <Button
             variant='contained'
             color='primary'
-            fullWidth
+            startIcon={<MailIcon />}
             disabled={isSendDisabled || (!selectedClients.length && !selectedCsvData.length)}
             onClick={handleSendEmails}
           >
-            Enviar Correos
+            Enviar Email
           </Button>
         </Box>
-      </div>
+      </Card>
 
       {/* Diálogos */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Confirmar Envío</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Estás a punto de enviar correos a {selectedClients.length + selectedCsvData.length} destinatarios. ¿Estás seguro?
-          </DialogContentText>
+          <Typography>Estás a punto de enviar correos a {selectedClients.length + selectedCsvData.length} destinatarios. ¿Estás seguro?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color='secondary'>
-            Cancelar
-          </Button>
-          <Button onClick={handleConfirmSend} color='primary'>
+          <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+          <Button onClick={handleConfirmSend} color='primary' autoFocus>
             Confirmar
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Advertencia cuando hay más de 500 contactos */}
-      <Dialog open={openWarningDialog} onClose={() => setOpenWarningDialog(false)}>
-        <DialogTitle>Advertencia</DialogTitle>
-        <DialogContent>
-          <DialogContentText>El archivo CSV contiene más de 500 contactos. No se puede cargar el archivo.</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenWarningDialog(false)} color='primary'>
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog para guardar plantilla */}
       <Dialog open={openSaveDialog} onClose={() => setOpenSaveDialog(false)}>
         <DialogTitle>Guardar Plantilla</DialogTitle>
         <DialogContent>
@@ -597,50 +709,50 @@ export const EmailSender = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenSaveDialog(false)}>Cancelar</Button>
-          <Button onClick={handleSaveTemplate} disabled={!templateName}>
+          <Button onClick={handleSaveTemplate} color='primary'>
             Guardar
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Dialog para mostrar y seleccionar plantillas */}
-      <Dialog open={openTemplatesDialog} onClose={() => setOpenTemplatesDialog(false)} maxWidth='md' fullWidth>
+      <Dialog maxWidth='md' fullWidth open={openTemplatesDialog} onClose={() => setOpenTemplatesDialog(false)}>
         <DialogTitle>Mis Plantillas</DialogTitle>
         <DialogContent>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Nombre</TableCell>
-                  <TableCell>Asunto</TableCell>
-                  <TableCell>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {templates.map((template) => (
-                  <TableRow key={template._id}>
-                    <TableCell>{template.name}</TableCell>
-                    <TableCell>{template.subject}</TableCell>
-                    <TableCell>
-                      <Button variant='contained' size='small' onClick={() => loadTemplate(template)}>
-                        Usar
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <List sx={{ width: "100%" }}>
+            {templates.map((template) => (
+              <ListItem
+                key={template._id}
+                sx={{
+                  borderBottom: "1px solid #eee",
+                  py: 2,
+                  "&:last-child": { borderBottom: "none" },
+                }}
+                secondaryAction={
+                  <Button variant='contained' size='small' onClick={() => loadTemplate(template)} sx={{ ml: 2 }}>
+                    Usar
+                  </Button>
+                }
+              >
+                <ListItemText primary={template.name} secondary={template.subject} sx={{ pr: 4 }} />
+              </ListItem>
+            ))}
+          </List>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setOpenTemplatesDialog(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 
-      {/* Cargando */}
-      <Backdrop open={loading} style={{ color: "#fff" }}>
-        <CircularProgress color='inherit' />
-      </Backdrop>
-    </motion.main>
+      {/* Diálogo de Loading */}
+      <Dialog open={loadingDialog} disableEscapeKeyDown={true}>
+        <DialogContent sx={{ textAlign: "center", p: 4 }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant='h6' gutterBottom>
+            Enviando correos...
+          </Typography>
+          <Typography color='textSecondary'>Por favor, no cierres esta pestaña hasta que el proceso termine.</Typography>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
