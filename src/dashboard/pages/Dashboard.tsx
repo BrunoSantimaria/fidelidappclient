@@ -36,7 +36,7 @@ const useDashboardData = () => {
     // Revalidación periódica cada 30 segundos
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
-  }, [getPromotionsAndMetrics]);
+  }, []);
 
   return {
     isLoading,
@@ -262,7 +262,6 @@ export const Dashboard = () => {
                       Página {currentPage} de {totalPages}
                     </span>
                     <button
-                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
                       className='px-2 py-1 text-sm rounded bg-slate-100 disabled:opacity-50'
