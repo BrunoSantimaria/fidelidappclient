@@ -8,26 +8,53 @@ import { QuickActions } from "../components/QuickActions";
 import { RecentPromotions } from "../components/RecentPromotions";
 import { useWeeklyVisits } from "../../hooks/useWeeklyVisits";
 import moment from "moment";
-import "moment/locale/es"; // Para los nombres de días en español
+import "moment/locale/es";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 
 // Configurar moment para usar español
 moment.locale("es");
 
+// Hook personalizado para manejar los datos del dashboard
+const useDashboardData = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { metrics, plan, promotions, getPromotionsAndMetrics, clients } = useDashboard();
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      await getPromotionsAndMetrics();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+    // Revalidación periódica cada 30 segundos
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    isLoading,
+    error,
+    metrics,
+    plan,
+    promotions,
+    clients,
+    refetch: loadData,
+  };
+};
+
 export const Dashboard = () => {
-  const { metrics, plan, promotions, getPromotionsAndMetrics, clients, loading } = useDashboard();
+  const { isLoading, error, metrics, plan, promotions, clients } = useDashboardData();
   const { user } = useAuthSlice();
   const { handleNavigate } = useNavigateTo();
   const [currentPage, setCurrentPage] = useState(1);
   const { weeklyVisits, loading: loadingVisits } = useWeeklyVisits();
-
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      await getPromotionsAndMetrics();
-    };
-    loadDashboardData();
-  }, []);
-
   const clientsPerPage = 3;
 
   const getInitials = (name: string) => {
@@ -39,7 +66,9 @@ export const Dashboard = () => {
   };
 
   const sortedClients = useMemo(() => {
-    return [...(clients || [])]
+    if (!clients || !promotions) return [];
+
+    return [...clients]
       .filter(
         (client) =>
           client.addedpromotions &&
@@ -55,8 +84,10 @@ export const Dashboard = () => {
   }, [clients, promotions]);
 
   const visitData = useMemo(() => {
+    if (!weeklyVisits) return [];
     moment.locale("es");
     // ... resto del código del visitData
+    return weeklyVisits;
   }, [weeklyVisits]);
 
   const indexOfLastClient = currentPage * clientsPerPage;
@@ -64,7 +95,7 @@ export const Dashboard = () => {
   const currentClients = sortedClients.slice(indexOfFirstClient, indexOfLastClient);
   const totalPages = Math.ceil(sortedClients.length / clientsPerPage);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
         <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5b7898]'></div>
@@ -72,12 +103,18 @@ export const Dashboard = () => {
     );
   }
 
-  console.log("first visit", user.accounts?.firstEmailMarketingCompleted);
+  if (error) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <p className='text-red-500'>Error al cargar los datos. Por favor, intenta de nuevo.</p>
+      </div>
+    );
+  }
+
   const onboardingTasks = [
     { id: 1, title: "Crear tu primera promoción", completed: metrics?.activePromotions > 0 },
-    { id: 2, title: "Añadir tu primer cliente", completed: clients.length > 0 },
+    { id: 2, title: "Añadir tu primer cliente", completed: clients?.length > 0 },
     { id: 3, title: "Enviar tu primera campaña de email", completed: user.accounts?.firstEmailMarketingCompleted || false },
-    //{ id: 4, title: "Agendar tu primer evento", completed: false },
   ];
 
   const progress = (onboardingTasks.filter((task) => task.completed).length / onboardingTasks.length) * 100;
