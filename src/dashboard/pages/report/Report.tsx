@@ -1,151 +1,273 @@
-import { useEffect, useState } from 'react';
-import { LineChart } from '@mui/x-charts';
-import { Box, Stack, Typography, CircularProgress } from '@mui/material';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, TablePagination } from '@mui/material';
-import api from '../../../utils/api';
+import { useEffect, useState } from "react";
+import { LineChart } from "@mui/x-charts";
+import { Box, Stack, Typography, CircularProgress, Card, Button } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, TablePagination } from "@mui/material";
+import api from "../../../utils/api";
+import {
+  People as PeopleIcon,
+  Stars as StarsIcon,
+  Visibility as VisibilityIcon,
+  CardGiftcard as CardGiftcardIcon,
+  Campaign as CampaignIcon,
+  Description as FileTextIcon,
+  Info as InfoIcon,
+} from "@mui/icons-material";
+import LinearProgress from "@mui/material/LinearProgress";
 
-const ClientMetricsTable = ({ title, data, dataType }) => {
-  const [page, setPage] = useState(0); // Current page
-  const rowsPerPage = 10; // Number of rows per page
+// Componente para las métricas superiores
+const MetricCard = ({ title, value, icon }) => (
+  <Card
+    sx={{
+      p: 2,
+      minWidth: { xs: "100%", sm: 180 },
+      bgcolor: "white",
+      color: "primary.main",
+      borderTop: 3,
+      borderColor: "primary.main",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 1,
+    }}
+  >
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {icon}
+      <Typography variant='body2'>{title}</Typography>
+    </Box>
+    <Typography variant='h5' fontWeight='bold'>
+      {value}
+    </Typography>
+  </Card>
+);
 
-  // Handle page change
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+const ClientMetricsTable = ({ title, subtitle, data, dataType }) => {
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 10;
 
   return (
-    <TableContainer component={Paper} sx={{ my: 2 }}>
-      <Typography variant="h6" align="center" gutterBottom>{title}</Typography>
+    <>
+      <Typography variant='h6' gutterBottom>
+        {title}
+      </Typography>
+      <Typography variant='body2' color='text.secondary' gutterBottom>
+        {subtitle}
+      </Typography>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>Cliente</TableCell>
-            <TableCell align="right">{dataType}</TableCell>
+            <TableCell align='right'>{dataType}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
             <TableRow key={index}>
               <TableCell>{item.client}</TableCell>
-              <TableCell align="right">{item.value}</TableCell>
+              <TableCell align='right'>{item.value}</TableCell>
             </TableRow>
           ))}
         </TableBody>
         <TableFooter>
           <TableRow>
             <TablePagination
-              rowsPerPageOptions={[10]} // Only allow 10 rows per page
-              count={data.length} // Total number of rows
-              rowsPerPage={rowsPerPage} // Rows per page
-              page={page} // Current page
-              onPageChange={handleChangePage} // Handle page change
+              rowsPerPageOptions={[10]}
+              count={data.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
             />
           </TableRow>
         </TableFooter>
       </Table>
-    </TableContainer>
+    </>
   );
 };
+
+// Componente de Loading
+const LoadingReport = ({ progress }) => (
+  <Card
+    sx={{
+      maxWidth: 600,
+      mx: "auto",
+      mt: 4,
+      p: 3,
+      borderTop: 3,
+      borderColor: "primary.main",
+    }}
+  >
+    <Stack spacing={3}>
+      {/* Título */}
+      <Stack direction='row' spacing={1} alignItems='center'>
+        <FileTextIcon />
+        <Typography variant='h6' color='primary'>
+          Generando tu Reporte
+        </Typography>
+      </Stack>
+
+      <Typography variant='body2' color='text.secondary'>
+        Estamos procesando tus datos para crear un informe detallado. Esto puede tomar unos momentos.
+      </Typography>
+
+      {/* Progreso */}
+      <Stack spacing={2} alignItems='center'>
+        <CircularProgress />
+        <LinearProgress sx={{ width: "100%" }} variant='determinate' value={progress} />
+        <Typography variant='body2' color='text.secondary'>
+          Progreso: {progress}%
+        </Typography>
+      </Stack>
+
+      {/* Tips */}
+      <Box
+        sx={{
+          bgcolor: "white",
+          color: "primary.main",
+          p: 2,
+          borderRadius: 1,
+        }}
+      >
+        <Stack direction='row' spacing={1} alignItems='center' mb={1}>
+          <InfoIcon fontSize='small' />
+          <Typography variant='subtitle2'>Mientras esperas</Typography>
+        </Stack>
+        <Typography variant='body2' mb={1}>
+          Aquí tienes algunos consejos sobre el uso de informes:
+        </Typography>
+        <ul style={{ paddingLeft: "1.5rem", fontSize: "0.875rem" }}>
+          <li>- Los informes detallados pueden ayudarte a identificar tendencias en el comportamiento de tus clientes.</li>
+          <li>- Utiliza los datos de los informes para personalizar tus promociones y aumentar la fidelización.</li>
+          <li>- Compara los informes mes a mes para medir el crecimiento de tu programa de fidelización.</li>
+          <li>- Los datos de canjes pueden indicarte qué recompensas son más populares entre tus clientes.</li>
+        </ul>
+      </Box>
+
+      {/* Botones */}
+    </Stack>
+  </Card>
+);
 
 export const Report = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    let progressTimer;
     const fetchData = async () => {
       try {
-        const response = await api.post('/api/promotions/getDashboardMetrics');
+        // Iniciar el timer de progreso
+        progressTimer = setInterval(() => {
+          setProgress((prev) => (prev >= 90 ? 90 : prev + 10));
+        }, 500);
+
+        const response = await api.post("/api/promotions/getDashboardMetrics");
         setData(response.data);
+        setProgress(100); // Completar el progreso
       } catch (error) {
-        setError('Error al cargar los datos');
-        console.error('Error:', error);
+        setError("Error al cargar los datos");
+        console.error("Error:", error);
       } finally {
+        clearInterval(progressTimer);
         setLoading(false);
       }
     };
     fetchData();
+
+    return () => {
+      if (progressTimer) clearInterval(progressTimer);
+    };
   }, []);
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (loading) {
+    return <LoadingReport progress={progress} />;
+  }
+
+  if (error) return <Typography color='error'>{error}</Typography>;
   if (!data) return null;
 
-  const dailyLabels = Object.keys(data.dailyData);
-  const dailyVisits = dailyLabels.map(date => data.dailyData[date].visits);
-  const dailyRegistrations = dailyLabels.map(date => data.dailyData[date].registrations);
-  const dailyRedeems = dailyLabels.map(date => data.dailyData[date].redeems);
+  // Extract the labels (dates) from dailyData
+  const dailyLabels = data.dailyData.map((entry) => entry.date);
 
-  const clientVisitsData = data.visitDataByClient.map(client => ({ client: client.client, value: client.visits }));
-  const clientRedeemsData = data.visitDataByClient.map(client => ({ client: client.client, value: client.redeems }));
+  // Extract values for visits, registrations, and points
+  const dailyVisits = data.dailyData.map((entry) => entry.visits);
+  const dailyRegistrations = data.dailyData.map((entry) => entry.registrations);
+  const dailyPoints = data.dailyData.map((entry) => entry.points);
 
-  const metrics = [
-    { label: 'Clientes Totales', value: data.totalClients },
-    { label: 'Puntos Acumulados', value: data.totalVisits },
-    { label: 'Promociones Canjeadas', value: data.promotionsRedeemed },
-    { label: 'Visitas Promedio', value: data.visitFrequency },
-    { label: 'Canjes Promedio', value: data.redemptionFrequency },
-  ];
-
+  const clientVisitsData = data.visitDataByClient?.map((client) => ({ client: client.client, value: client.visits })) || [];
+  const clientPointsData = data.pointDataByClient?.map((client) => ({ client: client.client, value: client.points })) || [];
 
   return (
-    <Stack
-      spacing={4}
-      sx={{
-        padding: "1rem",
-        paddingTop: { xs: 0, md: "5rem" }, // No top padding on mobile, 2rem on md+ screens
-        alignItems: "center"
-      }}
-    >
-      
-      <Stack direction="flex" justifyContent="center" flexWrap="wrap">
-        {metrics.map((metric, index) => (
-          <Box
-            key={index}
+    <div className='w-[80%] ml-0 md:ml-48'>
+      <Stack spacing={4} sx={{ p: 2, pt: { xs: 2, md: 6 } }}>
+        {/* Métricas superiores */}
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            flexWrap: "wrap",
+            gap: 2,
+            justifyContent: "center",
+          }}
+        >
+          <MetricCard title='Clientes Totales' value={data?.totalClients} icon={<PeopleIcon />} />
+          <MetricCard title='Puntos Acumulados' value={data?.totalPoints} icon={<StarsIcon />} />
+          <MetricCard title='Visitas Totales' value={data?.totalVisits} icon={<VisibilityIcon />} />
+          <MetricCard title='Canjes Realizados' value={data?.totalRedeemCount} icon={<CardGiftcardIcon />} />
+          <MetricCard title='Promociones Activas' value={data?.totalPromotions} icon={<CampaignIcon />} />
+        </Stack>
+
+        {/* Gráfico */}
+        <Card sx={{ p: 3, borderTop: 3, borderColor: "primary.main" }}>
+          <Typography variant='h6' gutterBottom>
+            Tus clientes en los últimos 7 días
+          </Typography>
+          <Typography variant='body2' color='text.secondary' gutterBottom>
+            Análisis de visitas, registros y puntos acumulados
+          </Typography>
+          <Box sx={{ height: 400, mt: 2 }}>
+            <LineChart
+              series={[
+                { data: dailyVisits, label: "Visitas", color: "#4ade80" },
+                { data: dailyRegistrations, label: "Registros", color: "#ff9999" },
+                { data: dailyPoints, label: "Puntos", color: "#ffcc00" },
+              ]}
+              xAxis={[
+                {
+                  scaleType: "band",
+                  data: dailyLabels,
+                  tickLabelStyle: { fontSize: 12 },
+                },
+              ]}
+            />
+          </Box>
+        </Card>
+
+        {/* Tablas */}
+        <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ width: "100%" }}>
+          <Card
             sx={{
-              backgroundColor: 'primary.main',
-              width: { xs: '100%', sm: 180 }, // 100% width on mobile, 180px on larger screens
-              textAlign: 'center',
-              color: 'white'
+              flex: 1,
+              borderTop: 3,
+              borderColor: "primary.main",
+              p: 3,
             }}
           >
-            <Typography variant="body1">{metric.label}</Typography>
-            <Typography variant="h6">{metric.value}</Typography>
-          </Box>
-        ))}
-      </Stack>
+            <ClientMetricsTable title='Visitas por Cliente' subtitle='Registro de visitas de cada cliente' data={clientVisitsData} dataType='Visitas' />
+          </Card>
 
-
-      <Typography variant="h5" align="center" gutterBottom>Tus clientes en los últimos 7 días:</Typography>
-      <Box sx={{ mt: 4, 
-        width: { xs: '100%', sm: '82%' }, // 100% width on mobile, 180px on larger screens
-       }}>
-
-        <LineChart
-          height={400}
-          series={[
-            { label: 'Visitas', data: dailyVisits, color:"lightgreen" },
-            { label: 'Registros', data: dailyRegistrations, color:"pink" },
-            { label: 'Canjes', data: dailyRedeems, color:"gold" },
-          ]}
-          xAxis={[{ 
-            scaleType: 'band', 
-            data: dailyLabels 
-
-          }]}
-        />
-      </Box>
-      <Box sx={{ mt: 4, width: "100%" }}>
-        <Stack direction="flex" justifyContent="center" spacing={4} flexWrap="wrap">
-          <Box sx={{ width: { xs: "100%", sm: "45%", md: "40%" }, p: 2 }}>
-            <ClientMetricsTable title="Visitas por Cliente" data={clientVisitsData} dataType="Visitas" />
-          </Box>
-          <Box sx={{ width: { xs: "100%", sm: "45%", md: "40%" }, p: 2 }}>
-            <ClientMetricsTable title="Canjes por Cliente" data={clientRedeemsData} dataType="Canjes" />
-          </Box>
+          <Card
+            sx={{
+              flex: 1,
+              borderTop: 3,
+              borderColor: "primary.main",
+              p: 3,
+            }}
+          >
+            <ClientMetricsTable title='Puntos por Cliente' subtitle='Puntos acumulados por cada cliente' data={clientPointsData} dataType='Canjes' />
+          </Card>
         </Stack>
-      </Box>
-
-    </Stack>
+      </Stack>
+    </div>
   );
 };

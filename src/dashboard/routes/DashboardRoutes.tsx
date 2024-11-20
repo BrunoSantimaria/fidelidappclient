@@ -18,9 +18,10 @@ import MuiAlert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress"; // Importa el indicador de carga
 import { StepperPromotion } from "../pages/Promotions/StepperPromotion";
 import { Stepper } from "../pages/Promotions/Stepper";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { EventNotifications } from "../../components/EventNotifications";
+
+import { PromotionPage } from "../pages/Promotions/PromotionPage";
+import { toast } from "react-toastify";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -38,10 +39,19 @@ const pageTransition = {
 export const DashboardRoutes = () => {
   const { getPromotionsAndMetrics, plan, metrics, loading, getSubscription } = useDashboard();
   const { user } = useAuthSlice();
-  const [notifications, setNotifications] = useState([]);
+
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  const LimitReachedComponent = () => {
+    useEffect(() => {
+      toast.info("Límite de promociones activas alcanzado", {});
+    }, []);
+
+    return <Navigate to='/dashboard' replace />;
+  };
+
   const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
     getPromotionsAndMetrics();
@@ -51,8 +61,6 @@ export const DashboardRoutes = () => {
   }, []);
   return (
     <>
-      <ToastContainer />
-      <EventNotifications />
       <Navigation />
       <Routes>
         <Route
@@ -87,11 +95,12 @@ export const DashboardRoutes = () => {
                 <Stepper />
               </motion.div>
             ) : (
-              <Navigate to='/dashboard' replace />
+              <LimitReachedComponent />
             )
           }
         />
         <Route path='/promotion/:id' element={<Promotion />} />
+        <Route path='/promotions' element={<PromotionPage />} />
         <Route path='/agenda/create' element={<CreateAgenda />} />
         <Route path='/clients/list' element={<Clients />} />
         <Route path='/qr' element={<AccountQr />} />

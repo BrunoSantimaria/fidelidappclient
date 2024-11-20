@@ -84,7 +84,7 @@ export const Stepper = () => {
       if (validateStep()) {
         setCurrentStep(currentStep + 1);
       } else {
-        alert("Por favor, completa todos los campos.");
+        toast.info("Por favor, completa todos los campos.");
       }
     } else if (direction === "previous" && currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -92,7 +92,7 @@ export const Stepper = () => {
       if (validateStep()) {
         sendPromotionData();
       } else {
-        alert("Los datos de la promoción no están completos.");
+        toast.info("Los datos de la promoción no están completos.");
       }
     }
   };
@@ -142,7 +142,7 @@ export const Stepper = () => {
     ) {
       console.log("Datos incompletos:", promotionDetails, promotionRequirements);
 
-      alert("Por favor, completa todos los campos.");
+      toast.info("Por favor, completa todos los campos.");
       return;
     }
     for (const [key, value] of formData.entries()) {
@@ -165,7 +165,7 @@ export const Stepper = () => {
   const isNextDisabled = !validateStep();
 
   return (
-    <div className='md:w-[90%] h-full mx-auto shadow-xl p-0 md:p-6 rounded-2xl pb-2  mt-0 md:ml-24  xl:ml-32 md:mt-6 xl:mt-20 bg-white'>
+    <div className='md:w-[90%] h-full border-t-4 border-1 border-black/20 border-t-[#5b7898] mx-auto shadow-xl p-0 md:p-6 rounded-2xl pb-2  mt-0 md:ml-24  xl:ml-32 md:mt-6 xl:mt-20 bg-white'>
       <div className='container horizontal mt-5'>
         <StepperPromotion steps={steps} currentStep={currentStep} />
       </div>

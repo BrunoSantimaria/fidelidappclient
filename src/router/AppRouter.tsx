@@ -8,7 +8,7 @@ import { useAuthSlice } from "../hooks/useAuthSlice";
 import { useEffect, useRef } from "react";
 import { Landing } from "../landing/pages";
 import { PromotionClient } from "../promotion-client/pages";
-import { ToastContainer, toast } from "react-toastify";
+
 import "react-toastify/dist/ReactToastify.css";
 import { ClientPromotionCard } from "../promotion-client/pages/ClientPromotionCard";
 import Agenda from "../agenda-client/Agenda";
@@ -16,8 +16,9 @@ import CancelAppointment from "../agenda-client/CancelAppointment";
 import ConfirmAppointment from "../agenda-client/ConfirmAppointment";
 import ThankYou from "../agenda-client/ThankYou";
 import { PromotionQrLanding } from "../landing/components/PromotionQrLanding";
-import { Report } from "../dashboard/pages/report/Report";
-import { NotificationProvider } from "../context/NotificationContext";
+
+import { PromotionPage } from "../dashboard/pages/Promotions/PromotionPage";
+import { ToastContainer } from "react-toastify";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
@@ -44,10 +45,23 @@ export const AppRouter = () => {
   }, []); // El useEffect se ejecuta solo una vez al cargar
 
   return (
-    <NotificationProvider>
+    <>
+      <ToastContainer
+        position='bottom-center'
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme='light'
+        limit={3}
+      />
+
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
         <FloatingWhatsAppButton />
-        <ToastContainer position='bottom-center' autoClose={5000} />
         <NavBar refs={refs} />
         <Box sx={{ flexGrow: 1 }}>
           <Routes>
@@ -74,6 +88,7 @@ export const AppRouter = () => {
 
                 <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
                 <Route path='/thankyou' element={<ThankYou />} />
+                <Route path='/dashboard/promotions' element={<PromotionPage />} />
                 <Route path='/dashboard/*' element={<DashboardRoutes />} />
               </>
             )}
@@ -82,6 +97,6 @@ export const AppRouter = () => {
         </Box>
         <Footer refs={refs} />
       </Box>
-    </NotificationProvider>
+    </>
   );
 };

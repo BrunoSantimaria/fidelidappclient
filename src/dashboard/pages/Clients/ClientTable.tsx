@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import Papa from "papaparse";
 import { useDropzone } from "react-dropzone";
-import { UploadFile } from "@mui/icons-material";
+import { UploadFile, PersonAdd, PersonOff } from "@mui/icons-material";
 import howtouse from "../../../assets/Mi video-1.gif";
 import { useDashboard } from "../../../hooks";
 import api from "../../../utils/api";
@@ -73,7 +73,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  function formatClientName(name) {
+  function formatClientName(name: string) {
     const trimmedName = name.trim();
     if (trimmedName) {
       return trimmedName
@@ -84,31 +84,49 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     return "";
   }
 
-  function formatClientEmail(email) {
+  function formatClientEmail(email: string) {
     return email.trim().toLowerCase();
   }
 
   const addClient = async () => {
     if (newClientName && newClientEmail) {
+      const formattedName = formatClientName(newClientName);
+      const formattedEmail = formatClientEmail(newClientEmail);
+
+      // Validación básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formattedEmail)) {
+        toast.error("Por favor ingresa un email válido");
+        return;
+      }
+
       const newClient = {
         accountId: accounts._id,
         clientData: {
-          name: newClientName,
-          email: newClientEmail,
+          name: formattedName,
+          email: formattedEmail,
         },
       };
 
       try {
-        await api.post("/api/clients/addClient", newClient);
-        console.log(newClient);
+        const response = await api.post("/api/clients/addClient", newClient);
 
-        setDisplayedClients([...displayedClients, { name: newClientName, email: newClientEmail, addedPromotions: [] }]);
-        toast.info(`Cliente ${newClientName} agregado.`);
+        // Actualizar el estado local con el nuevo cliente
+        setDisplayedClients((prevClients) => [
+          ...prevClients,
+          {
+            name: formattedName,
+            email: formattedEmail,
+            addedPromotions: [],
+          },
+        ]);
+
+        toast.info(`Cliente ${formattedName} agregado.`);
         setNewClientName("");
         setNewClientEmail("");
         await getPromotionsAndMetrics();
       } catch (error) {
-        if (error.response && error.response.data && error.response.data.message === "Client already exists in this account") {
+        if (error.response?.data?.message === "Client already exists in this account") {
           toast.info("El cliente ya existe.");
         } else {
           toast.error("Error al agregar cliente.");
@@ -264,113 +282,163 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     }
   };
   return (
-    <section>
-      <div className='w-[95%] flex flex-col md:flex-col m-auto justify-between mb-20'>
+    <section className='w-full'>
+      <div className='w-[95%] flex flex-col md:flex-col m-auto justify-between mb-10'>
         {/* Inputs para agregar cliente manualmente */}
-
-        <div className='flex flex-col md:flex-row m-auto mb-12 w-[95%] space-y-2 md:space-y-0 md:space-x-2 md:justify-center'>
-          <TextField label='Nombre' value={newClientName} onChange={(e) => setNewClientName(e.target.value)} />
-          <TextField label='Email' value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} />
-
-          <Button variant='contained' color='primary' onClick={addClient} style={{ marginLeft: "10px", display: "flex", height: "50px" }}>
+        <div className='flex flex-col md:flex-row m-auto mb-8 w-[95%] space-y-2 md:space-y-0 md:space-x-2 md:justify-center'>
+          <TextField
+            label='Nombre'
+            value={newClientName}
+            onChange={(e) => setNewClientName(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "&:hover fieldset": {
+                  borderColor: "#5b7898",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#5b7898",
+                },
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#5b7898",
+              },
+            }}
+          />
+          <TextField
+            label='Email'
+            value={newClientEmail}
+            onChange={(e) => setNewClientEmail(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "&:hover fieldset": {
+                  borderColor: "#5b7898",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#5b7898",
+                },
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#5b7898",
+              },
+            }}
+          />
+          <Button
+            variant='contained'
+            onClick={addClient}
+            sx={{
+              bgcolor: "#5b7898",
+              height: "56px",
+              "&:hover": {
+                bgcolor: "#4a6277",
+              },
+            }}
+            startIcon={<PersonAdd />}
+          >
             Agregar Cliente
           </Button>
         </div>
 
         {/* Componente Dropzone */}
-        <div className='w-[100%]  m-auto'>
-          <CsvDropzone />
+        <div className='w-[95%] m-auto mb-8'>
+          <Paper
+            elevation={0}
+            sx={{
+              border: "2px dashed #5b7898",
+              borderRadius: "8px",
+              bgcolor: "#f8fafc",
+            }}
+          >
+            <CsvDropzone />
+          </Paper>
         </div>
-        <div
-          onClick={() => setShowHowToUse(!showHowToUse)} // Mostrar al hacer hover
-          style={{ marginTop: "20px", textAlign: "center" }}
+
+        {/* Tabla de clientes */}
+        <Paper
+          elevation={0}
+          sx={{
+            width: "95%",
+            m: "auto",
+            border: "1px solid rgba(0, 0, 0, 0.12)",
+            borderTop: "4px solid #5b7898",
+            borderRadius: "8px",
+            overflow: "hidden",
+          }}
         >
-          {showHowToUse ? (
-            <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
-              Cerrar video.
-            </Typography>
+          {!accounts.clients.length ? (
+            <section className='p-8 text-center'>
+              <div className='flex flex-col items-center space-y-4'>
+                <PersonOff sx={{ fontSize: 48, color: "#5b7898" }} />
+                <span className='text-lg text-gray-600'>No hay clientes disponibles, empieza agregando uno arriba o sube un archivo CSV.</span>
+              </div>
+            </section>
           ) : (
-            <Typography variant='body2' color='primary' sx={{ cursor: "pointer" }}>
-              ¿Cómo usar esta funcionalidad?
-            </Typography>
-          )}
-
-          {showHowToUse && (
-            <div className='flex m-auto text-center justify-center' style={{ marginTop: "10px" }}>
-              <img src={howtouse} alt='Cómo usar' style={{ maxWidth: "100%", height: "auto" }} />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
-        {!accounts.clients.length ? (
-          <section className='shadow-md shadow-neutral-200 bg-gradient-to-br from-gray-100 to-main/30 p-6 rounded-md'>
-            <div className='flex flex-col space-y-6'>
-              <span className='text-center text-lg text-black/60'>No hay clientes disponibles, empieza agregando uno arriba o sube un archivo CSV.</span>
-            </div>
-          </section>
-        ) : (
-          <>
-            {/* Tabla de clientes */}
-            <TableContainer>
-              <Table stickyHeader aria-label='client table'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Nombre</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Telefóno</TableCell>
-                    <TableCell>Promociones</TableCell> {/* Nueva columna de promociones */}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {clients
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .reverse()
-                    .map((client) => {
-                      const clientPromotions = getClientPromotion(client); // Obtener promociones del cliente
-                      return (
-                        <TableRow hover key={client.email}>
-                          <TableCell>{client.name}</TableCell>
-                          <TableCell>{client.email}</TableCell>
-                          <TableCell>{client.phoneNumber}</TableCell>
-                          <TableCell>
-                            {clientPromotions ? (
-                              <Select value='' displayEmpty>
-                                <MenuItem value='' disabled>
-                                  Promociones
-                                </MenuItem>
-                                {clientPromotions.map((promo) => (
-                                  <MenuItem key={promo._id} value={promo._id} onClick={() => handleNavigate(`/promotion/${promo._id}`)}>
-                                    {promo.title}
+            <>
+              <TableContainer>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Nombre</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Email</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Teléfono</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Promociones</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {clients
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .reverse()
+                      .map((client) => {
+                        const clientPromotions = getClientPromotion(client); // Obtener promociones del cliente
+                        return (
+                          <TableRow hover key={client.email}>
+                            <TableCell>{client.name}</TableCell>
+                            <TableCell>{client.email}</TableCell>
+                            <TableCell>{client.phoneNumber || "-"}</TableCell>
+                            <TableCell>
+                              {clientPromotions ? (
+                                <Select value='' displayEmpty>
+                                  <MenuItem value='' disabled>
+                                    Promociones
                                   </MenuItem>
-                                ))}
-                              </Select>
-                            ) : (
-                              "Sin promociones"
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                                  {clientPromotions.map((promo) => (
+                                    <MenuItem key={promo._id} value={promo._id} onClick={() => handleNavigate(`/promotion/${promo._id}`)}>
+                                      {promo.title}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              ) : (
+                                "Sin promociones"
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
-            {/* Paginación solo si hay clientes */}
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component='div'
-              count={clients.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              labelRowsPerPage='Filas por página'
-              labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
-            />
-          </>
-        )}
+              <TablePagination
+                sx={{
+                  ".MuiTablePagination-select": {
+                    color: "#5b7898",
+                  },
+                  ".MuiTablePagination-selectIcon": {
+                    color: "#5b7898",
+                  },
+                }}
+                rowsPerPageOptions={[5, 10, 25]}
+                component='div'
+                count={clients.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage='Filas por página'
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
+              />
+            </>
+          )}
+        </Paper>
 
         {/* Dialog para cargar CSV */}
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
@@ -414,7 +482,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
             </div>
           </div>
         </Backdrop>
-      </Paper>
+      </div>
     </section>
   );
 };

@@ -17,6 +17,9 @@ import {
   AccordionSummary,
   Typography,
   AccordionDetails,
+  Card,
+  CardContent,
+  CardHeader,
 } from "@mui/material";
 import api from "../../../utils/api";
 import { PromotionMetrics } from "./PromotionMetrics";
@@ -26,6 +29,10 @@ import { toast } from "react-toastify";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
 
 import { PointsChart } from "./components/PointsCharts";
+import { Instagram, Facebook, WhatsApp } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
+import { CardDescription } from "@/components/ui/card";
+import CloseIcon from "@mui/icons-material/Close";
 
 export const Promotion = () => {
   const { activePromotion, getPromotionById, cleanPromotion } = useDashboard();
@@ -169,117 +176,165 @@ export const Promotion = () => {
   }
   console.log(activePromotion.createdAt, activePromotion.promotionDuration);
   return (
-    <main className='flex flex-col p-0 ml-2 md:p-10  md:ml-20 lg:ml-20 h-fit gap-5'>
-      <main className='flex flex-col justify-center place-items-center space-y-4 w-screen md:w-[95%] h-1/3 md:h-1/3 lg:h-1/3 rounded-md p-6 bg-gradient-to-br from-gray-50 to-main/50'>
-        <section className='flex flex-col md:flex-row justify-between w-screen md:w-[95%] lg:max-w-[95%] mx-0'>
-          <div className='h-1/3 md:h-1/3 z-10 w-[95%] md:w-[60%] space-y-6 text-left p-4 rounded-md'>
-            <h1 className='font-poppins font-bold text-2xl md:text-5xl'>{activePromotion.title}</h1>
-            <p className='font-medium'>{activePromotion.description}</p>
-
-            <div className='flex flex-col space-y-6'>
-              <Button variant='contained' color='primary' onClick={handleOpenModal}>
-                Modificar Promoción
-              </Button>
-
-              <Button variant='contained' color='primary' onClick={() => handleNavigate(`/promotion/${id}`)}>
-                Ver Promoción
-              </Button>
-              {activePromotion.systemType === "points" && (
-                <div className='mb-4 text-center bg-main rounded-md'>
-                  <Accordion
-                    sx={{
-                      textAlign: "center",
-                      margin: "auto",
-                      backgroundColor: "primary.main",
-                      color: "white",
-                      borderRadius: "8px",
-                      "&.MuiAccordion-root:before": {
-                        display: "none",
-                      },
-                      boxShadow: "none",
-                    }}
-                  >
-                    <AccordionSummary
-                      aria-controls='panel1a-content'
-                      id='panel1a-header'
-                      sx={{
-                        backgroundColor: "primary.main",
-                        color: "white",
-                        borderRadius: "8px",
-                        "&:hover": {
-                          backgroundColor: "primary.dark",
-                        },
-                      }}
-                    >
-                      <Typography variant='button' sx={{ color: "white", margin: "auto" }}>
-                        Ver Recompensas
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails
-                      sx={{
-                        backgroundColor: "primary.light",
-                        color: "white",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div className='space-y-2'>
-                        {promotionData.rewards.map((reward) => (
-                          <div key={reward._id} className='flex justify-between'>
-                            <Typography>{reward.description}</Typography>
-                            <Typography>{reward.points} puntos</Typography>
-                          </div>
-                        ))}
-                      </div>
-                    </AccordionDetails>
-                  </Accordion>
+    <div className='min-h-screen bg-gradient-to-b  from-slate-50 to-slate-100 p-4 md:p-8'>
+      <div className='w-full md:w-[90%] mx-auto'>
+        <Card className='border p-2 border-t-4 border-black/20 border-t-[#5b7898] shadow-lg'>
+          <CardContent className='p-6 md:p-8'>
+            <div className='grid lg:grid-cols-2 gap-8 items-center'>
+              <div className='space-y-6'>
+                <div className='space-y-2'>
+                  <h1 className='text-4xl font-bold tracking-tight text-[#5b7898]'>{activePromotion.title}</h1>
+                  <CardContent className='text-lg'>{activePromotion.description}</CardContent>
                 </div>
-              )}
-              <div className='flex flex-row space-x-6'>
-                <p className='italic'>Duración: {activePromotion.promotionDuration} días</p>
-                {activePromotion.systemType === "points" && ""}
-                <p>Inicio: {new Date(activePromotion.createdAt).toLocaleDateString()}</p>
 
-                <p className='mr-2'>Expiración: {getPromotionExpiryDate(activePromotion.createdAt, activePromotion.promotionDuration).toLocaleDateString()}</p>
+                <div className='space-y-4'>
+                  <Button variant='contained' className='w-full bg-[#5b7898] hover:bg-[#4a6277] text-lg py-6' onClick={handleOpenModal}>
+                    Modificar Promoción
+                  </Button>
+
+                  <Button
+                    variant='contained'
+                    className='w-full bg-[#5b7898] hover:bg-[#4a6277] text-lg py-6'
+                    onClick={() => handleNavigate(`/promotion/${id}`)}
+                  >
+                    Ver Promoción
+                  </Button>
+
+                  {/* Accordion de recompensas con nuevo estilo */}
+                  {activePromotion.systemType === "points" && (
+                    <Accordion className='border-[#5b7898] shadow-md'>
+                      <AccordionSummary className='bg-[#5b7898] text-white'>
+                        <Typography className='text-lg font-medium'>Ver Recompensas</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails className='bg-white'>
+                        <div className='space-y-2'>
+                          {promotionData.rewards.map((reward) => (
+                            <div key={reward._id} className='flex justify-between p-2 border-b'>
+                              <Typography>{reward.description}</Typography>
+                              <Typography className='font-bold'>{reward.points} puntos</Typography>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionDetails>
+                    </Accordion>
+                  )}
+
+                  <div className='grid grid-cols-3 gap-4 text-sm text-gray-600'>
+                    <div>
+                      <p className='font-medium'>Duración</p>
+                      <p>{activePromotion.promotionDuration} días</p>
+                    </div>
+                    <div>
+                      <p className='font-medium'>Inicio</p>
+                      <p>{new Date(activePromotion.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className='font-medium'>Expiración</p>
+                      <p>{getPromotionExpiryDate(activePromotion.createdAt, activePromotion.promotionDuration).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='relative h-[400px] w-full max-w-[500px] rounded-2xl overflow-hidden shadow-xl mx-auto'>
+                <img src={imagePreview} alt='Promotion' className='object-cover w-full h-full' />
               </div>
             </div>
-          </div>
+          </CardContent>
 
-          <div className='relative z-10 h-[300px] md:h-[450px] w-[95%] md:w-[40%] flex justify-center'>
-            <div className='w-full ml-0 p-2 rounded-md overflow-hidden shadow-md'>
-              <img src={imagePreview} alt='Promotion' className='object-cover rounded-md w-full h-full' />
-            </div>
-          </div>
-        </section>
-      </main>
+          <PromotionMetrics metrics={activePromotion} />
 
-      <PromotionMetrics metrics={activePromotion} />
+          {activePromotion.systemType === "points"
+            ? activePromotion?.statistics.pointsPerDay?.length > 0 && <PointsChart pointsPerDay={activePromotion.statistics.pointsPerDay} />
+            : activePromotion?.statistics.visitsPerDay?.length > 0 && <VisitCharts promotions={activePromotion.statistics.visitsPerDay} />}
 
-      {activePromotion.systemType === "points" ? (
-        <PointsChart pointsPerDay={activePromotion?.statistics.pointsPerDay} />
-      ) : (
-        <VisitCharts promotions={activePromotion?.statistics.visitsPerDay} />
-      )}
+          <ClientList
+            clients={activePromotion?.statistics.clientList}
+            promotion={activePromotion}
+            systemType={activePromotion.systemType} // Pasar el tipo de sistema (puntos o visitas)
+          />
 
-      <ClientList
-        clients={activePromotion?.statistics.clientList}
-        promotion={activePromotion}
-        systemType={activePromotion.systemType} // Pasar el tipo de sistema (puntos o visitas)
-      />
+          {/* Modal modificado con nueva estética */}
+          <Modal open={openModal} onClose={handleCloseModal}>
+            <Box className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] md:w-[80%] lg:w-[60%] max-h-[90vh] overflow-y-auto'>
+              <Card className='bg-white rounded-lg shadow-xl'>
+                <div className='p-6 space-y-6'>
+                  <div className='flex justify-between items-center border-b border-gray-200 pb-4'>
+                    <Typography variant='h5' className='font-bold text-[#5b7898]'>
+                      Modificar Promoción
+                    </Typography>
+                    <IconButton onClick={handleCloseModal} size='small'>
+                      <CloseIcon />
+                    </IconButton>
+                  </div>
 
-      {/* Modal de modificación */}
-      <Modal open={openModal} onClose={handleCloseModal}>
-        <Box className='flex flex-col space-y-4 p-5 bg-white shadow-md rounded-md max-w-xl mx-auto mt-20'>
-          <h2>Modificar Promoción</h2>
-          <TextField label='Título' name='title' value={promotionData.title} onChange={handleInputChange} fullWidth />
-          <TextField label='Descripción' name='description' value={promotionData.description} onChange={handleInputChange} fullWidth />
-          <TextField label='Condiciones' name='conditions' value={promotionData.conditions} onChange={handleInputChange} fullWidth />
-          <input type='file' accept='image/*' onChange={handleImageChange} />
-          {imagePreview && <img src={imagePreview} alt='Preview' className='w-full  object-cover mt-4' />}
-          <Button variant='contained' color='primary' onClick={handleSubmit}>
-            Guardar cambios
-          </Button>
-        </Box>
-      </Modal>
-    </main>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    <div className='space-y-4'>
+                      <TextField
+                        label='Título'
+                        name='title'
+                        value={promotionData.title}
+                        onChange={handleInputChange}
+                        fullWidth
+                        variant='outlined'
+                        className='bg-white'
+                      />
+                      <TextField
+                        label='Descripción'
+                        name='description'
+                        value={promotionData.description}
+                        onChange={handleInputChange}
+                        fullWidth
+                        multiline
+                        rows={4}
+                        variant='outlined'
+                        className='bg-white'
+                      />
+                      <TextField
+                        label='Condiciones'
+                        name='conditions'
+                        value={promotionData.conditions}
+                        onChange={handleInputChange}
+                        fullWidth
+                        multiline
+                        rows={4}
+                        variant='outlined'
+                        className='bg-white'
+                      />
+                    </div>
+
+                    <div className='space-y-4'>
+                      <div className='border-2 border-dashed border-gray-300 rounded-lg p-4 text-center'>
+                        <input type='file' accept='image/*' onChange={handleImageChange} className='hidden' id='image-upload' />
+                        <label
+                          htmlFor='image-upload'
+                          className='cursor-pointer inline-flex items-center justify-center px-4 py-2 bg-[#5b7898] text-white rounded-md hover:bg-[#4a6277] transition-colors'
+                        >
+                          Seleccionar Imagen
+                        </label>
+                        {imagePreview && (
+                          <div className='mt-4'>
+                            <img src={imagePreview} alt='Preview' className='max-h-[200px] mx-auto object-contain rounded-lg' />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='flex justify-end gap-4 pt-4 border-t border-gray-200'>
+                    <Button variant='outlined' onClick={handleCloseModal} className='text-[#5b7898] border-[#5b7898] hover:border-[#4a6277]'>
+                      Cancelar
+                    </Button>
+                    <Button variant='contained' onClick={handleSubmit} className='bg-[#5b7898] hover:bg-[#4a6277]'>
+                      Guardar cambios
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </Box>
+          </Modal>
+        </Card>
+      </div>
+    </div>
   );
 };

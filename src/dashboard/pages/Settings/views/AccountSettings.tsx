@@ -5,6 +5,7 @@ import { useAuthSlice } from "../../../../hooks/useAuthSlice";
 import { useState, useEffect } from "react";
 import api from "../../../../utils/api";
 import { toast } from "react-toastify";
+import { Settings } from "@mui/icons-material";
 
 export const AccountSettings = () => {
   const { user, refreshAccount } = useAuthSlice();
@@ -50,71 +51,84 @@ export const AccountSettings = () => {
   };
 
   return (
-    <motion.div
-      initial='hidden'
-      whileInView='visible'
-      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className='w-[95%] m-auto flex flex-col md:ml-20'>
-        <h2 className='text-2xl font-bold mb-4'>Ajustes de cuenta</h2>
+    <div className='w-full'>
+      {/* Encabezado */}
+      <div className='flex items-center gap-2 mb-4'>
+        <span className='text-main'>
+          <Settings />
+        </span>
+        <h2 className='text-lg text-gray-700'>Configuración de la Cuenta</h2>
+      </div>
+      <p className='text-sm text-gray-600 mb-6'>Administra la configuración de tu cuenta y preferencias</p>
 
-        <form onSubmit={handleSubmit} className='flex flex-col space-y-6'>
-          <div>
-            <label className='block'>Nombre de tu negocio</label>
-            <Input type='text' placeholder='Nombre negocio' className='w-full border rounded p-2' value={name} onChange={(e) => setName(e.target.value)} />
+      {/* Campos del formulario */}
+      <div className='space-y-4'>
+        <div>
+          <label className='block text-sm font-medium mb-2'>Nombre de tu negocio</label>
+          <div className='flex items-center border rounded-lg focus-within:border-main bg-white'>
+            <input
+              type='text'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className='w-full p-2 outline-none bg-white focus:ring-0'
+              placeholder='Nombre negocio'
+            />
           </div>
+        </div>
 
-          <div>
-            <div className='flex items-center space-x-1'>
-              <label className='block'>Sender Email</label>
-              <Tooltip
-                title='Sender email: Dirección desde la cual se enviarán tus correos de marketing. Usar un correo de tu empresa, como contacto@fidelid.app, ayuda a que los destinatarios te identifiquen fácilmente.'
-                arrow
-              >
-                <InfoOutlined fontSize='small' color='action' />
-              </Tooltip>
-            </div>
-            <Input
+        <div>
+          <div className='flex items-center gap-1 mb-2'>
+            <label className='block text-sm font-medium'>Sender Email</label>
+            <Tooltip
+              title='Sender email: Dirección desde la cual se enviarán tus correos de marketing. Usar un correo de tu empresa, como contacto@fidelid.app, ayuda a que los destinatarios te identifiquen fácilmente.'
+              arrow
+            >
+              <InfoOutlined fontSize='small' color='action' />
+            </Tooltip>
+          </div>
+          <div className='flex items-center border rounded-lg focus-within:border-main bg-white'>
+            <input
               type='email'
-              placeholder='info@empresa.com'
-              className='w-full border rounded p-2'
               value={senderEmail}
               onChange={(e) => setSenderEmail(e.target.value)}
+              className='w-full p-2 outline-none bg-white focus:ring-0'
+              placeholder='info@empresa.com'
             />
           </div>
+        </div>
 
-          <div>
-            <label className='block'>Teléfono</label>
-            <Input
+        <div>
+          <label className='block text-sm font-medium mb-2'>Teléfono</label>
+          <div className='flex items-center border rounded-lg focus-within:border-main bg-white'>
+            <input
               type='text'
-              placeholder='Número de teléfono'
-              className='w-full border rounded p-2'
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              className='w-full p-2 outline-none bg-white focus:ring-0'
+              placeholder='Número de teléfono'
             />
           </div>
+        </div>
 
-          {error && <p className='text-red-500'>{error}</p>}
+        {error && <p className='text-red-500'>{error}</p>}
 
-          <div className='flex gap-4 mt-4'>
-            <Button type='submit' variant='contained' className='bg-blue-500 text-white p-2 rounded' disabled={!isModified}>
-              Guardar cambios
-            </Button>
-            <Button
-              className='text-gray-500 p-2 rounded'
-              onClick={() => {
-                setName(user?.name || "");
-                setSenderEmail(user?.accounts.senderEmail || "");
-                setPhone(user?.phone || "");
-                setError("");
-              }}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </form>
+        <div className='flex justify-end gap-4 mt-6'>
+          <button
+            className='px-4 py-2 text-gray-600 bg-white border border-main hover:bg-gray-100 rounded'
+            onClick={() => {
+              setName(user?.name || "");
+              setSenderEmail(user?.accounts.senderEmail || "");
+              setPhone(user?.phone || "");
+              setError("");
+            }}
+          >
+            Cancelar
+          </button>
+          <button className='px-4 py-2 bg-main text-white rounded hover:bg-main/80' onClick={handleSubmit} disabled={!isModified}>
+            Guardar cambios
+          </button>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };

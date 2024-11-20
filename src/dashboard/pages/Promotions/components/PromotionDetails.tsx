@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useDropzone } from "react-dropzone";
 
 export const PromotionDetails = ({ promotionDetails, setPromotionDetails, currentStep, steps }) => {
   const [error, setError] = useState({
@@ -10,10 +11,7 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
   });
   const [imagePreview, setImagePreview] = useState(promotionDetails.image ? URL.createObjectURL(promotionDetails.image) : "");
   const [isValid, setIsValid] = useState(false);
-
-  useEffect(() => {
-    validateFields();
-  }, [promotionDetails]);
+  const [showErrors, setShowErrors] = useState(false);
 
   // Manejar los cambios en los campos de texto
   const handleChange = (e) => {
@@ -24,36 +22,39 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
     }));
   };
 
-  // Manejar la carga de la imagen
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const isImage = file.type.startsWith("image/");
-      if (!isImage) {
-        setError((prev) => ({
-          ...prev,
-          image: "El archivo seleccionado no es una imagen válida.",
-        }));
-        setImagePreview("");
-        return;
+  const onDrop = React.useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+          setPromotionDetails((prev) => ({
+            ...prev,
+            image: file,
+          }));
+        };
+        reader.readAsDataURL(file);
       }
+    },
+    [setPromotionDetails]
+  );
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/jpeg": [],
+      "image/png": [],
+      "image/jpg": [],
+    },
+    maxFiles: 1,
+    onDropRejected: () => {
       setError((prev) => ({
         ...prev,
-        image: "",
+        image: "El archivo debe ser una imagen en formato JPG, JPEG o PNG.",
       }));
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setPromotionDetails((prev) => ({
-          ...prev,
-          image: file,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+    },
+  });
 
   // Validar los campos antes de proceder
   const validateFields = () => {
@@ -82,6 +83,8 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
 
     setError(newError);
     setIsValid(isValid);
+    setShowErrors(true);
+    return isValid;
   };
   const pageTransition = {
     hidden: { opacity: 0, y: 50 },
@@ -109,7 +112,7 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
           className='w-full p-4 h-14 border  bg-white border-main rounded-md'
           placeholder='Escribe el título'
         />
-        {/* {error.title && <p className='text-red-500 text-sm'>{error.title}</p>} */}
+        {showErrors && error.title && <p className='text-red-500 text-sm'>{error.title}</p>}
       </div>
 
       <div className='mt-4 space-y-2'>
@@ -125,7 +128,7 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
           className='w-full p-4 h-16 border  bg-white border-main rounded-md'
           placeholder='Describe tu promoción'
         />
-        {/* {error.description && <p className='text-red-500 text-sm'>{error.description}</p>} */}
+        {showErrors && error.description && <p className='text-red-500 text-sm'>{error.description}</p>}
       </div>
 
       <div className='mt-4 space-y-2'>
@@ -139,20 +142,29 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
           className='w-full p-4 h-24 border  bg-white border-main rounded-md'
           placeholder='Escribe las condiciones de la promoción'
         />
-        {/* {error.conditions && <p className='text-red-500 text-sm'>{error.conditions}</p>} */}
+        {showErrors && error.conditions && <p className='text-red-500 text-sm'>{error.conditions}</p>}
       </div>
 
       <div className='mt-4 space-y-2'>
-        <label htmlFor='image'>Imagen de la promoción</label>
-        <input id='image' name='image' type='file' accept='image/*' onChange={handleImageChange} className='w-full p-2 border rounded' />
-        {/* {error.image && <p className='text-red-500 text-sm'>{error.image}</p>} */}
-      </div>
-
-      {imagePreview && (
-        <div className='mt-4'>
-          <img src={imagePreview} alt='Vista previa' className='w-32 h-32 object-cover text-center m-auto' />
+        <label>Imagen de la promoción</label>
+        <div {...getRootProps()} className='border-2 border-dashed border-main rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors'>
+          <input {...getInputProps()} />
+          {isDragActive ? (
+            <p>Suelta la imagen aquí...</p>
+          ) : (
+            <div>
+              <p>Arrastra y suelta una imagen aquí, o haz clic para seleccionar</p>
+              <p className='text-sm text-gray-500 mt-2'>Solo archivos JPG, JPEG o PNG</p>
+            </div>
+          )}
         </div>
-      )}
+        {showErrors && error.image && <p className='text-red-500 text-sm'>{error.image}</p>}
+        {imagePreview && (
+          <div className='mt-4'>
+            <img src={imagePreview} alt='Vista previa' className='w-32 h-32 object-cover text-center m-auto' />
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 };

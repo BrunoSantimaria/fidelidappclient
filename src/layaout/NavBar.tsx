@@ -92,7 +92,7 @@ export const NavBar = ({ refs }) => {
               </div>
             ) : (
               <span
-                onClick={() => handleNavigate("/auth/login")}
+                onClick={() => handleNavigate("/auth/login", { state: { showRegister: true } })}
                 className={`${!isHome && "hidden"} bg-main p-4 rounded-md cursor-pointer text-white transition duration-700  hover:bg-white hover:text-main transform hover:scale-110`}
               >
                 Registrate
@@ -169,11 +169,11 @@ export const NavBar = ({ refs }) => {
                   <span
                     onClick={() => {
                       handleMenuToggle();
-                      handleNavigate("/auth/login");
+                      handleNavigate("/auth/login", { state: { showRegister: true } });
                     }}
                     className='text-black hover:text-gray-500 cursor-pointer hover:bg-main/50 p-2 rounded-md'
                   >
-                    Iniciar Sesión
+                    Registrate
                   </span>
                 )}
               </div>

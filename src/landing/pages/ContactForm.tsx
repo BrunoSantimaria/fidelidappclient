@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet";
 import api from "../../utils/api";
 import { toast } from "react-toastify";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
+import { Mail, Message, Phone, Send, Person, Business } from "@mui/icons-material";
 
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,6 +16,45 @@ const ContactForm = () => {
     reset,
     formState: { errors },
   } = useForm();
+
+  const inputStyles = {
+    "& .MuiInputBase-root": {
+      backgroundColor: "white",
+      borderRadius: "8px",
+      "&:hover": {
+        "& fieldset": {
+          borderColor: "#5b7898",
+        },
+      },
+      "&.Mui-focused": {
+        "& fieldset": {
+          borderColor: "#5b7898",
+        },
+      },
+    },
+    "& .MuiInputBase-input": {
+      pl: 5,
+      py: 2,
+      "&::placeholder": {
+        color: "rgba(0, 0, 0, 0.4)",
+        opacity: 1,
+      },
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "rgba(0, 0, 0, 0.1)",
+      },
+    },
+  };
+
+  const iconStyles = {
+    position: "absolute",
+    left: 10,
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "#5b7898",
+    zIndex: 1,
+  };
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -48,7 +88,16 @@ const ContactForm = () => {
   };
 
   return (
-    <Container sx={{ marginTop: "60px", marginBottom: "60px", maxWidth: "80vw" }}>
+    <Container
+      sx={{
+        my: 8,
+        width: {
+          xs: "95%",
+          sm: "80%",
+          md: "60%",
+        },
+      }}
+    >
       <Helmet>
         <script async src='https://www.googletagmanager.com/gtag/js?id=AW-16750398859'></script>
         <script>
@@ -62,51 +111,140 @@ const ContactForm = () => {
         </script>
       </Helmet>
 
-      <Typography variant='h4' align='center' gutterBottom>
-        ¿Interesado en saber más? Contáctanos
-      </Typography>
-      <Box component='form' onSubmit={handleSubmit(onSubmit)} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <TextField
-          label='Nombre'
-          variant='outlined'
-          {...register("name", { required: "El nombre es requerido" })}
-          error={!!errors.name}
-          helperText={errors.name ? errors.name.message : ""}
-        />
-        <TextField
-          label='Email'
-          variant='outlined'
-          type='email'
-          {...register("email", { required: "El correo electrónico es requerido" })}
-          error={!!errors.email}
-          helperText={errors.email ? errors.email.message : ""}
-        />
-        <TextField
-          label='Número de Teléfono' // Nuevo campo
-          variant='outlined'
-          {...register("phone")}
-          error={!!errors.phone}
-          helperText={errors.phone ? errors.phone.message : ""}
-        />
-        <TextField
-          label='Organización' // Nuevo campo
-          variant='outlined'
-          {...register("organization")}
-          error={!!errors.organization}
-          helperText={errors.organization ? errors.organization.message : ""}
-        />
-        <TextField
-          label='Mensaje'
-          variant='outlined'
-          multiline
-          rows={4}
-          {...register("message", { required: "El mensaje es requerido" })}
-          error={!!errors.message}
-          helperText={errors.message ? errors.message.message : ""}
-        />
-        <Button id='formulario' variant={isSubmitting ? "disabled" : "contained"} type='submit' sx={{ backgroundColor: "primary.main" }}>
-          ENVIAR CONSULTA
-        </Button>
+      <Box
+        sx={{
+          backgroundColor: "white",
+          borderRadius: 2,
+          boxShadow: 3,
+          borderTop: "4px solid #5b7898",
+          p: 4,
+        }}
+      >
+        <Typography
+          variant='h4'
+          align='center'
+          sx={{
+            color: "#5b7898",
+            fontWeight: "bold",
+            mb: 1,
+          }}
+        >
+          ¿Interesado en saber más?
+        </Typography>
+        <Typography variant='h5' align='center' sx={{ mb: 4 }}>
+          Contáctanos
+        </Typography>
+
+        <Box
+          component='form'
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
+          <Box sx={{ position: "relative" }}>
+            <Person sx={iconStyles} />
+            <TextField
+              fullWidth
+              placeholder='Tu nombre'
+              variant='outlined'
+              InputLabelProps={{ shrink: false }}
+              label=''
+              {...register("name", { required: "El nombre es requerido" })}
+              error={!!errors.name}
+              helperText={errors.name ? errors.name.message : ""}
+              sx={inputStyles}
+            />
+          </Box>
+
+          <Box sx={{ position: "relative" }}>
+            <Mail sx={iconStyles} />
+            <TextField
+              fullWidth
+              placeholder='tu@email.com'
+              variant='outlined'
+              InputLabelProps={{ shrink: false }}
+              label=''
+              type='email'
+              {...register("email", { required: "El correo electrónico es requerido" })}
+              error={!!errors.email}
+              helperText={errors.email ? errors.email.message : ""}
+              sx={inputStyles}
+            />
+          </Box>
+
+          <Box sx={{ position: "relative" }}>
+            <Phone sx={iconStyles} />
+            <TextField
+              fullWidth
+              placeholder='+56 9 1234 5678'
+              variant='outlined'
+              InputLabelProps={{ shrink: false }}
+              label=''
+              {...register("phone")}
+              error={!!errors.phone}
+              helperText={errors.phone ? errors.phone.message : ""}
+              sx={inputStyles}
+            />
+          </Box>
+
+          <Box sx={{ position: "relative" }}>
+            <Business sx={iconStyles} />
+            <TextField
+              fullWidth
+              placeholder='Nombre de tu empresa'
+              variant='outlined'
+              InputLabelProps={{ shrink: false }}
+              label=''
+              {...register("organization")}
+              error={!!errors.organization}
+              helperText={errors.organization ? errors.organization.message : ""}
+              sx={inputStyles}
+            />
+          </Box>
+
+          <Box sx={{ position: "relative" }}>
+            <Message
+              sx={{
+                ...iconStyles,
+                top: "24px",
+                transform: "none",
+              }}
+            />
+            <TextField
+              fullWidth
+              placeholder='¿En qué podemos ayudarte?'
+              variant='outlined'
+              InputLabelProps={{ shrink: false }}
+              label=''
+              multiline
+              rows={4}
+              {...register("message", { required: "El mensaje es requerido" })}
+              error={!!errors.message}
+              helperText={errors.message ? errors.message.message : ""}
+              sx={inputStyles}
+            />
+          </Box>
+
+          <Button
+            id='formulario'
+            variant='contained'
+            type='submit'
+            disabled={isSubmitting}
+            startIcon={<Send />}
+            sx={{
+              backgroundColor: "#5b7898",
+              "&:hover": {
+                backgroundColor: "#4a6277",
+              },
+              py: 1.5,
+            }}
+          >
+            {isSubmitting ? "Enviando..." : "Enviar Consulta"}
+          </Button>
+        </Box>
       </Box>
     </Container>
   );

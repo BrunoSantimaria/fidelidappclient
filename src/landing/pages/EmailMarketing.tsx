@@ -52,7 +52,7 @@ export const EmailMarketing = () => {
             initial={{ x: -200, opacity: 0 }}
             animate={isInView ? { x: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 1.2 }}
-            onClick={() => handleNavigate("/auth/login")}
+            onClick={() => handleNavigate("/auth/login", { state: { showRegister: true } })}
           >
             Registrate ahora para empezar
           </motion.div>

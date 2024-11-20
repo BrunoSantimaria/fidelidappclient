@@ -24,6 +24,7 @@ import { AppBar, Toolbar, IconButton, Menu, MenuItem, Badge } from "@mui/materia
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { NotificationBell } from "../NotificationBell";
 import { useNavigate } from "react-router-dom";
+import { Package, Users, Calendar, LoyaltyRounded } from "lucide-react";
 const containerVariants = {
   close: {
     width: "5rem",
@@ -107,7 +108,7 @@ export const Navigation = () => {
         initial='close'
         className={`${
           isOpen ? "fixed" : "hidden"
-        } md:flex bg-main min-h-screen lg:h-screen md:h-screen flex-col justify-between z-50 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
+        } md:flex bg-[#5b7898] min-h-screen lg:h-screen md:h-screen flex-col justify-between z-50 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
       >
         <div className='flex flex-row w-full justify-between place-items-center'>
           <div
@@ -133,36 +134,18 @@ export const Navigation = () => {
           </motion.button>
         </div>
 
-        <div className='flex flex-col h-full mt-6 md:mt-10 lg:mt-10 gap-6 '>
-          {/* <NavigationLink name='Home' link='/'>
-            <HomeRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
-          </NavigationLink> */}
+        <div className='flex flex-col h-full mt-6 md:mt-10 lg:mt-10 gap-6'>
+          <NavigationLink name='Dashboard' link='/dashboard'>
+            <SpaceDashboardRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
 
-          <NavigationLink name='Home' link='/dashboard'>
-            <SpaceDashboardRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
+          <NavigationLink name='Promociones' link='/dashboard/promotions'>
+            <LoyaltyRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
 
           <NavigationLink name='Reporte' link='/dashboard/report'>
-            <AssessmentIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
+            <AssessmentIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
-
-          {metrics?.activePromotions < plan?.promotionLimit ? (
-            <NavigationLink name='Nueva Promoción' link='/dashboard/promotions/create'>
-              <LoyaltyRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-            </NavigationLink>
-          ) : (
-            <>
-              <div
-                onClick={() => {
-                  toast.info("Limite de programas activos superado.");
-                }}
-              >
-                <NavigationLink name='Nueva Promoción'>
-                  <LoyaltyRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-                </NavigationLink>
-              </div>
-            </>
-          )}
 
           <NavigationLink name='Código qr' link='/dashboard/qr/'>
             <QrCode2RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
@@ -177,11 +160,12 @@ export const Navigation = () => {
               <MailRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
             </NavigationLink>
           </div>
-          <div onClick={handleModal}>
-            <NavigationLink name='Agregar administradores'>
+
+          {/*  <div onClick={handleModal}>  <NavigationLink name='Agregar administradores'>
               <PersonAddAlt1RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-            </NavigationLink>
-          </div>
+          </NavigationLink>
+          </div>*/}
+
           <Divider className='bg-gray-300/80' />
           <div>
             <NavigationLink name='Ajustes' link='/dashboard/settings'>
@@ -198,52 +182,6 @@ export const Navigation = () => {
         <div className='flex justify-center items-center'>
           <img src={logo} alt='Logo' className='w-16 mt-6 scale-90 md:scale-150 lg:scale-150 h-auto mb-4' />
         </div>
-        <AppBar position='fixed' className='bg-main'>
-          <Toolbar className='justify-between'>
-            {/* Menú hamburguesa */}
-            <div className='flex items-center'>
-              <IconButton edge='start' color='inherit' aria-label='menu' onClick={handleOpen} className='mr-2'>
-                <MenuIcon />
-              </IconButton>
-              <span className='text-lg font-semibold hidden md:block'>{user?.accounts?.name || "Dashboard"}</span>
-            </div>
-
-            {/* Área derecha con notificaciones y perfil */}
-            <div className='flex items-center space-x-4'>
-              {/* Notificaciones */}
-              <NotificationBell />
-
-              {/* Perfil */}
-              <div>
-                <IconButton aria-label='account of current user' aria-controls='menu-appbar' aria-haspopup='true' onClick={handleMenu} color='inherit'>
-                  <AccountCircle />
-                </IconButton>
-                <Menu
-                  id='menu-appbar'
-                  anchorEl={anchorEl}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                >
-                  <MenuItem className='text-sm'>
-                    <span className='font-semibold'>{user?.email}</span>
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem onClick={handleSettings}>Configuración</MenuItem>
-                  <MenuItem onClick={handleLogout}>Cerrar sesión</MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </Toolbar>
-        </AppBar>
       </motion.nav>
     </>
   );

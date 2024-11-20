@@ -107,3 +107,26 @@ button:focus-visible {
 .transition-icon:hover {
   color: #ffb74d;
 }
+
+.MuiOutlinedInput-root {
+  background-color: white;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #5b7898;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #5b7898;
+}
+
+/* Estilos para el botón de Google */
+.MuiButton-outlined {
+  border-color: #e0e0e0 !important;
+  color: #666 !important;
+}
+
+.MuiButton-outlined:hover {
+  background-color: #f5f5f5 !important;
+  border-color: #d0d0d0 !important;
+}

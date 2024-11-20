@@ -2,48 +2,76 @@ import { useState } from "react";
 import { planList } from "../../data/plans";
 import { ModalLanding } from "../components/ModalLanding";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { useNavigate } from "react-router-dom";
+import { Tooltip } from "@mui/material";
+
 export const Plans = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const handleNavigate = (path: string, options?: any) => navigate(path, options);
 
   return (
-    <div className='mt-16    md:px-0 md:mb-16'>
-      <h3 className='text-3xl md:text-5xl font-bold text-center mb-16'>Planes</h3>
-      <div className='flex flex-col sm:flex-row justify-center space-y-6 md:space-y-0 md:mx-16 md:space-x-28'>
+    <div className='container mx-auto py-16 px-4'>
+      <div className='text-center mb-12'>
+        <h2 className='text-3xl font-bold text-[#5b7898] mb-4'>Planes y Precios</h2>
+        <p className='text-gray-600'>Elige el plan que mejor se adapte a las necesidades de tu negocio</p>
+      </div>
+
+      <div className='grid md:grid-cols-3 gap-8'>
         {planList.map((plan, index) => (
           <div
             key={index}
-            className='bg-white rounded-lg  border border-gray-600/40 shadow-lg p-6 flex flex-col m-auto md:m-0 justify-center md:justify-between w-5/6 md:w-full max-w-lg transition-transform transform hover:scale-105'
+            className={`relative bg-white rounded-lg border ${
+              plan.type === "Premium" ? "border-[#5b7898] shadow-lg scale-105" : "border-gray-200"
+            } transition-all duration-300 hover:shadow-xl`}
           >
-            <div>
-              {/* Tipo de Plan */}
-              <h5 className='text-2xl font-bold text-center mb-2'>{plan.type}</h5>
-              <h6 className={`${plan.price ? "" : "hidden"} text-lg text-gray-500 text-center mb-4`}>${plan.price} CLP/MES</h6>
+            {plan.type === "Premium" && (
+              <div className='absolute -top-4 left-1/2 -translate-x-1/2'>
+                <span className='bg-[#5b7898] text-white px-3 py-1 rounded-full text-sm'>Más Popular</span>
+              </div>
+            )}
 
-              <ul className='space-y-5 mb-4'>
-                {plan.description.map((item, idx) => (
-                  <li key={idx} className='flex items-center'>
-                    <div className='text-main mr-2'>
-                      {" "}
-                      <LockOpenIcon />
+            <div className='p-6'>
+              <div className='mb-8'>
+                <h3 className='text-2xl font-bold text-[#5b7898] mb-2'>{plan.type}</h3>
+                {plan.price !== undefined && (
+                  <div className='flex items-baseline mb-2'>
+                    <span className='text-3xl font-bold'>CLP ${plan.price}</span>
+                    <span className='ml-1 text-gray-600'>/MES</span>
+                  </div>
+                )}
+                <p className='text-sm text-gray-600'>{plan.subtitle}</p>
+              </div>
+
+              <ul className='space-y-4 mb-8'>
+                {plan.description.map((feature, i) => (
+                  <li key={i} className='flex items-start gap-2'>
+                    <div className='flex-shrink-0 text-[#5b7898] mt-1'>
+                      <LockOpenIcon className='h-5 w-5' />
                     </div>
-
-                    <span>{item}</span>
+                    <span className='text-sm'>{feature}</span>
+                    {feature.includes("Email marketing") && (
+                      <Tooltip title='Envía campañas de email marketing personalizadas a tu base de clientes'>
+                        <HelpOutlineIcon className='h-4 w-4 text-gray-400 cursor-help' />
+                      </Tooltip>
+                    )}
                   </li>
                 ))}
               </ul>
-            </div>
 
-            {plan.button && (
-              <button
-                className='mt-4 w-full py-2 bg-main text-white font-semibold rounded-lg hover:bg-[#4a6377] transition-colors duration-300'
-                onClick={handleOpen}
-              >
-                {plan.button}
-              </button>
-            )}
+              {plan.button && (
+                <button
+                  className='w-full py-2 px-4 bg-[#5b7898] text-white rounded-lg font-semibold hover:bg-[#4a6277] transition-colors duration-300'
+                  onClick={plan.type === "Gratis" ? () => handleNavigate("/auth/login", { state: { showRegister: true } }) : handleOpen}
+                >
+                  {plan.button}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>

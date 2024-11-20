@@ -1,49 +1,52 @@
-import { Box, Card, CardContent, Typography, Grid, Divider } from "@mui/material";
+import { motion } from "framer-motion";
+import { Quote } from "lucide-react";
 import { testimonials } from "../../data/testimonials";
 
 export const Testimonials = () => {
   return (
-    <Box sx={{ padding: 3, marginTop: "60px" }}>
-      <Divider sx={{ width: { xs: "100vw", md: "80vw" }, margin: "0 auto", marginBottom: "60px" }} />
-      <Typography
-        variant='h3'
-        sx={{ marginBottom: "60px", textAlign: "center", fontWeight: "bold", fontSize: { xs: 32, md: "3em" }, zIndex: 1, width: { xs: "100%", md: "100%" } }}
-      >
-        Lo que dicen nuestros clientes
-      </Typography>
-      <Grid container spacing={3} justifyContent='center' sx={{ width: "100vw" }}>
-        {testimonials.map((testimonial, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index} sx={{ marginRight: { xs: 3, md: 0, lg: 0 } }}>
-            <Card sx={{ boxShadow: 6, borderRadius: 2, minHeight: { xs: "250px", md: "400px", lg: "280px" }, maxWidth: "450px" }}>
-              <CardContent>
-                <Box display='flex' alignItems='center' marginBottom={2}>
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      borderRadius: "50%",
-                      marginRight: "16px",
-                    }}
-                  />
+    <section className='py-16 px-4'>
+      <div className='max-w-7xl mx-auto'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className='text-center'
+        >
+          <h2 className='text-[#5b7898] font-bold text-2xl md:text-4xl mb-2'>Lo que dicen nuestros clientes</h2>
+          <p className='text-gray-600 max-w-2xl mx-auto mb-16'>
+            Descubre cómo FidelidApp ha ayudado a diferentes negocios a crecer y mantener a sus clientes satisfechos
+          </p>
+        </motion.div>
+
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12'>
+          {testimonials.map((testimonial, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <div className='bg-white rounded-xl shadow-lg p-6 h-full flex flex-col'>
+                <div className='flex gap-4 mb-4'>
+                  <img src={testimonial.avatar} alt={testimonial.name} className='w-12 h-12 rounded-full object-cover' />
                   <div>
-                    <Typography variant='h6' fontWeight='bold'>
-                      {testimonial.name}
-                    </Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                      {testimonial.position}, {testimonial.industry}
-                    </Typography>
+                    <h3 className='text-[#5b7898] font-semibold'>{testimonial.name}</h3>
+                    <p className='text-gray-600 text-sm'>{testimonial.position}</p>
+                    <p className='text-gray-600 text-sm'>{testimonial.industry}</p>
                   </div>
-                </Box>
-                <Typography variant='body1' sx={{ fontStyle: "italic" }}>
-                  "{testimonial.message}"
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+                </div>
+
+                <div className='relative flex-1'>
+                  <Quote className='absolute -top-2 -left-2 w-6 h-6 text-[#5b7898] opacity-20' />
+                  <p className='pt-4 text-gray-700 leading-relaxed relative'>{testimonial.message}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };

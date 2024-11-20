@@ -3,142 +3,155 @@ import React, { useState, useEffect } from "react";
 import { useSettings } from "../../../../hooks/useSettings";
 import { useAuthSlice } from "../../../../hooks/useAuthSlice";
 import { motion } from "framer-motion";
+import { Settings, Upload, Instagram, Facebook, WhatsApp, Language } from "@mui/icons-material";
 
 export const Customization = () => {
   const { user, refreshAccount } = useAuthSlice();
   const { handleCustomization, loading } = useSettings();
+  const [logo, setLogo] = useState<File | null>(null);
+  const [preview, setPreview] = useState(user?.accounts?.logo || "");
+  const [instagram, setInstagram] = useState(user?.accounts?.socialMedia?.instagram || "");
+  const [facebook, setFacebook] = useState(user?.accounts?.socialMedia?.facebook || "");
+  const [whatsapp, setWhatsapp] = useState(user?.accounts?.socialMedia?.whatsapp || "");
+  const [website, setWebsite] = useState(user?.accounts?.socialMedia?.website || "");
 
-  // Asegúrate de que user y user.accounts estén definidos
-  if (!user || !user.accounts) {
-    return <div>Cargando...</div>; // Representación de carga
-  }
-
-  const initialLogo = user.accounts.logo || "";
-
-  const socialMedia = user.accounts.socialMedia || {}; // Cambia aquí
-  console.log(socialMedia);
-  const initialInstagram = socialMedia.instagram || "";
-  const initialFacebook = socialMedia.facebook || "";
-  const initialWhatsapp = socialMedia.whatsapp || "";
-  const initialWebsite = socialMedia.website || ""; // Cambia aquí
-  const [logo, setLogo] = useState(initialLogo);
-  const [logoPreview, setLogoPreview] = useState(initialLogo);
-  const [instagram, setInstagram] = useState(initialInstagram);
-  const [facebook, setFacebook] = useState(initialFacebook);
-  const [whatsapp, setWhatsapp] = useState(initialWhatsapp);
-  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
-  const [website, setWebsite] = useState(initialWebsite);
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
       setLogo(file);
-      setLogoPreview(URL.createObjectURL(file));
-    } else {
-      setLogo(null);
-      setLogoPreview(null);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const settings = {
+        logo,
+        instagram,
+        facebook,
+        whatsapp,
+        website,
+      };
+
+      await handleCustomization(settings);
+      await refreshAccount();
+    } catch (error) {
+      console.error("Error al guardar los cambios:", error);
+      alert("Hubo un error al guardar los cambios. Por favor, intenta de nuevo.");
     }
   };
 
   const handleCancel = () => {
-    setLogo(initialLogo);
-    setLogoPreview(null);
-    setInstagram(initialInstagram);
-    setFacebook(initialFacebook);
-    setWhatsapp(initialWhatsapp);
+    setLogo(null);
+    setPreview(user?.accounts?.logo || "");
+    setInstagram(user?.accounts?.socialMedia?.instagram || "");
+    setFacebook(user?.accounts?.socialMedia?.facebook || "");
+    setWhatsapp(user?.accounts?.socialMedia?.whatsapp || "");
+    setWebsite(user?.accounts?.socialMedia?.website || "");
   };
 
-  const handleSubmit = async () => {
-    const settings = {
-      logo,
-      instagram,
-      facebook,
-      whatsapp,
-      website,
-    };
-    handleCustomization(settings);
-    await refreshAccount();
-  };
-
-  useEffect(() => {
-    const isSame =
-      logo === initialLogo && instagram === initialInstagram && facebook === initialFacebook && whatsapp === initialWhatsapp && website === initialWebsite;
-    setIsSaveDisabled(isSame);
-  }, [logo, instagram, facebook, whatsapp, website]);
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
   return (
-    <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
-      <div className='w-[95%] m-auto flex flex-col md:ml-20 h-screen'>
-        <h2 className='text-2xl font-bold mb-4'>Personalización</h2>
+    <div className='w-full'>
+      {/* Encabezado */}
+      <div className='flex items-center gap-2 mb-4'>
+        <span className='text-main'>
+          <Settings />
+        </span>
+        <h2 className='text-lg text-gray-700'>Personalización</h2>
+      </div>
+      <p className='text-sm text-gray-600 mb-6'>Personaliza la apariencia y la información de tu cuenta</p>
 
-        {/* Input para el logo */}
-        <div className='mb-4'>
-          <label className='block mb-2'>Logo de la cuenta</label>
-          <Input type='file' className='w-full border rounded p-2' accept='image/*' onChange={handleLogoChange} />
-          {logoPreview && <img src={logoPreview} alt='Logo preview' className='mt-4 w-32 h-32 object-cover' />}
-        </div>
-
-        {/* Redes sociales */}
-        <div className='mb-4'>
-          <label className='block mb-2'>Instagram</label>
-          <Input
-            type='text'
-            className='w-full border rounded p-2'
-            placeholder='URL de tu cuenta de Instagram'
-            value={instagram}
-            onChange={(e) => setInstagram(e.target.value)}
-          />
-        </div>
-
-        <div className='mb-4'>
-          <label className='block mb-2'>Facebook</label>
-          <Input
-            type='text'
-            className='w-full border rounded p-2'
-            placeholder='URL de tu cuenta de Facebook'
-            value={facebook}
-            onChange={(e) => setFacebook(e.target.value)}
-          />
-        </div>
-
-        <div className='mb-4'>
-          <label className='block mb-2'>WhatsApp</label>
-          <Input
-            type='text'
-            className='w-full border rounded p-2'
-            placeholder='Número de WhatsApp'
-            value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-          />
-        </div>
-        <div className='mb-4'>
-          <label className='block mb-2'>Página web</label>
-          <Input
-            type='text'
-            className='w-full border rounded p-2'
-            placeholder='https://tusitio.com'
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-          />
-        </div>
-
-        {/* Botones de guardar y cancelar */}
-        <div className='flex gap-4 mt-4'>
-          <Button
-            variant='contained'
-            className={`bg-blue-500 text-white p-2 rounded ${isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-            disabled={isSaveDisabled || loading}
-            onClick={handleSubmit}
-          >
-            Guardar Cambios
-          </Button>
-          <Button variant='outlined' className='text-gray-500 p-2 rounded' onClick={handleCancel}>
-            Cancelar
-          </Button>
+      {/* Logo de la cuenta - Modificado para incluir preview */}
+      <div className='mb-6'>
+        <label className='block text-sm font-medium mb-2'>Logo de la cuenta</label>
+        <div className='border border-dashed border-gray-300 rounded-lg p-8 text-center'>
+          <div className='flex flex-col items-center justify-center'>
+            {preview ? <img src={preview} alt='Logo preview' className='w-32 h-32 object-contain mb-4' /> : <Upload className='text-blue-600 mb-2' />}
+            <p className='text-sm text-gray-600 mb-2'>Arrastra tu logo aquí o</p>
+            <label className='cursor-pointer'>
+              <span className='text-sm text-main'>Seleccionar archivo</span>
+              <input type='file' className='hidden' onChange={handleFileChange} accept='image/*' />
+            </label>
+          </div>
         </div>
       </div>
-    </motion.div>
+
+      {/* Redes sociales - Modificar los inputs */}
+      <div className='space-y-4'>
+        <div>
+          <label className='block text-sm font-medium mb-2'>Instagram</label>
+          <div className='flex items-center border rounded-lg focus-within:border-main bg-white'>
+            <span className='px-3 py-2'>
+              <Instagram className='text-main' />
+            </span>
+            <input
+              type='text'
+              value={instagram}
+              onChange={(e) => setInstagram(e.target.value)}
+              placeholder='https://instagram.com'
+              className='w-full p-2 outline-none bg-white focus:ring-0'
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className='block text-sm font-medium mb-2'>Facebook</label>
+          <div className='flex items-center border rounded-lg focus-within:border-main bg-white'>
+            <span className='px-3 py-2'>
+              <Facebook className='text-main' />
+            </span>
+            <input
+              type='text'
+              value={facebook}
+              onChange={(e) => setFacebook(e.target.value)}
+              placeholder='https://facebook.com'
+              className='w-full p-2 bg-white outline-none focus:ring-0'
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className='block text-sm font-medium mb-2'>WhatsApp</label>
+          <div className='flex items-center border rounded-lg focus-within:border-main bg-white'>
+            <span className='px-3 py-2'>
+              <WhatsApp className='text-main' />
+            </span>
+            <input
+              type='text'
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
+              placeholder='341582526'
+              className='w-full p-2 bg-white outline-none focus:ring-0'
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className='block text-sm font-medium mb-2'>Página web</label>
+          <div className='flex items-center border rounded-lg focus-within:border-main bg-white'>
+            <span className='px-3 py-2'>
+              <Language className='text-main' />
+            </span>
+            <input
+              type='text'
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder='https://google.com'
+              className='w-full bg-white p-2 outline-none focus:ring-0'
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Botones de acción */}
+      <div className='flex justify-end gap-4 mt-6'>
+        <button className='px-4 py-2 text-gray-600 bg-white border border-main hover:bg-gray-100 rounded' onClick={handleCancel}>
+          Cancelar
+        </button>
+        <button className='px-4 py-2 bg-main text-white rounded hover:bg-main/80' onClick={handleSubmit} disabled={loading}>
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
   );
 };

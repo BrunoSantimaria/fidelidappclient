@@ -41,7 +41,7 @@ export const ClientList = ({ clients, promotion }) => {
 
   if (!clients.length)
     return (
-      <section className='shadow-md shadow-neutral-200 w-[95%] bg-gradient-to-br from-gray-100 to-main/30 p-6 rounded-md'>
+      <section className='shadow-md shadow-neutral-200 w-[95%] mt-10 border-t-4 border-t-main border-black/20 border-1 p-6 rounded-md'>
         <div className='flex flex-col space-y-6'>
           <span className='text-center text-lg text-black/60'>Aún no se registraron clientes a la promoción.</span>
         </div>

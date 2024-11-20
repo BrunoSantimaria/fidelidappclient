@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { Backdrop, Button, CircularProgress, Input, Alert, Divider } from "@mui/material";
-import { Facebook, Instagram, WhatsApp } from "@mui/icons-material";
+import { Backdrop, Button, CircularProgress, Input, Alert, Divider, Card, CardContent, CardActions, Typography, Container, Box } from "@mui/material";
+import { Facebook, Instagram, WhatsApp, Language } from "@mui/icons-material";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import background from "../../assets/fondocandado2.png";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet-async";
+import React from "react";
+import keysPattern from "../../assets/fondocandado2.png";
 
 export const PromotionClient = () => {
   const { id } = useParams();
@@ -74,12 +76,13 @@ export const PromotionClient = () => {
   };
 
   const handleSubmit = async () => {
-    if (emailError || nameError) {
+    if (emailError || nameError || !clientEmail || !clientName) {
+      toast.info("Por favor completa todos los campos obligatorios");
       return;
     }
 
     try {
-      await api.post("/api/promotions/client", {
+      const response = await api.post("/api/promotions/client", {
         promotionId: id,
         clientEmail: clientEmail.trim().toLowerCase(),
         clientName: clientName
@@ -90,16 +93,13 @@ export const PromotionClient = () => {
         clientPhone: phoneNumber.trim(),
         accountId: accountId,
       });
-      toast.success("Has sido agregado a la promoción exitosamente. Cargaremos tu Fidelicard y enviaremos una copia a tu correo!.");
-      setClientEmail("");
-      setClientName("");
-      setPhoneNumber("");
-      //Set 3 second timeout
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
 
-      console.log(promotion.id);
+      toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");
+
+      // Obtener el clientId de la respuesta y redirigir
+      const clientId = response.data.client._id;
+      console.log(response.data);
+      handleNavigate(`/promotions/${clientId}/${id}`);
     } catch (error) {
       console.log(error.response.data.error);
       if (error.response.data.error === "Client already has this promotion") {
@@ -153,320 +153,163 @@ export const PromotionClient = () => {
     );
   }
   const formatTextWithLineBreaks = (text) => {
-    return text.split("\r\n");
+    return text.split("\r\n").map((line, index) => (
+      <React.Fragment key={index}>
+        {line}
+        <br />
+      </React.Fragment>
+    ));
   };
   return (
-    <>
-      {" "}
-      <Helmet>
-        <title>{promotion.title || "Fidelidapp"}</title>
-      </Helmet>
-      <section className=' md:pr-40 mt-6 flex flex-col justify-center place-items-center space-y-6  w-full h-full md:h-screen bg-gradient-to-br from-gray-50 to-main/50'>
-        <div className='flex flex-col md:flex-row md:justify-around w-full max-w-6xl mx-auto'>
-          <div className='relative z-10 w-[95%]  md:w-[90%] space-y-6 m-0 text-left p-4 rounded-md'>
-            <div className='space-y-2 flex flex-col mb-6'>
-              {/* <p className='flex flex-col'>Para ser agregado a la promoción, inscribe tu nombre y email a continuación:</p> */}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundImage: `url(${keysPattern})`,
+        backgroundRepeat: "repeat",
+        backgroundSize: "700px",
+        py: 8,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "white",
+          opacity: 0.8,
+          zIndex: 0,
+          minHeight: "100vh",
+        },
+      }}
+    >
+      <Container
+        maxWidth='xxl'
+        sx={{
+          width: { xs: "100%", md: "100%", lg: "95%" },
+          position: "relative",
+          zIndex: 1,
+          bottom: 40,
+        }}
+      >
+        <Card sx={{ borderTop: 4, borderColor: "#5b7898", boxShadow: 3 }}>
+          <CardContent sx={{ p: { xs: 3, md: 6 } }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                gap: 4,
+                alignItems: "center",
+              }}
+            >
+              {/* Formulario con redes sociales integradas */}
+              <Box
+                className='space-y-6'
+                sx={{
+                  width: "100%",
+                  order: { xs: 1, md: 2 },
+                }}
+              >
+                <Box className='space-y-4'>
+                  <Input fullWidth placeholder='Nombre' value={clientName} onChange={handleNameChange} sx={{ bgcolor: "white", p: 1.5 }} />
+                  <Input fullWidth type='email' placeholder='Email' value={clientEmail} onChange={handleEmailChange} sx={{ bgcolor: "white", p: 1.5 }} />
+                  <Input
+                    fullWidth
+                    type='tel'
+                    placeholder='Número de teléfono (opcional)'
+                    value={phoneNumber}
+                    onChange={handlePhoneNumberChange}
+                    sx={{ bgcolor: "white", p: 1.5 }}
+                  />
+                  <Button
+                    fullWidth
+                    variant='contained'
+                    onClick={handleSubmit}
+                    disabled={isSubmitting || nameError || emailError}
+                    sx={{
+                      bgcolor: "#5b7898",
+                      "&:hover": { bgcolor: "#4a6277" },
+                      py: 2,
+                      fontSize: "1.125rem",
+                    }}
+                  >
+                    {isSubmitting ? "Sumándose a la promoción..." : "SUMARME A LA PROMOCIÓN"}
+                  </Button>
+                </Box>
 
-              {nameError && <Alert severity='error'>El nombre no puede estar vacío.</Alert>}
-              <Input
-                id='name'
-                type='name'
-                value={clientName}
-                onChange={handleNameChange}
-                autoComplete='name'
-                sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
-                placeholder='Nombre'
-              />
+                {/* Redes sociales movidas al final del contenedor */}
+                {user?.accounts && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 2,
+                      mt: "auto",
+                      pt: 4,
+                    }}
+                  >
+                    {user.accounts.logo && <img src={user.accounts.logo} alt='Logo' className='w-[10rem] h-[10rem] object-contain' />}
+                    <Box className='flex gap-4'>
+                      {user.accounts.socialMedia.instagram && (
+                        <a href={user.accounts.socialMedia.instagram} className='text-[#5b7898] hover:text-[#4a6277]'>
+                          <Instagram sx={{ fontSize: 28 }} />
+                        </a>
+                      )}
+                      {user.accounts.socialMedia.facebook && (
+                        <a href={user.accounts.socialMedia.facebook} className='text-[#5b7898] hover:text-[#4a6277]'>
+                          <Facebook sx={{ fontSize: 28 }} />
+                        </a>
+                      )}
+                      {user.accounts.socialMedia.whatsapp && (
+                        <a href={`https://wa.me/${user.accounts.socialMedia.whatsapp}`} className='text-[#5b7898] hover:text-[#4a6277]'>
+                          <WhatsApp sx={{ fontSize: 28 }} />
+                        </a>
+                      )}
+                      {user.accounts.socialMedia.website && (
+                        <a href={user.accounts.socialMedia.website} className='text-[#5b7898] hover:text-[#4a6277]'>
+                          <Language sx={{ fontSize: 28 }} />
+                        </a>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
 
-              {emailError && <Alert severity='error'>Introduce un email válido.</Alert>}
-              <Input
-                id='email'
-                type='email'
-                value={clientEmail}
-                onChange={handleEmailChange}
-                autoComplete='email'
-                sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
-                placeholder='Email'
-              />
+              {/* Contenido de la promoción */}
+              <Box
+                className='space-y-6'
+                sx={{
+                  width: "100%",
+                  order: { xs: 2, md: 1 },
+                }}
+              >
+                <Box className='space-y-2'>
+                  <Typography
+                    variant='h3'
+                    sx={{
+                      fontWeight: "bold",
+                      color: "#5b7898",
+                      fontSize: { xs: "2rem", md: "3rem" },
+                    }}
+                  >
+                    {promotion.title}
+                  </Typography>
+                  <Typography variant='body1' color='text.secondary' sx={{ fontSize: "1.125rem" }}>
+                    {formatTextWithLineBreaks(promotion.description)}
+                  </Typography>
+                </Box>
 
-              <Input
-                id='phone'
-                type='tel'
-                value={phoneNumber}
-                onChange={handlePhoneNumberChange}
-                placeholder='Número de teléfono (opcional)'
-                sx={{ padding: "12px", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#ffff" }}
-              />
-
-              <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting || nameError || emailError}>
-                {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
-              </Button>
-            </div>
-
-            <h1 className='w-full md:w-[100%] font-poppins font-bold text-3xl md:text-5xl'>{promotion.title}</h1>
-            <p className='w-full md:w-[100%] font-poppins text-lg '>
-              {formatTextWithLineBreaks(promotion.description).map((line, index) => (
-                <p key={index} className='font-poppins text-lg'>
-                  {line}
-                </p>
-              ))}
-            </p>
-          </div>
-
-          {/* Imagen de la promoción */}
-          {promotion.imageUrl && (
-            <div className=' md:w-[60%] md:ml-12 mb-6 mx-auto md:mx-0 '>
-              <img src={promotion.imageUrl} alt='Promoción' className=' scale-90 rounded-md md:ml-40 object-contain w-full h-full' />
-            </div>
-          )}
-        </div>
-        <Divider sx={{ color: "white", width: "60%" }} />
-        {/* Footer con logo y redes sociales */}
-        {user?.accounts && (
-          <footer className='flex flex-row items-center justify-cente space-x-20 r mt-12 p-6'>
-            {user.accounts.logo && (
-              <img
-                src={user.accounts.logo}
-                alt='Logo'
-                className='max-w-full max-h-20 md:max-h-36 mb-4 object-contain'
-                style={{ width: "auto", height: "auto" }}
-              />
-            )}
-
-            <div className='flex space-x-4'>
-              {user.accounts.socialMedia.instagram && (
-                <a href={user.accounts.socialMedia.instagram} target='_blank' rel='noopener noreferrer'>
-                  <Instagram sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
-                </a>
-              )}
-              {user.accounts.socialMedia.facebook && (
-                <a href={user.accounts.socialMedia.facebook} target='_blank' rel='noopener noreferrer'>
-                  <Facebook sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
-                </a>
-              )}
-              {user.accounts.socialMedia.whatsapp && (
-                <a href={`https://wa.me/${user.accounts.socialMedia.whatsapp}`} target='_blank' rel='noopener noreferrer'>
-                  <WhatsApp sx={{ fontSize: 40 }} className='text-main hover:text-main/80 duration-300 ' />
-                </a>
-              )}
-            </div>
-          </footer>
-        )}
-      </section>
-    </>
+                {promotion.imageUrl && (
+                  <Box className='relative rounded-xl overflow-hidden shadow-xl' sx={{ maxWidth: { xs: "100%", lg: "500px" } }}>
+                    <img src={promotion.imageUrl} alt='Promoción' className='object-contain w-full' />
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 };
-
-// import { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import api from "../../utils/api";
-// import { Backdrop, Button, CircularProgress, TextField } from "@mui/material";
-// import { useAuthSlice } from "../../hooks/useAuthSlice";
-// import { useNavigateTo } from "../../hooks/useNavigateTo";
-// import background from "../../assets/fondocandado2.png";
-// import { toast } from "react-toastify";
-// import ColorThief from "colorthief";
-
-// const isDark = (r, g, b) => r * 0.299 + g * 0.587 + b * 0.114 < 128;
-
-// const extractColorsFromLogo = (logoUrl, setGradientColors, setTextColor) => {
-//   const img = new Image();
-//   img.src = logoUrl;
-//   img.crossOrigin = "Anonymous"; // Para evitar problemas de CORS
-
-//   img.onload = () => {
-//     const colorThief = new ColorThief();
-
-//     // Obtener una paleta de colores (5 colores dominantes)
-//     const colors = colorThief.getPalette(img, 5);
-//     const avgColor = colors.reduce(
-//       (acc, [r, g, b]) => {
-//         acc.r += r;
-//         acc.g += g;
-//         acc.b += b;
-//         return acc;
-//       },
-//       { r: 0, g: 0, b: 0 }
-//     );
-
-//     // Calcular el color promedio de la paleta
-//     const colorCount = colors.length;
-//     const averageColor = {
-//       r: Math.floor(avgColor.r / colorCount),
-//       g: Math.floor(avgColor.g / colorCount),
-//       b: Math.floor(avgColor.b / colorCount),
-//     };
-
-//     // Usar el color promedio para determinar si el fondo es claro u oscuro
-//     const newTextColor = isDark(averageColor.r, averageColor.g, averageColor.b) ? "#FFFFFF" : "#000000";
-//     setTextColor(newTextColor);
-
-//     // Crear un degradado de dos colores basado en el color promedio
-//     const gradientColor1 = `rgb(${averageColor.r},${averageColor.g},${averageColor.b})`;
-//     const gradientColor2 = `rgb(${Math.min(averageColor.r + 60, 255)},${Math.min(averageColor.g + 60, 255)},${Math.min(averageColor.b + 60, 255)})`;
-//     setGradientColors([gradientColor1, gradientColor2]);
-//   };
-// };
-
-// export const PromotionClient = () => {
-//   const { id } = useParams();
-//   const { status, user } = useAuthSlice();
-//   const { handleNavigate } = useNavigateTo();
-//   const [loading, setLoading] = useState(true);
-//   const [promotion, setPromotion] = useState(null);
-//   const [clientEmail, setClientEmail] = useState("");
-//   const [clientName, setClientName] = useState("");
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const [accountId, setAccountId] = useState("");
-
-//   // Estado para el degradado y el color del texto
-//   const [gradientColors, setGradientColors] = useState(["#ffffff", "#ffffff"]);
-//   const [textColor, setTextColor] = useState("#000000");
-
-//   // Cargar los colores del logo
-//   useEffect(() => {
-//     const fetchPromotion = async () => {
-//       try {
-//         const response = await api.get(`/api/promotions/${id}`);
-//         setPromotion(response.data.promotion);
-//         setAccountId(response.data.accountId);
-
-//         // Extraer colores del logo de la cuenta del usuario
-//         if (user?.accounts?.logo) {
-//           extractColorsFromLogo(user.accounts.logo, setGradientColors, setTextColor);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching promotion:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchPromotion();
-//   }, [id, user]);
-
-//   const handleEmailChange = (event) => {
-//     setClientEmail(event.target.value);
-//   };
-//   const handleNameChange = (event) => {
-//     setClientName(event.target.value);
-//   };
-
-//   const handleSubmit = async () => {
-//     if (!clientEmail) {
-//       return toast.info("Por favor, ingresa un email válido.");
-//     }
-
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailRegex.test(clientEmail)) return toast.info("Por favor, ingresa un email válido.");
-//     if (!clientName || clientName.trim().length < 2) {
-//       toast.info("Debes ingresar un nombre.");
-//     }
-//     setIsSubmitting(true);
-
-//     try {
-//       await api.post("/api/promotions/client", {
-//         promotionId: id,
-//         clientEmail: clientEmail.trim(),
-//         clientName: clientName.trim(),
-//         accountId: accountId,
-//       });
-//       toast.success("Te has sumado exitosamente a la promoción.");
-//       setClientEmail("");
-//       setClientName("");
-//     } catch (error) {
-//       console.log(error.response.data.error);
-//       if (error.response.data.error === "Client already has this promotion") return toast.info("Ya te encuentras en esta promoción.");
-//       toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <Backdrop open>
-//         <CircularProgress color='inherit' />
-//       </Backdrop>
-//     );
-//   }
-
-//   if (!promotion) {
-//     return (
-//       <div className='relative flex flex-col m-0 text-center justify-center w-screen h-screen'>
-//         <div
-//           className='absolute inset-0 bg-cover bg-center'
-//           style={{
-//             backgroundImage: `url(${background})`,
-//             opacity: 0.5,
-//           }}
-//         ></div>
-//         <div className='relative z-10'>
-//           <div>Esta promoción no existe.</div>
-//           <div
-//             onClick={() => handleNavigate("/")}
-//             className='p-2 bg-main w-[30%] justify-center mx-auto my-10 rounded-md text-white cursor-pointer hover:bg-main/60 duration-300'
-//           >
-//             Volver a home.
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <section
-//       className='relative flex flex-col justify-center place-items-center space-y-6 w-full h-full md:h-screen'
-//       style={{
-//         background: `linear-gradient(to bottom right, ${gradientColors[0]}, ${gradientColors[1]})`,
-//       }}
-//     >
-//       <div className='flex flex-col md:flex-row justify-between w-full max-w-6xl mx-auto mt-10'>
-//         <div className='relative z-10 w-[95%] md:w-[60%] space-y-6 m-0 text-left p-6 rounded-md'>
-//           <h1 className={`font-poppins font-bold text-5xl`} style={{ color: textColor }}>
-//             {promotion.title}
-//           </h1>
-//           <p className={`font-medium`} style={{ color: textColor }}>
-//             {promotion.description}
-//           </p>
-//           <div>
-//             <p className='italic' style={{ color: textColor }}>
-//               La promoción se activa con: {promotion.visitsRequired} visitas en {promotion.promotionDuration} días.
-//             </p>
-//             <p className='italic' style={{ color: textColor }}>
-//               Términos y condiciones aplican, serán enviados a tu correo una vez inscrito a la promoción
-//             </p>
-//           </div>
-//           <div className='space-y-2 flex flex-col mb-6' style={{ color: textColor }}>
-//             <p className='flex flex-col' style={{ color: textColor }}>
-//               Para ser agregado a la promoción, inscribe tu nombre y email a continuación:
-//             </p>
-//             <TextField label='Nombre' variant='filled' sx={{ width: "100%" }} value={clientName} onChange={handleNameChange} />
-
-//             <TextField label='Email' variant='filled' sx={{ width: "100%" }} value={clientEmail} onChange={handleEmailChange} />
-//             <Button variant='contained' onClick={handleSubmit} disabled={isSubmitting}>
-//               {isSubmitting ? "Sumándose a la promoción..." : "Sumarme a la promoción."}
-//             </Button>
-//           </div>
-//         </div>
-
-//         <div className='relative z-10 w-[95%] md:w-[40%] flex justify-center'>
-//           <div className='w-full h-120 ml-6 rounded-md overflow-hidden bg-gray-200 shadow-md'>
-//             <img src={promotion.imageUrl} alt='Promotion' className='object-cover w-full h-full' />
-//           </div>
-//         </div>
-//       </div>
-//       <div className='flex flex-col w-[50%]'>
-//         {user.accounts.logo && (
-//           <div className='w-[20%]'>
-//             <img src={user.accounts.logo} alt='Logo' className=' p-6' />
-//           </div>
-//         )}
-//       </div>
-//       <Backdrop open={isSubmitting} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-//         <CircularProgress color='inherit' />
-//         <div className='mt-2 text-white'>Sumándose a la promoción...</div>
-//       </Backdrop>
-//     </section>
-//   );
-// };

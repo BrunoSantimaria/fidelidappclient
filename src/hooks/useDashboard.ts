@@ -17,26 +17,22 @@ export const useDashboard = () => {
 
   const getPromotionsAndMetrics = async () => {
     try {
-      const resp = await api.get("/api/promotions");
-      console.log(resp.data);
       dispatch(setLoading(true));
-      dispatch(setPromotions(resp.data.promotions));
-      console.log("esto es lo que trae", resp.data.promotions);
-      dispatch(setMetrics(resp.data.metrics));
-      console.log("esto es lo que trae", resp.data.metrics);
-      const agendas = await api.get("/api/agenda");
-      dispatch(setAgendas(agendas.data));
-      console.log(accounts);
+      const [promotionsResp, clientsResp, agendasResp] = await Promise.all([
+        api.get("/api/promotions"),
+        api.get("/api/clients/getAccountClients", {
+          params: { accountId: accounts._id },
+        }),
+        api.get("/api/agenda"),
+      ]);
 
-      const clients = await api.get("/api/clients/getAccountClients", {
-        params: { accountId: accounts._id },
-      });
-
-      dispatch(setClients(clients.data.clients));
+      dispatch(setPromotions(promotionsResp.data.promotions));
+      dispatch(setClients(clientsResp.data.clients));
+      dispatch(setMetrics(promotionsResp.data.metrics));
+      dispatch(setAgendas(agendasResp.data));
     } catch (error) {
       console.log(error);
       if (error.response?.status === 401) {
-        // Maneja el logout desde aquí
         dispatch(onLogOut(""));
         handleNavigate("/");
       }

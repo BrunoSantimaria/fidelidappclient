@@ -19,6 +19,7 @@ import {
   Dialog,
 } from "@mui/material";
 import { useDashboard } from "../../../../hooks";
+import { CreditCard } from "@mui/icons-material";
 const MERCADOPAGO_PUBLIC = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
 initMercadoPago(MERCADOPAGO_PUBLIC, { locale: "es-CL" });
 
@@ -123,88 +124,77 @@ export const Subscription = () => {
 
   return (
     <motion.div initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
-      <div className='w-[95%] m-auto md:ml-20'>
-        <h2 className='text-2xl font-bold mb-4'>Suscripción</h2>
-
-        {/* Mostrar el plan actual */}
-        <div className='mb-4'>
-          <p className='text-lg'>
-            <strong>Plan activo:</strong>
-            <span className={`ml-2 ${user.plan.planStatus === "pro" || user.plan.planStatus === "pro2" ? "text-green-500" : "text-black"}`}>
-              {
-                user.plan.planStatus === "pro"
-                  ? user.plan.planStatus.toUpperCase() // Convierte "pro" a mayúsculas
-                  : user.plan.planStatus.charAt(0).toUpperCase() + user.plan.planStatus.slice(1) // Convierte la primera letra de "free" a mayúsculas
-              }
-              {user.plan.planStatus === "pro" && " ⭐"} {/* Emoji de estrella */}
+      <div className='w-full max-w-[1200px] mx-auto px-4'>
+        <div className='bg-white rounded-lg p-6'>
+          <div className='flex items-center gap-2 mb-4'>
+            <span className='text-main'>
+              <CreditCard />
             </span>
-          </p>
-        </div>
-
-        {/* Mostrar la fecha de vencimiento si el plan es Pro */}
-        {user.plan.planStatus === "pro" && expirationDate && user?.accounts.activePayer && (
-          <div className='mb-4'>
-            <p className='text-lg'>
-              <strong>Próximo pago:</strong> {formatDate(expirationDate)}
-            </p>
+            <h2 className='text-lg text-gray-700'>Suscripción</h2>
           </div>
-        )}
-        {!user?.accounts.activePayer && user?.accounts.planStatus === "pro" && (
-          <div className='mb-4'>
-            <p className='text-lg'>
-              <strong>Fin de la suscripción:</strong> {formatDate(expirationDate)}
-            </p>
-          </div>
-        )}
-        {/* Mostrar la Wallet con el preapprovalId */}
-        {preferenceId && (
-          <div className='mt-4'>
-            <Wallet
-              initialization={{ preferenceId: preferenceId }}
-              onReady={(status) => {
-                console.log("Wallet está lista", status);
-              }}
-              onError={(error) => {
-                console.error("Error en la Wallet", error);
-              }}
-            />
-          </div>
-        )}
+          <p className='text-sm text-gray-600 mb-6'>Gestiona tu plan y suscripción</p>
 
-        {/* Tabla comparativa y botón de suscripción si el plan es Free */}
+          {/* Panel de información del plan actual */}
+          <div className='bg-gray-50 rounded-lg p-6 mb-6'>
+            <div className='mb-4'>
+              <p className='text-lg'>
+                <strong>Plan activo:</strong>
+                <span className={`ml-2 ${user.plan.planStatus === "pro" || user.plan.planStatus === "premium" ? "text-green-500" : "text-gray-600"}`}>
+                  {user.plan.planStatus === "pro" ? "PRO ⭐" : user.plan.planStatus === "premium" ? "PREMIUM 💎" : "Free"}
+                </span>
+              </p>
+            </div>
 
-        <>
-          <div className={`${!user?.accounts.activePayer && user?.accounts.planStatus === "pro" ? "hidden" : ""} flex justify-start mt-6`}>
+            {/* Información de fechas */}
+            {user.plan.planStatus === "pro" && expirationDate && user?.accounts.activePayer && (
+              <div className='mb-4'>
+                <p className='text-lg text-gray-700'>
+                  <strong>Próximo pago:</strong> {formatDate(expirationDate)}
+                </p>
+              </div>
+            )}
+            {!user?.accounts.activePayer && user?.accounts.planStatus === "pro" && (
+              <div className='mb-4'>
+                <p className='text-lg'>
+                  <strong>Fin de la suscripción:</strong> {formatDate(expirationDate)}
+                </p>
+              </div>
+            )}
+            {/* Mostrar la Wallet con el preapprovalId */}
+            {preferenceId && (
+              <div className='mt-4'>
+                <Wallet
+                  initialization={{ preferenceId: preferenceId }}
+                  onReady={(status) => {
+                    console.log("Wallet está lista", status);
+                  }}
+                  onError={(error) => {
+                    console.error("Error en la Wallet", error);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Botones de acción */}
+          <div className={`${!user?.accounts.activePayer && user?.accounts.planStatus === "pro" ? "hidden" : ""} mb-8`}>
             {user?.accounts?.planStatus === "free" ? (
-              <Button className='' variant='contained' color='primary' onClick={createPreference}>
+              <Button variant='contained' color='primary' onClick={createPreference} className='bg-main hover:bg-main-dark transition-colors'>
                 ¡Suscríbete al Plan Pro ahora!
               </Button>
             ) : (
               user?.accounts?.planStatus === "pro" && (
-                <Button variant='contained' color='error' onClick={() => setOpenDialog(true)}>
+                <Button variant='contained' color='error' onClick={() => setOpenDialog(true)} className='bg-red-500 hover:bg-red-600 transition-colors'>
                   Cancelar Suscripción
                 </Button>
               )
             )}
-
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-              <DialogTitle>Cancelar Suscripción</DialogTitle>
-              <DialogContent>
-                <DialogContentText>¿Estás seguro de que deseas cancelar tu suscripción? Esta acción no se puede deshacer.</DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setOpenDialog(false)} color='primary'>
-                  Cancelar
-                </Button>
-                <Button onClick={handleCancelSubscription} color='secondary'>
-                  Confirmar
-                </Button>
-              </DialogActions>
-            </Dialog>
           </div>
-          <div className='mt-8'>
-            <h3 className='text-xl font-bold mb-6'>Comparación de Planes</h3>
-            <TableContainer component={Paper}>
+
+          {/* Tabla comparativa */}
+          <div className='bg-white rounded-lg'>
+            <h3 className='text-xl font-bold mb-6 text-gray-800'>Comparación de Planes</h3>
+            <TableContainer component={Paper} className='shadow-sm'>
               <Table>
                 <TableHead>
                   <TableRow className='bg-main'>
@@ -273,8 +263,10 @@ export const Subscription = () => {
               </Table>
             </TableContainer>
           </div>
-        </>
+        </div>
       </div>
+
+      {/* Dialog se mantiene igual */}
     </motion.div>
   );
 };

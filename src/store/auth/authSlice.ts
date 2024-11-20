@@ -18,6 +18,7 @@ export interface User {
     _id: string;
     planStatus: string;
     promotionLimit: number;
+    emailLimit: number;
     clientLimit: number;
     sendEmail: boolean;
     createdAt: string;
