@@ -36,7 +36,7 @@ const useDashboardData = () => {
     // Revalidación periódica cada 30 segundos
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [getPromotionsAndMetrics]);
 
   return {
     isLoading,
