@@ -16,31 +16,36 @@ moment.locale("es");
 
 // Hook personalizado para manejar los datos del dashboard
 const useDashboardData = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { metrics, plan, promotions, getPromotionsAndMetrics, clients } = useDashboard();
+  const { metrics, plan, promotions, getPromotionsAndMetrics, clients, loadingPromotions, loadingClients, loadingAgendas } = useDashboard();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        setIsLoading(true);
         await getPromotionsAndMetrics(true);
       } catch (err) {
         console.error("Error al cargar datos del dashboard:", err);
         setError(err);
-      } finally {
-        setIsLoading(false);
       }
     };
 
     loadData();
   }, []);
 
-  return { isLoading, error, metrics, plan, promotions, clients };
+  return {
+    loadingPromotions,
+    loadingClients,
+    loadingAgendas,
+    error,
+    metrics,
+    plan,
+    promotions,
+    clients,
+  };
 };
 
 export const Dashboard = () => {
-  const { isLoading, error, metrics, plan, promotions, clients } = useDashboardData();
+  const { loadingPromotions, loadingClients, loadingAgendas, error, metrics, plan, promotions, clients } = useDashboardData();
   const { user } = useAuthSlice();
   const { handleNavigate } = useNavigateTo();
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,10 +83,10 @@ export const Dashboard = () => {
   const currentClients = sortedClients.slice(indexOfFirstClient, indexOfLastClient);
   const totalPages = Math.ceil(sortedClients.length / clientsPerPage);
 
-  if (isLoading) {
+  if (loadingPromotions) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5b7898]'></div>
+        <div className='animate-pulse bg-gray-200 h-64 rounded-lg'></div>
       </div>
     );
   }
@@ -115,16 +120,25 @@ export const Dashboard = () => {
 
         {/* Grid de Métricas */}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-          <MetricCard
-            title='Programas activos'
-            value={`${metrics?.activePromotions || 0}/${plan?.promotionLimit || 0}`}
-            icon={<Package2 className='w-4 h-4 text-[#5b7898]' />}
-          />
-          <MetricCard
-            title='Clientes Registrados'
-            value={`${metrics?.registeredClients || 0} /${plan?.clientLimit || " Ilimitado"}`}
-            icon={<Users className='w-4 h-4 text-[#5b7898]' />}
-          />
+          {loadingPromotions ? (
+            <div className='animate-pulse bg-gray-200 h-32 rounded-lg'></div>
+          ) : (
+            <MetricCard
+              title='Programas activos'
+              value={`${metrics?.activePromotions || 0}/${plan?.promotionLimit || 0}`}
+              icon={<Package2 className='w-4 h-4 text-[#5b7898]' />}
+            />
+          )}
+
+          {loadingClients ? (
+            <div className='animate-pulse bg-gray-200 h-32 rounded-lg'></div>
+          ) : (
+            <MetricCard
+              title='Clientes Registrados'
+              value={`${metrics?.registeredClients || 0} /${plan?.clientLimit || " Ilimitado"}`}
+              icon={<Users className='w-4 h-4 text-[#5b7898]' />}
+            />
+          )}
           <MetricCard title='Visitas Totales' value={metrics?.totalVisits || 0} icon={<PieChart className='w-4 h-4 text-[#5b7898]' />} />
           <MetricCard title='Promociones Canjeadas' value={metrics?.redeemedPromotions || 0} icon={<Package2 className='w-4 h-4 text-[#5b7898]' />} />
         </div>
@@ -194,7 +208,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Clientes Recientes */}
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className='flex flex-col gap-8'>
           <div className='bg-white rounded-lg border border-t-4 border-black/20 border-t-[#5b7898] p-6 flex flex-col h-full'>
             <h2 className='text-xl font-bold text-[#5b7898]'>Clientes Recientes</h2>
             <p className='text-gray-600 text-sm mt-1'>Últimos clientes registrados</p>

@@ -87,10 +87,15 @@ export const Footer = ({ refs }) => {
               </li>
               <li>
                 <a
-                  onClick={() => navigate("/auth/login", { state: { showRegister: true } })}
+                  onClick={() => handleNavigate("/auth/login#register", { state: { showRegister: true } })}
                   className='text-sm text-slate-200 hover:text-white transition-colors'
                 >
                   Registrarse
+                </a>
+              </li>
+              <li>
+                <a onClick={() => handleNavigate("/auth/login#login")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                  Iniciar Sesión
                 </a>
               </li>
             </ul>

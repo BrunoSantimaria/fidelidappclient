@@ -9,18 +9,19 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Typography from "@mui/material/Typography";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { validateEmail, validatePassword, validateName } from "../../utils/validations";
 import { toast } from "react-toastify";
-import { useLocation, useSearchParams } from "react-router-dom";
 
-export const LoginPage = () => {
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const showRegister = location.state?.showRegister || searchParams.get("showRegister") === "true";
-  const [tabValue, setTabValue] = useState(showRegister ? 1 : 0);
+export const LoginPage = ({ defaultTab = "register" }) => {
+  const [tabValue, setTabValue] = useState(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash === "login") return 0;
+    if (hash === "register") return 1;
+    return defaultTab === "login" ? 0 : 1;
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -29,6 +30,24 @@ export const LoginPage = () => {
   const [errors, setErrors] = useState({ email: "", password: "", name: "" });
 
   const { startLogin, startRegister, startGoogleSignIn } = useAuthSlice();
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash === "login") setTabValue(0);
+      if (hash === "register") setTabValue(1);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    const newHash = tabValue === 0 ? "login" : "register";
+    if (window.location.hash.slice(1) !== newHash) {
+      window.location.hash = newHash;
+    }
+  }, [tabValue]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +107,7 @@ export const LoginPage = () => {
     <Box className='h-full mt-44 mb-24 w-full flex items-center justify-center'>
       <Card className='w-full max-w-md lg:max-w-[40%] overflow-visible mx-4'>
         <Box className='border-t-4 border-[#5b7898]'>
-          {/* Tabs con más espaciado */}
+          {/* Solo mostramos los tabs si defaultTab no está definido */}
           <Box className='flex justify-between px-6 pt-6 border-b border-gray-200'>
             <Typography
               component='span'

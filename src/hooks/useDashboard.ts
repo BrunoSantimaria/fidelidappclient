@@ -25,9 +25,24 @@ export const useDashboard = () => {
   const dispatch = useDispatch();
   const { handleNavigate } = useNavigateTo();
 
+  const [loadingPromotions, setLoadingPromotions] = useState(false);
+  const [loadingClients, setLoadingClients] = useState(false);
+  const [loadingAgendas, setLoadingAgendas] = useState(false);
+
+  useEffect(() => {
+    dispatch(setPromotions([]));
+    dispatch(setClients([]));
+    dispatch(setAgendas([]));
+    dispatch(setMetrics(null));
+    dispatch(setLastUpdate(null));
+    dispatch(cleanActivePromotion());
+
+    getPromotionsAndMetrics(true);
+  }, [accounts?._id]);
+
   const getPromotionsAndMetrics = async (forceUpdate = false) => {
     const now = Date.now();
-    if (!forceUpdate && lastUpdate && now - lastUpdate < cacheExpiration) {
+    if (!forceUpdate && lastUpdate && now - lastUpdate < cacheExpiration && accounts?._id) {
       return;
     }
 
@@ -37,26 +52,38 @@ export const useDashboard = () => {
     }
 
     try {
-      dispatch(setLoading(true));
-      const [promotionsResp, clientsResp, agendasResp] = await Promise.all([
-        api.get("/api/promotions"),
-        api.get("/api/clients/getAccountClients", {
+      setLoadingPromotions(true);
+      setLoadingClients(true);
+      setLoadingAgendas(true);
+
+      try {
+        const promotionsResp = await api.get("/api/promotions");
+        if (promotionsResp?.data) {
+          dispatch(setPromotions(promotionsResp.data.promotions));
+          dispatch(setMetrics(promotionsResp.data.metrics));
+        }
+      } finally {
+        setLoadingPromotions(false);
+      }
+
+      try {
+        const clientsResp = await api.get("/api/clients/getAccountClients", {
           params: { accountId: accounts._id },
-        }),
-        api.get("/api/agenda"),
-      ]);
-
-      if (promotionsResp?.data) {
-        dispatch(setPromotions(promotionsResp.data.promotions));
-        dispatch(setMetrics(promotionsResp.data.metrics));
+        });
+        if (clientsResp?.data) {
+          dispatch(setClients(clientsResp.data.clients));
+        }
+      } finally {
+        setLoadingClients(false);
       }
 
-      if (clientsResp?.data) {
-        dispatch(setClients(clientsResp.data.clients));
-      }
-
-      if (agendasResp?.data) {
-        dispatch(setAgendas(agendasResp.data));
+      try {
+        const agendasResp = await api.get("/api/agenda");
+        if (agendasResp?.data) {
+          dispatch(setAgendas(agendasResp.data));
+        }
+      } finally {
+        setLoadingAgendas(false);
       }
 
       dispatch(setLastUpdate(now));
@@ -67,8 +94,6 @@ export const useDashboard = () => {
         handleNavigate("/");
       }
       throw error;
-    } finally {
-      dispatch(setLoading(false));
     }
   };
 
@@ -167,5 +192,8 @@ export const useDashboard = () => {
     regenerateQr,
     loading,
     getSubscription,
+    loadingPromotions,
+    loadingClients,
+    loadingAgendas,
   };
 };

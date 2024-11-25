@@ -91,12 +91,20 @@ export const NavBar = ({ refs }) => {
                 </span>
               </div>
             ) : (
-              <span
-                onClick={() => handleNavigate("/auth/login", { state: { showRegister: true } })}
-                className={`${!isHome && "hidden"} bg-main p-4 rounded-md cursor-pointer text-white transition duration-700  hover:bg-white hover:text-main transform hover:scale-110`}
-              >
-                Registrate
-              </span>
+              <div className='space-x-4'>
+                <span
+                  onClick={() => handleNavigate("/auth/login#login", { state: { showRegister: false } })}
+                  className={`${!isHome && "hidden"} cursor-pointer text-white hover:text-gray-400 transition duration-200 cursor-pointer`}
+                >
+                  Iniciar Sesión
+                </span>
+                <span
+                  onClick={() => handleNavigate("/auth/login", { state: { showRegister: true } })}
+                  className={`${!isHome && "hidden"} bg-main p-4 rounded-md cursor-pointer text-white transition duration-700 hover:bg-white hover:text-main transform hover:scale-110`}
+                >
+                  Registrate
+                </span>
+              </div>
             )}
           </div>
         </nav>
@@ -166,15 +174,26 @@ export const NavBar = ({ refs }) => {
                     </span>
                   </>
                 ) : (
-                  <span
-                    onClick={() => {
-                      handleMenuToggle();
-                      handleNavigate("/auth/login", { state: { showRegister: true } });
-                    }}
-                    className='text-black hover:text-gray-500 cursor-pointer hover:bg-main/50 p-2 rounded-md'
-                  >
-                    Registrate
-                  </span>
+                  <>
+                    <span
+                      onClick={() => {
+                        handleMenuToggle();
+                        handleNavigate("/auth/login", { state: { showRegister: false } });
+                      }}
+                      className='text-black hover:text-gray-500 cursor-pointer hover:bg-main/50 p-2 rounded-md'
+                    >
+                      Iniciar Sesión
+                    </span>
+                    <span
+                      onClick={() => {
+                        handleMenuToggle();
+                        handleNavigate("/auth/login#login", { state: { showRegister: true } });
+                      }}
+                      className='text-black hover:text-gray-500 cursor-pointer hover:bg-main/50 p-2 rounded-md'
+                    >
+                      Registrate
+                    </span>
+                  </>
                 )}
               </div>
             </div>

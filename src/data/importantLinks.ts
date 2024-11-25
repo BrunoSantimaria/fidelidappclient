@@ -23,5 +23,9 @@ export const ImportantLinksList: ImportantLinks = {
       title: "Registrarse",
       link: "#",
     },
+    {
+      title: "Iniciar Sesión",
+      link: "#auth/login#login",
+    },
   ],
 };

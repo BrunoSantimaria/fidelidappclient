@@ -40,14 +40,12 @@ const pageTransition = {
 };
 
 export const DashboardRoutes = () => {
-  const { getPromotionsAndMetrics, plan, metrics, loading, getSubscription } = useDashboard();
+  const { getPromotionsAndMetrics, plan, metrics, getSubscription } = useDashboard();
   const { user } = useAuthSlice();
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
-  const [initialLoading, setInitialLoading] = useState(true);
 
   const LimitReachedComponent = () => {
     useEffect(() => {
@@ -60,15 +58,12 @@ export const DashboardRoutes = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setInitialLoading(true);
         if (user?.id) {
           await Promise.all([getPromotionsAndMetrics(true), getSubscription().catch((err) => console.warn("Error al obtener suscripción:", err))]);
         }
       } catch (error) {
         console.error("Error al obtener datos:", error);
         toast.error("Error al cargar los datos");
-      } finally {
-        setInitialLoading(false);
       }
     };
 
@@ -78,21 +73,6 @@ export const DashboardRoutes = () => {
       return () => clearInterval(interval);
     }
   }, [user?.id]);
-
-  if (initialLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </div>
-    );
-  }
 
   return (
     <>
