@@ -74,7 +74,7 @@ export const EmailSender = () => {
   const [openSaveDialog, setOpenSaveDialog] = useState(false); // Dialog para guardar plantilla
   const [openTemplatesDialog, setOpenTemplatesDialog] = useState(false); // Dialog para ver plantillas
   const [currentTab, setCurrentTab] = useState("design");
-  const [tempDesign, setTempDesign] = useState(null);
+  const [emailDesign, setEmailDesign] = useState(null);
   const [loadingDialog, setLoadingDialog] = useState(false);
 
   useEffect(() => {
@@ -94,14 +94,16 @@ export const EmailSender = () => {
   };
 
   // Enviar correos (abre el diálogo de confirmación)
-  const handleSendEmails = () => {
+  const handleSendEmails = async () => {
     const totalEmails = contactSource === "csv" ? selectedCsvData.length : selectedClients.length;
     setEmailCount(totalEmails);
 
     if (currentTab === "recipients") {
       setCurrentTab("design");
-      if (tempDesign) {
-        emailEditorRef.current.editor.loadDesign(tempDesign);
+      if (emailDesign) {
+        setTimeout(() => {
+          emailEditorRef.current.editor.loadDesign(emailDesign);
+        }, 1000);
       }
     } else {
       setOpenDialog(true);
@@ -366,9 +368,9 @@ export const EmailSender = () => {
     loadTemplates();
   }, []);
 
-  // Configuración del editor de email para hacerlo más responsive
+  // Actualizar la configuración del editor
   const emailEditorOptions = {
-    locale: "es-ES",
+    locale: "es",
     features: {
       responsiveDesign: true,
     },
@@ -394,7 +396,13 @@ export const EmailSender = () => {
       es: {
         "tools.social.name": "Redes Sociales",
         "tools.socialGroup.name": "Grupo de Redes Sociales",
-        // Otras traducciones si son necesarias
+        "tabs.body.title": "Contenido",
+        "tabs.style.title": "Estilo",
+        "tabs.settings.title": "Configuración",
+        "content.button.text": "Botón",
+        "content.text.text": "Texto",
+        "content.image.text": "Imagen",
+        // Agregar más traducciones según necesites
       },
     },
     displayMode: "email",
@@ -406,37 +414,58 @@ export const EmailSender = () => {
     },
     onReady: () => {
       console.log("Editor listo");
-      if (tempDesign && currentTab === "design") {
-        emailEditorRef.current.editor.loadDesign(tempDesign);
+      // Restaurar el diseño guardado si existe y estamos en la pestaña de diseño
+      if (currentTab === "design" && emailDesign) {
+        setTimeout(() => {
+          if (emailEditorRef.current?.editor) {
+            console.log("Cargando diseño guardado:", emailDesign);
+            emailEditorRef.current.editor.loadDesign(emailDesign);
+          }
+        }, 1000);
       }
     },
   };
 
+  // Modificar el manejo del cambio de pestañas
   const handleTabChange = async (_, newValue) => {
-    if (currentTab === "design" && newValue === "recipients") {
-      if (emailEditorRef.current?.editor) {
-        emailEditorRef.current.editor.saveDesign((design) => {
-          console.log("Guardando diseño:", design); // Para debugging
-          setTempDesign(design);
-        });
+    try {
+      if (currentTab === "design" && newValue === "recipients") {
+        // Guardar el diseño actual antes de cambiar de pestaña
+        if (emailEditorRef.current?.editor) {
+          await new Promise((resolve) => {
+            emailEditorRef.current.editor.saveDesign((design) => {
+              console.log("Guardando diseño:", design);
+              setEmailDesign(design);
+              resolve(design);
+            });
+          });
+        }
+      } else if (newValue === "design" && emailDesign) {
+        // Esperar a que el editor esté listo antes de cargar el diseño
+        setTimeout(() => {
+          if (emailEditorRef.current?.editor) {
+            console.log("Restaurando diseño:", emailDesign);
+            emailEditorRef.current.editor.loadDesign(emailDesign);
+          }
+        }, 1000);
       }
+      setCurrentTab(newValue);
+    } catch (error) {
+      console.error("Error al cambiar de pestaña:", error);
     }
-    setCurrentTab(newValue);
   };
 
-  // Añade este useEffect para manejar la carga inicial del editor
+  // Agregar un efecto para manejar la restauración del diseño
   useEffect(() => {
-    let editorLoadedInterval;
-    if (currentTab === "design" && tempDesign) {
-      editorLoadedInterval = setInterval(() => {
-        if (emailEditorRef.current?.editor) {
-          emailEditorRef.current.editor.loadDesign(tempDesign);
-          clearInterval(editorLoadedInterval);
-        }
-      }, 100);
+    if (currentTab === "design" && emailDesign && emailEditorRef.current?.editor) {
+      const timer = setTimeout(() => {
+        console.log("Intentando restaurar diseño:", emailDesign);
+        emailEditorRef.current.editor.loadDesign(emailDesign);
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
-    return () => clearInterval(editorLoadedInterval);
-  }, [currentTab, tempDesign]);
+  }, [currentTab, emailDesign]);
 
   return (
     <div className=' w-[95%] md:ml-20 lg:ml-20 mx-auto p-8 space-y-8'>

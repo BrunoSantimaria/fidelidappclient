@@ -32,14 +32,11 @@ export interface DashboardState {
 // Estado inicial
 const initialState: DashboardState = {
   promotions: [],
-  agendas: [],
-  clients: [],
   metrics: null,
   loading: false,
-  activePromotion: [],
   errorMessage: null,
   lastUpdate: null,
-  cacheExpiration: 60000, // 1 minuto en milisegundos
+  cacheExpiration: 60000, // 1 minuto
 };
 
 export const dashboardSlice = createSlice({

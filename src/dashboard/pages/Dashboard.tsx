@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
 import { useDashboard } from "../../hooks/useDashboard";
 import { Package2, Users, PieChart, Calendar, Mail, CheckCircle2, Plus } from "lucide-react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import { MetricCard } from "../components/MetricCard";
 import { QuickActions } from "../components/QuickActions";
 import { RecentPromotions } from "../components/RecentPromotions";
-import { useWeeklyVisits } from "../../hooks/useWeeklyVisits";
+
 import moment from "moment";
 import "moment/locale/es";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
@@ -20,33 +20,23 @@ const useDashboardData = () => {
   const [error, setError] = useState(null);
   const { metrics, plan, promotions, getPromotionsAndMetrics, clients } = useDashboard();
 
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      await getPromotionsAndMetrics();
-    } catch (err) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        await getPromotionsAndMetrics(true);
+      } catch (err) {
+        console.error("Error al cargar datos del dashboard:", err);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     loadData();
-    // Revalidación periódica cada 30 segundos
-    const interval = setInterval(loadData, 30000);
-    return () => clearInterval(interval);
   }, []);
 
-  return {
-    isLoading,
-    error,
-    metrics,
-    plan,
-    promotions,
-    clients,
-    refetch: loadData,
-  };
+  return { isLoading, error, metrics, plan, promotions, clients };
 };
 
 export const Dashboard = () => {
@@ -54,7 +44,7 @@ export const Dashboard = () => {
   const { user } = useAuthSlice();
   const { handleNavigate } = useNavigateTo();
   const [currentPage, setCurrentPage] = useState(1);
-  const { weeklyVisits, loading: loadingVisits } = useWeeklyVisits();
+
   const clientsPerPage = 3;
 
   const getInitials = (name: string) => {
@@ -82,13 +72,6 @@ export const Dashboard = () => {
       })
       .slice(0, 20);
   }, [clients, promotions]);
-
-  const visitData = useMemo(() => {
-    if (!weeklyVisits) return [];
-    moment.locale("es");
-    // ... resto del código del visitData
-    return weeklyVisits;
-  }, [weeklyVisits]);
 
   const indexOfLastClient = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
@@ -217,7 +200,7 @@ export const Dashboard = () => {
             <p className='text-gray-600 text-sm mt-1'>Últimos clientes registrados</p>
 
             <div className='mt-4 flex-1 flex flex-col justify-between'>
-              {clients.length === 0 ? (
+              {clients?.length === 0 ? (
                 <div className='flex items-center justify-center h-full'>
                   <span className='text-gray-500'>No hay clientes registrados</span>
                 </div>

@@ -47,6 +47,8 @@ export const DashboardRoutes = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
+  const [initialLoading, setInitialLoading] = useState(true);
+
   const LimitReachedComponent = () => {
     useEffect(() => {
       toast.info("Límite de promociones activas alcanzado", {});
@@ -55,28 +57,43 @@ export const DashboardRoutes = () => {
     return <Navigate to='/dashboard' replace />;
   };
 
-  const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await getPromotionsAndMetrics();
+        setInitialLoading(true);
+        if (user?.id) {
+          await Promise.all([getPromotionsAndMetrics(true), getSubscription().catch((err) => console.warn("Error al obtener suscripción:", err))]);
+        }
       } catch (error) {
-        console.error("Error al obtener promociones y métricas:", error);
+        console.error("Error al obtener datos:", error);
         toast.error("Error al cargar los datos");
+      } finally {
+        setInitialLoading(false);
       }
     };
 
-    fetchData();
-    // Configurar un intervalo para actualizar cada 5 minutos
-    const interval = setInterval(fetchData, 5 * 60 * 1000);
+    if (user?.id) {
+      fetchData();
+      const interval = setInterval(() => getPromotionsAndMetrics(), 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.id]);
 
-    // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(interval);
-  }, []);
+  if (initialLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    getSubscription();
-  }, []);
   return (
     <>
       <Navigation />

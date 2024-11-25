@@ -19,14 +19,20 @@ import { log } from "console";
 
 export const useDashboard = () => {
   const { accounts, plan } = useSelector((state) => state.auth.user);
+  const { user } = useAuthSlice();
   const { metrics, promotions, activePromotion, agendas, clients, loading, lastUpdate, cacheExpiration } = useSelector((state) => state.dashboard);
   const { refreshAccount } = useAuthSlice();
   const dispatch = useDispatch();
   const { handleNavigate } = useNavigateTo();
 
   const getPromotionsAndMetrics = async (forceUpdate = false) => {
-    // Si no ha pasado el tiempo de caché y no es una actualización forzada, no actualizar
-    if (!forceUpdate && lastUpdate && Date.now() - lastUpdate < cacheExpiration) {
+    const now = Date.now();
+    if (!forceUpdate && lastUpdate && now - lastUpdate < cacheExpiration) {
+      return;
+    }
+
+    if (!accounts?._id) {
+      console.warn("No hay cuenta activa");
       return;
     }
 
@@ -40,17 +46,27 @@ export const useDashboard = () => {
         api.get("/api/agenda"),
       ]);
 
-      dispatch(setPromotions(promotionsResp.data.promotions));
-      dispatch(setClients(clientsResp.data.clients));
-      dispatch(setMetrics(promotionsResp.data.metrics));
-      dispatch(setAgendas(agendasResp.data));
-      dispatch(setLastUpdate(Date.now()));
+      if (promotionsResp?.data) {
+        dispatch(setPromotions(promotionsResp.data.promotions));
+        dispatch(setMetrics(promotionsResp.data.metrics));
+      }
+
+      if (clientsResp?.data) {
+        dispatch(setClients(clientsResp.data.clients));
+      }
+
+      if (agendasResp?.data) {
+        dispatch(setAgendas(agendasResp.data));
+      }
+
+      dispatch(setLastUpdate(now));
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching data:", error);
       if (error.response?.status === 401) {
         dispatch(onLogOut(""));
         handleNavigate("/");
       }
+      throw error;
     } finally {
       dispatch(setLoading(false));
     }
@@ -113,12 +129,25 @@ export const useDashboard = () => {
     }
   };
   const getSubscription = async () => {
-    console.log("plan", accounts);
     try {
-      const response = await api.get(`/api/mercadopago/check_and_update_subscription/${accounts._id}`);
+      if (!user?.accounts) {
+        console.warn("Esperando datos del usuario...");
+        return;
+      }
+
+      // Asegurarse de que accounts sea un array o un objeto
+      const accountId = Array.isArray(user.accounts) ? user.accounts[0]?._id : user.accounts._id;
+
+      if (!accountId) {
+        console.warn("ID de cuenta no disponible");
+        return;
+      }
+
+      const response = await api.get(`/api/mercadopago/check_and_update_subscription/${accountId}`);
       console.log(response);
     } catch (error) {
       console.log(error);
+      toast.error("Error al verificar la suscripción");
     }
   };
   return {

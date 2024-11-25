@@ -23,8 +23,6 @@ export const RecentPromotions = ({ promotions = [] }: RecentPromotionsProps) => 
     handleNavigate(`/dashboard/promotion/${promotionId}`);
   };
 
-  console.log("promociones", promotions);
-
   // Ordenar promociones por fecha de creación (más recientes primero)
   const sortedPromotions = [...promotions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 

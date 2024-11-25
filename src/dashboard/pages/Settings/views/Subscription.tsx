@@ -39,8 +39,10 @@ export const Subscription = () => {
     day: "numeric",
   });
   useEffect(() => {
-    getSubscription();
-  }, []);
+    if (user?.accounts) {
+      getSubscription();
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchSubscriptionData = async () => {
