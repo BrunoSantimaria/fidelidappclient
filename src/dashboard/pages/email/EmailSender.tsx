@@ -6,7 +6,13 @@ import { toast } from "react-toastify";
 import { useDashboard } from "../../../hooks";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import api from "../../../utils/api";
-import CircularProgress from "@mui/material/CircularProgress";
+
+import { CalendarToday as CalendarTodayIcon } from "@mui/icons-material";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
 
 // Material UI
 import {
@@ -47,6 +53,63 @@ import {
 // Icons
 import { Mail as MailIcon, Upload as UploadIcon, Bolt as BoltIcon, Save as SaveIcon, Description as DescriptionIcon } from "@mui/icons-material";
 
+// Definir el componente ScheduleDialog fuera del componente principal
+const ScheduleDialog = ({ open, onClose, onConfirm }) => {
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  // Crear las fechas mínima y máxima
+  const minDate = dayjs();
+  const maxDate = dayjs().add(1, "year");
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Programar envío de correo</DialogTitle>
+      <DialogContent>
+        <Typography variant='body2' sx={{ mb: 2 }}>
+          Selecciona la fecha y hora para enviar el correo
+        </Typography>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
+          <DateTimePicker
+            label='Fecha y hora de envío'
+            value={selectedDate}
+            onChange={(newValue) => setSelectedDate(newValue)}
+            minDateTime={minDate}
+            maxDateTime={maxDate}
+            sx={{ width: "100%", mt: 2 }}
+            views={["year", "month", "day", "hours", "minutes"]}
+            ampm={false}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                variant: "outlined",
+              },
+              actionBar: {
+                actions: ["clear", "cancel", "accept"],
+              },
+            }}
+            localeText={{
+              fieldTimeLabel: "Hora",
+              fieldDateLabel: "Fecha",
+              clearButtonLabel: "Limpiar",
+              cancelButtonLabel: "Cancelar",
+              okButtonLabel: "Aceptar",
+              timePickerToolbarTitle: "Seleccionar hora",
+              datePickerToolbarTitle: "Seleccionar fecha",
+            }}
+            disablePast={true}
+          />
+        </LocalizationProvider>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={() => onConfirm(selectedDate)} variant='contained' disabled={!selectedDate}>
+          Programar
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 export const EmailSender = () => {
   const [showHowToUse, setShowHowToUse] = useState(false);
   const [contactSource, setContactSource] = useState("csv"); // Estado para la fuente de contactos (CSV o Clientes)
@@ -57,7 +120,6 @@ export const EmailSender = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5); // Número de filas por página
   const [openDialog, setOpenDialog] = useState(false); // Control del diálogo de confirmación
   const [emailCount, setEmailCount] = useState(0); // Cantidad de correos a enviar
-  const [loading, setLoading] = useState(false); // Estado de carga para enviar correos
   const [openWarningDialog, setOpenWarningDialog] = useState(false); // Diálogo de advertencia para más de 500 contactos
   const [selectedClients, setSelectedClients] = useState([]);
   const [selectedSection, setSelectedSection] = useState("clients"); // 'clients' o 'csv'
@@ -75,7 +137,7 @@ export const EmailSender = () => {
   const [openTemplatesDialog, setOpenTemplatesDialog] = useState(false); // Dialog para ver plantillas
   const [currentTab, setCurrentTab] = useState("design");
   const [emailDesign, setEmailDesign] = useState(null);
-  const [loadingDialog, setLoadingDialog] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
 
   useEffect(() => {
     getPromotionsAndMetrics();
@@ -150,46 +212,32 @@ export const EmailSender = () => {
   };
   // Confirmar el envío de correos
   const handleConfirmSend = async () => {
-    setLoading(true);
-    setLoadingDialog(true);
-    setOpenDialog(false);
-
-    let recipients;
-
-    if (contactSource === "csv") {
-      recipients = csvData
-        .filter((row) => selectedCsvData.includes(row.email) && row.email && /\S+@\S+\.\S+/.test(row.email))
-        .map((row) => ({
-          email: row.email,
-          name: row.name || "Cliente",
-        }));
-    } else if (contactSource === "clients") {
-      recipients = clients
-        .filter((client) => selectedClients.includes(client.email) && client.email && /\S+@\S+\.\S+/.test(client.email))
-        .map((client) => ({
-          email: client.email,
-          name: client.name || "Cliente",
-        }));
-    }
-    if (recipients.length > plan.emailLimit - accounts.emailsSentCount) {
-      if (plan.emailLimit >= accounts.emailsSentCount) {
-        setLoading(false);
-        return toast.info(`Te has quedado sin limite de emails. Hazte PRO ahora y aumenta tu límite a 10.000. 🚀`);
-      } else {
-        setLoading(false);
-        return toast.info(`Te quedan disponibles ${plan.emailLimit - accounts.emailsSentCount} emails, por favor selecciona menos destinatarios.`);
-      }
-    }
-    // Validar si hay destinatarios válidos
-    if (recipients.length === 0) {
-      toast.error("No hay destinatarios válidos.");
-      setLoading(false);
-      setOpenDialog(false);
-      return;
-    }
-
     try {
-      // Exportar el contenido del editor de emails
+      setOpenDialog(false);
+
+      // Mostrar mensaje de éxito inmediatamente
+      toast.success("La campaña de correos se ha iniciado correctamente. Recibirás una notificación por correo cuando se complete el envío.", {
+        autoClose: 8000,
+      });
+
+      let recipients;
+
+      if (contactSource === "csv") {
+        recipients = csvData
+          .filter((row) => selectedCsvData.includes(row.email) && row.email && /\S+@\S+\.\S+/.test(row.email))
+          .map((row) => ({
+            email: row.email,
+            name: row.name || "Cliente",
+          }));
+      } else if (contactSource === "clients") {
+        recipients = clients
+          .filter((client) => selectedClients.includes(client.email) && client.email && /\S+@\S+\.\S+/.test(client.email))
+          .map((client) => ({
+            email: client.email,
+            name: client.name || "Cliente",
+          }));
+      }
+
       const templateHtml = await new Promise((resolve, reject) => {
         if (emailEditorRef.current) {
           emailEditorRef.current.editor.exportHtml((data) => {
@@ -210,34 +258,37 @@ export const EmailSender = () => {
         template: templateHtml,
         clients: recipients,
       };
-      console.log(recipients);
-      //Enviar los datos del formulario (asunto, template, y lista de clientes)
+
       await api.post("/api/email/send", formData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      toast.success("Correo enviado correctamente.");
-      refreshAccount();
+      // Limpiar todo el contenido
       setSubject("");
       setCsvFile(null);
       setSelectedClients([]);
-      emailEditorRef.current.editor.loadDesign({ body: { rows: [] } }); // Limpiar el editor
+      setSelectedCsvData([]);
+      setCsvData([]);
+      setEmailDesign(null);
+      setContactSource("csv");
+      setCurrentTab("design");
+
+      // Limpiar el editor después de un pequeño delay para asegurar que está listo
+      setTimeout(() => {
+        if (emailEditorRef.current?.editor) {
+          emailEditorRef.current.editor.loadDesign({ body: { rows: [] } });
+        }
+      }, 100);
     } catch (error) {
-      console.error("Error al enviar el correo:", error);
-      toast.error("Hubo un problema enviando el correo.");
-    } finally {
-      setLoading(false);
-      setLoadingDialog(false);
+      console.error("Error al iniciar la campaña:", error);
+      toast.error("Hubo un problema al iniciar la campaña de correos.");
     }
   };
   useEffect(() => {
     refreshAccount();
   }, [clients]);
-  useEffect(() => {
-    refreshAccount();
-  }, [loading]);
 
   const handleContactSourceChange = (event) => {
     setContactSource(event.target.value);
@@ -466,6 +517,80 @@ export const EmailSender = () => {
       return () => clearTimeout(timer);
     }
   }, [currentTab, emailDesign]);
+
+  const handleScheduleEmail = async (selectedDate) => {
+    try {
+      // Validar que haya destinatarios seleccionados
+      if ((!selectedCsvData.length && contactSource === "csv") || (!selectedClients.length && contactSource === "clients")) {
+        toast.error("Debes seleccionar al menos un destinatario");
+        return;
+      }
+
+      const templateHtml = await new Promise((resolve, reject) => {
+        if (emailEditorRef.current) {
+          emailEditorRef.current.editor.exportHtml((data) => {
+            const { html } = data;
+            if (html && html.trim() !== "") {
+              resolve(html);
+            } else {
+              reject("El contenido del email está vacío.");
+            }
+          });
+        } else {
+          reject("Editor no disponible.");
+        }
+      });
+
+      let recipients;
+      if (contactSource === "csv") {
+        recipients = csvData
+          .filter((row) => selectedCsvData.includes(row.email))
+          .map((row) => ({
+            email: row.email,
+            name: row.name || "Cliente",
+          }));
+      } else {
+        recipients = clients
+          .filter((client) => selectedClients.includes(client.email))
+          .map((client) => ({
+            email: client.email,
+            name: client.name || "Cliente",
+          }));
+      }
+
+      const formData = {
+        subject,
+        template: templateHtml,
+        clients: recipients,
+        scheduledDate: selectedDate.toISOString(), // Asegurarnos de enviar en formato ISO
+        userId: accounts._id, // Agregar el ID del usuario
+        campaignName: subject, // Usar el asunto como nombre de campaña
+      };
+
+      const response = await api.post("/api/email/schedule", formData);
+
+      if (response.data.success) {
+        toast.success(
+          `Email programado para ${new Date(selectedDate).toLocaleString("es-ES", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}`
+        );
+
+        setShowScheduleDialog(false);
+
+        // Limpiar el formulario
+        setSubject("");
+        setCsvFile(null);
+        setSelectedClients([]);
+        setSelectedCsvData([]);
+        emailEditorRef.current.editor.loadDesign({ body: { rows: [] } });
+      }
+    } catch (error) {
+      console.error("Error al programar el correo:", error);
+      toast.error(error.response?.data?.message || "Error al programar el correo");
+    }
+  };
 
   return (
     <div className=' w-[95%] md:ml-20 lg:ml-20 mx-auto p-8 space-y-8'>
@@ -705,28 +830,48 @@ export const EmailSender = () => {
               Cargar Plantilla
             </Button>
           </Box>
-          <Button
-            variant='contained'
-            color='primary'
-            startIcon={<MailIcon />}
-            disabled={isSendDisabled || (!selectedClients.length && !selectedCsvData.length)}
-            onClick={handleSendEmails}
-          >
-            Enviar Email
-          </Button>
+          <Box className='flex gap-2'>
+            <Button
+              variant='outlined'
+              startIcon={<CalendarTodayIcon />}
+              onClick={() => setShowScheduleDialog(true)}
+              disabled={isSendDisabled || (!selectedClients.length && !selectedCsvData.length)}
+            >
+              Programar Envío
+            </Button>
+            <Button
+              variant='contained'
+              color='primary'
+              startIcon={<MailIcon />}
+              disabled={isSendDisabled || (!selectedClients.length && !selectedCsvData.length)}
+              onClick={handleSendEmails}
+            >
+              Enviar Email
+            </Button>
+          </Box>
         </Box>
       </Card>
 
       {/* Diálogos */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Confirmar Envío</DialogTitle>
+        <DialogTitle>Confirmar Envío de Campaña</DialogTitle>
         <DialogContent>
-          <Typography>Estás a punto de enviar correos a {selectedClients.length + selectedCsvData.length} destinatarios. ¿Estás seguro?</Typography>
+          <Typography variant='body1' gutterBottom>
+            Estás a punto de iniciar una campaña de correos para {selectedClients.length + selectedCsvData.length} destinatarios.
+          </Typography>
+          <Typography variant='body2' color='textSecondary'>
+            Una vez iniciada la campaña:
+            <ul>
+              <li>Podrás salir de esta página sin interrumpir el envío</li>
+              <li>Recibirás un correo de confirmación cuando se complete el envío</li>
+              <li>Podrás ver las estadísticas de la campaña en tu panel de control</li>
+            </ul>
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
-          <Button onClick={handleConfirmSend} color='primary' autoFocus>
-            Confirmar
+          <Button onClick={handleConfirmSend} color='primary' variant='contained' autoFocus>
+            Iniciar Campaña
           </Button>
         </DialogActions>
       </Dialog>
@@ -772,16 +917,8 @@ export const EmailSender = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Diálogo de Loading */}
-      <Dialog open={loadingDialog} disableEscapeKeyDown={true}>
-        <DialogContent sx={{ textAlign: "center", p: 4 }}>
-          <CircularProgress sx={{ mb: 2 }} />
-          <Typography variant='h6' gutterBottom>
-            Enviando correos...
-          </Typography>
-          <Typography color='textSecondary'>Por favor, no cierres esta pestaña hasta que el proceso termine.</Typography>
-        </DialogContent>
-      </Dialog>
+      {/* Diálogo de programación */}
+      <ScheduleDialog open={showScheduleDialog} onClose={() => setShowScheduleDialog(false)} onConfirm={handleScheduleEmail} />
     </div>
   );
 };
