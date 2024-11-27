@@ -153,6 +153,9 @@ export const Report = () => {
   return (
     <Box className='w-full px-4 md:w-[80%] md:ml-48'>
       <Stack spacing={4} sx={{ py: { xs: 2, md: 6 } }}>
+        <Typography variant='h6' gutterBottom>
+          Métricas globales {data.Name}
+        </Typography>
         <Stack
           direction='row'
           spacing={2}
@@ -162,7 +165,7 @@ export const Report = () => {
             justifyContent: { xs: "space-around", md: "center" },
           }}
         >
-          <MetricCard title='Clientes Registrados' value={data.registeredClients} icon={<PeopleIcon />} />
+          <MetricCard title='Clientes Registrados' value={data.totalClients} icon={<PeopleIcon />} />
           <MetricCard title='Puntos Acumulados' value={data.totalPoints} icon={<StarsIcon />} />
           <MetricCard title='Visitas Totales' value={data.totalVisits} icon={<VisibilityIcon />} />
           <MetricCard title='Canjes Realizados' value={data.totalRedeemCount} icon={<CardGiftcardIcon />} />
@@ -171,7 +174,7 @@ export const Report = () => {
 
         <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
           <Typography variant='h6' gutterBottom>
-            Tus clientes en los últimos 7 días
+            Tus clientes en los últimos 14 días
           </Typography>
           <Typography variant='body2' color='text.secondary' gutterBottom>
             Análisis de visitas, registros y puntos acumulados
