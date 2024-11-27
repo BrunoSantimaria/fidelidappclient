@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 import logo from "../../../assets/LOGO-SIN-FONDO.png";
 import { NavigationLink } from "./NavigationLink";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import LoyaltyRoundedIcon from "@mui/icons-material/LoyaltyRounded";
-import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
+import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
@@ -16,15 +15,12 @@ import { AddAdmin } from "./AddAdmin";
 import { useDashboard } from "../../../hooks";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MailRoundedIcon from "@mui/icons-material/MailRounded";
-import { toast } from "react-toastify";
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 import { Divider } from "@mui/material";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
-import { AppBar, Toolbar, IconButton, Menu, MenuItem, Badge } from "@mui/material";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import { NotificationBell } from "../NotificationBell";
+
 import { useNavigate } from "react-router-dom";
-import { Package, Users, Calendar, LoyaltyRounded } from "lucide-react";
+
 const containerVariants = {
   close: {
     width: "5rem",
@@ -160,7 +156,11 @@ export const Navigation = () => {
               <MailRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
             </NavigationLink>
           </div>
-
+          <div>
+            <NavigationLink name='Campañas' link='/dashboard/email-campaign' isOpen={isOpen}>
+              <CampaignRoundedIcon />
+            </NavigationLink>
+          </div>
           {/*  <div onClick={handleModal}>  <NavigationLink name='Agregar administradores'>
               <PersonAddAlt1RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>

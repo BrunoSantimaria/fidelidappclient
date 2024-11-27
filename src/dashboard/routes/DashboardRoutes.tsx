@@ -25,6 +25,7 @@ import { PromotionPage } from "../pages/Promotions/PromotionPage";
 import { toast } from "react-toastify";
 
 import { AutomationRulesPage } from "../pages/AutomationRules/AutomationRules";
+import EmailCampaigns, { EmailCampaign } from "../pages/email/EmailCampaign";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -99,6 +100,14 @@ export const DashboardRoutes = () => {
           element={
             <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
               <EmailSender />
+            </motion.div>
+          }
+        />
+        <Route
+          path='/email-campaign'
+          element={
+            <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
+              <EmailCampaign />
             </motion.div>
           }
         />
