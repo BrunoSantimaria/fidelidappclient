@@ -1,13 +1,38 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, Card, CardContent, Typography, Button, Chip, Collapse, Divider, Tab, Tabs, Pagination, LinearProgress, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Collapse,
+  Divider,
+  Tab,
+  Tabs,
+  Pagination,
+  LinearProgress,
+  CircularProgress,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import { Email, CalendarToday, ExpandMore, Send as SendIcon, OpenInBrowser, Mouse, ErrorOutline } from "@mui/icons-material";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement } from "chart.js";
 import api from "../../../utils/api";
 import { useDashboard } from "../../../hooks";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { toast } from "react-toastify";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement);
 
@@ -292,7 +317,7 @@ export const EmailCampaign = () => {
             Campañas Activas
           </Typography>
           {paginatedActiveCampaigns.map((campaign) => (
-            <CampaignCard key={campaign.id} campaign={campaign} isActive={true} />
+            <CampaignCard key={campaign.id} campaign={campaign} isActive={true} setCampaignsData={setCampaignsData} accounts={accounts} />
           ))}
           {campaignsData.active.length > campaignsPerPage && (
             <Box className='flex justify-center mt-8'>
@@ -312,7 +337,7 @@ export const EmailCampaign = () => {
               Campañas Programadas
             </Typography>
             {campaignsData.scheduled.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} isActive={false} />
+              <CampaignCard key={campaign.id} campaign={campaign} isActive={false} setCampaignsData={setCampaignsData} accounts={accounts} />
             ))}
           </Box>
         )}
@@ -352,17 +377,80 @@ export const EmailCampaign = () => {
   );
 };
 
-const CampaignCard = ({ campaign, isActive }: { campaign: Campaign; isActive: boolean }) => {
+const CampaignCard = ({
+  campaign,
+  isActive,
+  setCampaignsData,
+  accounts,
+}: {
+  campaign: Campaign;
+  isActive: boolean;
+  setCampaignsData: React.Dispatch<React.SetStateAction<CampaignsData>>;
+  accounts: any;
+}) => {
   const [open, setOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [newScheduleDate, setNewScheduleDate] = useState(dayjs(campaign.scheduledFor));
+  const [loading, setLoading] = useState(false);
 
-  const handleDelete = () => {
-    // TODO: Implementar lógica de eliminación
-    console.log("Eliminar campaña:", campaign.id);
+  // Calcular fechas mínimas y máximas permitidas
+  const minDate = dayjs();
+  const maxDate = dayjs().add(30, "days");
+
+  const handleDateChange = (newValue: any) => {
+    setNewScheduleDate(newValue);
   };
 
-  const handleReschedule = () => {
-    // TODO: Implementar lógica de reprogramación
-    console.log("Reprogramar campaña:", campaign.id);
+  const handleReschedule = async (selectedDate: any) => {
+    try {
+      const response = await api.put(`/api/email/scheduled/${campaign.id}`, {
+        newScheduleDate: selectedDate.toISOString(),
+      });
+
+      // Cerrar el diálogo
+      setOpenDialog(false);
+
+      // Mostrar toast de éxito
+      toast.success("Campaña reprogramada correctamente");
+
+      // Actualizar la fecha en el componente
+      setNewScheduleDate(selectedDate);
+    } catch (error) {
+      console.error("Error al reprogramar la campaña:", error);
+      toast.error("Error al reprogramar la campaña");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      await api.delete(`/api/email/scheduled/${campaign.id}`);
+
+      // Actualizar solo las campañas programadas
+      const response = await api.get("/api/campaigns/all", {
+        params: {
+          accountId: accounts._id,
+        },
+      });
+
+      const sortedScheduledCampaigns = response.data.scheduled.sort((a: ScheduledCampaign, b: ScheduledCampaign) => {
+        return new Date(b.scheduledFor).getTime() - new Date(a.scheduledFor).getTime();
+      });
+
+      setCampaignsData((prev) => ({
+        ...prev,
+        scheduled: sortedScheduledCampaigns,
+      }));
+
+      toast.success("Campaña eliminada correctamente");
+      setOpenDeleteDialog(false);
+    } catch (error) {
+      console.error("Error al eliminar la campaña:", error);
+      toast.error("Error al eliminar la campaña");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -387,34 +475,14 @@ const CampaignCard = ({ campaign, isActive }: { campaign: Campaign; isActive: bo
             <Box className='flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-end'>
               {getStatusChip(campaign.status)}
               {!isActive && campaign.status === "pending" && (
-                <Box className='flex gap-2 w-full sm:w-auto'>
-                  <Button
-                    variant='outlined'
-                    color='primary'
-                    size='small'
-                    fullWidth
-                    className='sm:w-auto'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleReschedule();
-                    }}
-                  >
+                <>
+                  <Button variant='outlined' color='primary' size='small' onClick={() => setOpenDialog(true)}>
                     Reprogramar
                   </Button>
-                  <Button
-                    variant='outlined'
-                    color='error'
-                    size='small'
-                    fullWidth
-                    className='sm:w-auto'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete();
-                    }}
-                  >
+                  <Button variant='outlined' color='error' size='small' onClick={() => setOpenDeleteDialog(true)}>
                     Eliminar
                   </Button>
-                </Box>
+                </>
               )}
               <ExpandMore className={`transform transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
             </Box>
@@ -481,6 +549,72 @@ const CampaignCard = ({ campaign, isActive }: { campaign: Campaign; isActive: bo
             </Box>
           )}
         </Collapse>
+
+        {/* Diálogo de reprogramación */}
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+          <DialogTitle>Reprogramar campaña</DialogTitle>
+          <DialogContent>
+            <Typography variant='body2' sx={{ mb: 2 }}>
+              Selecciona la nueva fecha y hora para la campaña
+            </Typography>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
+              <DateTimePicker
+                label='Fecha y hora de envío'
+                value={newScheduleDate}
+                onChange={handleDateChange}
+                minDateTime={minDate}
+                maxDateTime={maxDate}
+                sx={{ width: "100%", mt: 2 }}
+                views={["year", "month", "day", "hours", "minutes"]}
+                ampm={false}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    variant: "outlined",
+                  },
+                  actionBar: {
+                    actions: ["clear", "cancel", "accept"],
+                  },
+                }}
+                localeText={{
+                  fieldTimeLabel: "Hora",
+                  fieldDateLabel: "Fecha",
+                  clearButtonLabel: "Limpiar",
+                  cancelButtonLabel: "Cancelar",
+                  okButtonLabel: "Aceptar",
+                  timePickerToolbarTitle: "Seleccionar hora",
+                  datePickerToolbarTitle: "Seleccionar fecha",
+                }}
+                disablePast={true}
+              />
+            </LocalizationProvider>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+            <Button onClick={() => handleReschedule(newScheduleDate)} variant='contained' disabled={!newScheduleDate}>
+              Confirmar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Diálogo de confirmación de eliminación */}
+        <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+          <DialogTitle>Confirmar eliminación</DialogTitle>
+          <DialogContent>
+            <Typography variant='body1'>¿Estás seguro que deseas eliminar esta campaña programada?</Typography>
+            <Typography variant='body2' color='error' sx={{ mt: 2 }}>
+              Esta acción no se puede deshacer.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDeleteDialog(false)} disabled={loading}>
+              Cancelar
+            </Button>
+            <Button onClick={handleDelete} variant='contained' color='error' disabled={loading}>
+              {loading ? <CircularProgress size={24} /> : "Eliminar"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </CardContent>
     </Card>
   );
