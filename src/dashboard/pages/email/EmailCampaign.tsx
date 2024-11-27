@@ -67,6 +67,8 @@ const getStatusChip = (status: string) => {
       return <Chip label='Completada' color='primary' />;
     case "pending":
       return <Chip label='Programada' variant='outlined' />;
+    case "in_progress":
+      return <Chip label='En progreso' color='secondary' />;
     default:
       return <Chip label='En proceso' color='secondary' />;
   }
@@ -81,7 +83,7 @@ const getDisplayDate = (campaign: Campaign) => {
 };
 
 const renderMetricsSummary = (campaign: ActiveCampaign) => {
-  const totalSent = campaign.metrics.totalSent;
+  const totalSent = campaign.metrics.totalSent || 0;
   const metrics = [
     {
       icon: <SendIcon sx={{ fontSize: 20 }} className='text-[#5b7898]' />,
@@ -92,20 +94,20 @@ const renderMetricsSummary = (campaign: ActiveCampaign) => {
     {
       icon: <OpenInBrowser sx={{ fontSize: 20 }} className='text-[#4CAF50]' />,
       label: "Abiertos",
-      value: campaign.metrics.opens,
-      percentage: Math.round((campaign.metrics.opens / totalSent) * 100),
+      value: campaign.metrics.opens || 0,
+      percentage: totalSent ? Math.round(((campaign.metrics.opens || 0) / totalSent) * 100) : 0,
     },
     {
       icon: <Mouse sx={{ fontSize: 20 }} className='text-[#FFC107]' />,
       label: "Clicks",
-      value: campaign.metrics.clicks,
-      percentage: Math.round((campaign.metrics.clicks / campaign.metrics.opens) * 100),
+      value: campaign.metrics.clicks || 0,
+      percentage: campaign.metrics.opens ? Math.round(((campaign.metrics.clicks || 0) / campaign.metrics.opens) * 100) : 0,
     },
     {
       icon: <ErrorOutline sx={{ fontSize: 20 }} className='text-[#F44336]' />,
       label: "Rebotados",
-      value: campaign.metrics.bounces,
-      percentage: Math.round((campaign.metrics.bounces / totalSent) * 100),
+      value: campaign.metrics.bounces || 0,
+      percentage: totalSent ? Math.round(((campaign.metrics.bounces || 0) / totalSent) * 100) : 0,
     },
   ];
 
@@ -148,7 +150,7 @@ const renderMetricsChart = (campaign: ActiveCampaign) => {
     datasets: [
       {
         label: "Cantidad",
-        data: [campaign.metrics.totalSent, campaign.metrics.opens, campaign.metrics.clicks, campaign.metrics.bounces],
+        data: [campaign.metrics.totalSent || 0, campaign.metrics.opens || 0, campaign.metrics.clicks || 0, campaign.metrics.bounces || 0],
         backgroundColor: [
           "#5b7898", // Enviados - azul principal
           "#4CAF50", // Abiertos - verde

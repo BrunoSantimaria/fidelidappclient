@@ -58,7 +58,6 @@ export const useAuthSlice = () => {
         dispatch(onLogin(userWithAccountAndPlan));
       } catch (error) {
         console.error("Error fetching current user details:", error);
-        toast.error("No se han podido obtener las cuentas y el plan.");
       }
     }
   };
