@@ -17,12 +17,11 @@ export const PromotionInfo = () => {
       </p>
       <ul className='list-disc list-inside text-gray-700 space-y-2'>
         <li>
-          <strong className='text-main'>Sistema de Visitas:</strong> Ideal para motivar visitas recurrentes. Define una cantidad de visitas para que el cliente
-          obtenga el beneficio.
+          <strong className='text-main'>Promociones Únicas:</strong> Ideal para motivar visitas de tus clientes. Define un beneficio para que tus clientes lo obtengan mediante canjes.
         </li>
         <li>
           <strong className='text-main'>Sistema de Puntos:</strong> Perfecto para un programa de acumulación. El cliente acumula puntos hasta alcanzar el total
-          necesario para obtener el premio.
+          necesario para obtener diversos premios.
         </li>
       </ul>
       <p className='mt-4 text-gray-700'>Selecciona un tipo y configura los detalles en los siguientes pasos.</p>

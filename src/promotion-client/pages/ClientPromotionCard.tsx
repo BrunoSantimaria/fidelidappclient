@@ -41,6 +41,8 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { Helmet } from "react-helmet-async";
 import api from "../../utils/api";
 import { motion, AnimatePresence } from "framer-motion";
+import ClientPromotionsTable from "../components/ClientPromotionsTable";
+
 
 const marioCoinSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav";
 const marioStarSound = "https://themushroomkingdom.net/sounds/wav/smb2/smb2_grow.wav";
@@ -105,6 +107,7 @@ export const ClientPromotionCard = () => {
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [rewardToConfirm, setRewardToConfirm] = useState(null);
+  const [clientPromotions, setClientPromotions] = useState([]);
 
   const handleOpenConfirmDialog = () => setOpenConfirmDialog(true);
   const handleCloseConfirmDialog = () => {
@@ -128,6 +131,7 @@ export const ClientPromotionCard = () => {
         setPromotionDetails(response.data.promotionDetails);
         setClient(response.data.client);
         setImageUrl(response.data.promotionDetails.imageUrl);
+        setClientPromotions(response.data.clientPromotions);
 
         const userResponse = await api.get("/auth/current");
         setUser(userResponse.data);
@@ -295,6 +299,11 @@ export const ClientPromotionCard = () => {
     }
   };
 
+  const handleRedirect = (id) => {
+    console.log(`Redirecting to promotion with ID: ${id}`);
+    // Implement navigation logic here
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -314,6 +323,7 @@ export const ClientPromotionCard = () => {
       </Container>
     );
   }
+
   return (
     <>
       <Helmet>
@@ -351,9 +361,8 @@ export const ClientPromotionCard = () => {
                 </Typography>
                 <div className='font-medium flex items-center space-x-1'>
                   <span
-                    className={`inline-block h-2 w-2 rounded-full ${
-                      promotion.status === "Active" ? "bg-green-500" : promotion.status === "Expired" ? "bg-red-500" : "bg-yellow-500"
-                    }`}
+                    className={`inline-block h-2 w-2 rounded-full ${promotion.status === "Active" ? "bg-green-500" : promotion.status === "Expired" ? "bg-red-500" : "bg-yellow-500"
+                      }`}
                   />
                   <span>{promotion.status}</span>
                 </div>
@@ -476,6 +485,18 @@ export const ClientPromotionCard = () => {
                         </Card>
                       );
                     })}
+
+                    {/* Lista de promociones del cliente */}
+                    <div className='flex flex-col md:flex-row gap-4'>
+                      <div className='flex-1'>
+                        <div className='flex flex-col'>
+                          <span className='font-bold text-main font-lato text-xl md:text-3xl'>Tus otras promociones </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <ClientPromotionsTable clientPromotions={clientPromotions} onRedirect={handleRedirect} />
+
 
                     {/* Social Media y Logo centrados */}
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>

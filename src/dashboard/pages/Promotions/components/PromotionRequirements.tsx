@@ -8,6 +8,8 @@ export const PromotionRequirements = ({
     visitsRequired: 0,
     promotionDuration: "",
     rewards: [],
+    startDate: "",
+    endDate: "",
   },
   setPromotionRequirements,
 }) => {
@@ -81,7 +83,7 @@ export const PromotionRequirements = ({
             className='w-4 h-4 p-2 border bg-white border-main rounded-md'
           />
           <label htmlFor='isRecurrent' className='text-sm font-medium'>
-            ¿Es recurrente?
+            ¿Es recurrente? Es decir si el beneficio se puede canjear varias veces.
           </label>
         </div>
       )}
@@ -98,26 +100,60 @@ export const PromotionRequirements = ({
             value={promotionRequirements.visitsRequired}
             onChange={handleChange}
             className='w-full p-2 border bg-white border-main rounded-md'
-            placeholder='Número de visitas'
+            placeholder='Por ej si se requieren 3 visitas durante la promoción para canjear el beneficio'
           />
         </div>
       )}
 
-      <div>
-        <label htmlFor='promotionDuration' className='block text-sm font-medium mb-2'>
-          Duración de la promoción
-        </label>
-        <input
-          id='promotionDuration'
-          name='promotionDuration'
-          type='number'
-          value={promotionRequirements.promotionDuration}
-          onChange={handleChange}
-          className='w-full p-4 h-12 border bg-white border-main rounded-md'
-          placeholder='Duración en días'
-          min='0'
-        />
-      </div>
+      {system === "visits" && (
+        <div>
+          <label htmlFor='startDate' className='block text-sm font-medium mb-2'>
+            Inicio de la promoción
+          </label>
+          <input
+            id='startDate'
+            name='startDate'
+            type='date'
+            value={promotionRequirements.startDate}
+            onChange={handleChange}
+            className='w-full p-4 h-12 border bg-white border-main rounded-md'
+            placeholder='Fecha de inicio de la promoción'
+          />
+        </div>
+      )}
+      {system === "visits" && (
+        <div>
+          <label htmlFor='endDate' className='block text-sm font-medium mb-2'>
+            Fin de la promoción
+          </label>
+          <input
+            id='endDate'
+            name='endDate'
+            type='date'
+            value={promotionRequirements.endDate}
+            onChange={handleChange}
+            className='w-full p-4 h-12 border bg-white border-main rounded-md'
+            placeholder='Fecha de fin de la promoción'
+          />
+        </div>
+      )}
+
+      {system === "points" && (
+        <div>
+          <label htmlFor='promotionDuration' className='block text-sm font-medium mb-2'>
+            Duración de los puntos
+          </label>
+          <input
+            id='promotionDuration'
+            name='promotionDuration'
+            type='number'
+            value={promotionRequirements.promotionDuration}
+            onChange={handleChange}
+            className='w-full p-4 h-12 border bg-white border-main rounded-md'
+            placeholder='Tiempo en que los clientes deben realizar al menos un canje antes de que los puntos se pierdan.'
+          />
+        </div>
+      )}
 
       {system === "points" && (
         <div className='flex flex-col mt-4 space-y-2 mb-2 m-auto justify-center text-center'>

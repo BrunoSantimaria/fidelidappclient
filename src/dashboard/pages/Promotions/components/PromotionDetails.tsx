@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useDropzone } from "react-dropzone";
 
-export const PromotionDetails = ({ promotionDetails, setPromotionDetails, currentStep, steps }) => {
+export const PromotionDetails = ({ promotionDetails, setPromotionDetails, selectedSystem, currentStep, steps }) => {
   const [error, setError] = useState({
     title: "",
     description: "",
@@ -102,7 +102,7 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
         <label htmlFor='title' className='font-bold'>
           Título de la promoción
         </label>
-        <p className='italic text-gray-500 pb-2 text-xs'>Ej. Obtén un 15% de descuento en tu primer pedido.</p>
+        <p className='italic text-gray-500 pb-2 text-xs'>Ej. Tu negocio de premia por unirte a nuestra comunidad.</p>
         <input
           id='title'
           name='title'
@@ -118,7 +118,7 @@ export const PromotionDetails = ({ promotionDetails, setPromotionDetails, curren
       <div className='mt-4 space-y-2'>
         <label htmlFor='description'>Descripción</label>
         <p className='italic text-gray-500 pb-2 text-xs'>
-          Ej. Por cada compra de $10.000 consigues 1 {promotionDetails.systemType === "points" ? "punto" : "visita"}.
+           {selectedSystem === "points" ? "Ej. Por cada compra de $10.000 consigues 1 punto" : "Obtén un 15% de descuento en tu primer pedido"}.
         </p>{" "}
         <textarea
           id='description'

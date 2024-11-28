@@ -19,7 +19,7 @@ export const PromotionSystem = ({ setSelectedSystem, selectedSystem }) => {
           className={`w-full p-4 border rounded-lg ${selectedSystem === "visits" ? "bg-main text-white" : "bg-white text-main border-main"}`}
           onClick={() => setSelectedSystem("visits")}
         >
-          Sistema de Visitas
+          Promoción Única
         </button>
         <button
           className={`w-full p-4 border rounded-lg ${selectedSystem === "points" ? "bg-main text-white" : "bg-white text-main border-main"}`}

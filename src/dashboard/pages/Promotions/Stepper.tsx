@@ -23,6 +23,8 @@ export const Stepper = () => {
     promotionDuration: "",
     rewards: [], // Usamos rewards para las recompensas
     isRecurrent: false,
+    startDate: "",
+    endDate: ""
   });
 
   const steps = ["Cómo crear una promoción", "Sistema de promoción", "Detalles de la promoción", "Requisitos de la promoción"];
@@ -41,7 +43,7 @@ export const Stepper = () => {
       case 4:
         if (selectedSystem === "visits") {
           // Validación de visitas necesarias y duración
-          return isFieldNotEmpty(promotionRequirements.visitsRequired) && isFieldNotEmpty(promotionRequirements.promotionDuration);
+          return isFieldNotEmpty(promotionRequirements.visitsRequired);
         } else if (selectedSystem === "points") {
           // Validación de que haya al menos una recompensa
           return promotionRequirements.rewards.length > 0;
@@ -59,6 +61,8 @@ export const Stepper = () => {
       promotionDuration: "",
       rewards: [],
       isRecurrent: false,
+      startDate: "",
+      endDate: ""
     });
   }, [selectedSystem]);
 
@@ -69,7 +73,7 @@ export const Stepper = () => {
       case 2:
         return <PromotionSystem setSelectedSystem={setSelectedSystem} selectedSystem={selectedSystem} />;
       case 3:
-        return <PromotionDetails promotionDetails={promotionDetails} setPromotionDetails={setPromotionDetails} />;
+        return <PromotionDetails promotionDetails={promotionDetails} setPromotionDetails={setPromotionDetails} selectedSystem={selectedSystem} />;
       case 4:
         return (
           <PromotionRequirements system={selectedSystem} promotionRequirements={promotionRequirements} setPromotionRequirements={setPromotionRequirements} />
@@ -109,8 +113,13 @@ export const Stepper = () => {
     formData.append("promotionRequirements[promotionDuration]", promotionRequirements.promotionDuration);
     formData.append("promotionRequirements[isRecurrent]", promotionRequirements.isRecurrent);
 
+    // Si el selectedSystem es visits entonces sumar start y end date
+    if (selectedSystem === "visits") {
+      formData.append("promotionRequirements[startDate]", promotionRequirements.startDate);
+      formData.append("promotionRequirements[endDate]", promotionRequirements.endDate);
+    }
+
     // Asegurarse de que `promotionRequirements.rewards` sea un array de objetos
-    console.log(selectedSystem);
     if (selectedSystem === "points") {
       if (promotionRequirements.rewards && Array.isArray(promotionRequirements.rewards) && promotionRequirements.rewards.length > 0) {
         // No convertir a JSON, dejar como un array de objetos
@@ -137,7 +146,6 @@ export const Stepper = () => {
       !promotionDetails.description ||
       !promotionDetails.conditions ||
       !promotionDetails.image ||
-      !promotionRequirements.promotionDuration ||
       (selectedSystem === "visits" && !promotionRequirements.visitsRequired)
     ) {
       console.log("Datos incompletos:", promotionDetails, promotionRequirements);

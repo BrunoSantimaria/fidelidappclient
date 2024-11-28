@@ -130,6 +130,32 @@ export const PromotionClient = () => {
     );
   }
 
+  //If promotion.status is inactive show a message
+  if (promotion.status === "inactive") {
+    return (
+      <div className='relative flex flex-col m-0 text-center justify-center w-screen h-screen'>
+        <div
+          className='absolute inset-0 bg-cover bg-center'
+          style={{
+            backgroundImage: `url(${background})`,
+            opacity: 0.5,
+          }}
+        ></div>
+        <div className='relative z-10'>
+          <div className='p-2 bg-white w-[30%] justify-center mx-auto my-10 rounded-md text-main cursor-pointer hover:bg-main/60 duration-300'>
+          
+          Esta promoción ha finalizado.</div>
+          <div
+            onClick={() => handleNavigate("/")}
+            className='p-2 bg-main w-[30%] justify-center mx-auto my-10 rounded-md text-white cursor-pointer hover:bg-main/60 duration-300'
+          >
+            Volver a home.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!promotion) {
     return (
       <div className='relative flex flex-col m-0 text-center justify-center w-screen h-screen'>
@@ -141,7 +167,8 @@ export const PromotionClient = () => {
           }}
         ></div>
         <div className='relative z-10'>
-          <div>Esta promoción no existe.</div>
+          <div className='p-2 bg-white w-[30%] justify-center mx-auto my-10 rounded-md text-main cursor-pointer hover:bg-main/60 duration-300'>
+          Esta promoción no existe.</div>
           <div
             onClick={() => handleNavigate("/")}
             className='p-2 bg-main w-[30%] justify-center mx-auto my-10 rounded-md text-white cursor-pointer hover:bg-main/60 duration-300'

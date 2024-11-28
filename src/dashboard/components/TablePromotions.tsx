@@ -129,10 +129,13 @@ export const TablePromotions = () => {
                     <TableCell>Título</TableCell>
                     <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>Descripción</TableCell>
                     <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                      Duración
+                      Fecha Inicio
                     </TableCell>
                     <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                      Recurrente
+                      Fecha Fin 
+                    </TableCell>
+                    <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
+                      Status
                     </TableCell>
                     <TableCell align='center'>Tipo</TableCell>
                     <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
@@ -151,12 +154,15 @@ export const TablePromotions = () => {
                       </TableCell>
                       <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>{promotion.description.slice(0, 100)}...</TableCell>
                       <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                        {promotion.promotionDuration}
+                        {promotion.startDate ? promotion.startDate.split("T")[0] : promotion.createdAt.split("T")[0]}
+                      </TableCell>
+                      <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
+                        {promotion.endDate ? promotion.endDate.split("T")[0] : promotion.promotionDuration}
                       </TableCell>
                       <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
                         <Box
                           sx={{
-                            bgcolor: promotion.promotionRecurrent === "True" ? "#5b7898" : "grey.300",
+                            bgcolor: promotion.status === "active" ? "#5b7898" : "grey.300",
                             color: "white",
                             px: 2,
                             py: 0.5,
@@ -165,7 +171,7 @@ export const TablePromotions = () => {
                             fontSize: "0.875rem",
                           }}
                         >
-                          {promotion.promotionRecurrent === "True" ? "Sí" : "No"}
+                          {promotion.status === "active" ? "Activa" : "Inactiva"}
                         </Box>
                       </TableCell>
                       <TableCell align='center'>{getSystemType(promotion.systemType)}</TableCell>

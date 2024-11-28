@@ -55,6 +55,8 @@ export const Promotion = () => {
     promotionDuration: 0,
     image: null,
     rewards: [], // Nueva propiedad para las recompensas
+    startDate: "",
+    endDate: "",
   });
   const { handleNavigate } = useNavigateTo();
 
@@ -67,6 +69,19 @@ export const Promotion = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
   };
+
+  // Preview number of emails to send when sharing a promotion
+  const previewPromotionEmails = async (promotionId) => {
+    try {
+      const response = await api.post("api/email/previewPromotionEmails", { promotionId });
+      console.log(response.data); // Log the response data to see the result
+      toast.success(`Preview successful! Total emails to send: ${response.data.totalEmailsToSend}`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Error while previewing emails");
+    }
+  };
+
 
   // Cargar la promoción al montar el componente
   useEffect(() => {
@@ -94,6 +109,8 @@ export const Promotion = () => {
         promotionDuration: activePromotion.promotionDuration,
         rewards: activePromotion.rewards || [], // Cargar recompensas si están disponibles
         imageUrl: activePromotion.imageUrl,
+        startDate: activePromotion.startDate,
+        endDate: activePromotion.endDate,
       });
       setImagePreview(activePromotion.imageUrl); // Mostrar la imagen actual
     }
@@ -174,7 +191,6 @@ export const Promotion = () => {
 
     return creationDate;
   }
-  console.log(activePromotion.createdAt, activePromotion.promotionDuration);
   return (
     <div className='min-h-screen bg-gradient-to-b  from-slate-50 to-slate-100 p-4 md:p-8'>
       <div className='w-full md:w-[90%] mx-auto'>
@@ -184,6 +200,7 @@ export const Promotion = () => {
               <div className='space-y-6'>
                 <div className='space-y-2'>
                   <h1 className='text-4xl font-bold tracking-tight text-[#5b7898]'>{activePromotion.title}</h1>
+                  <p className='text-lg'>Status: {activePromotion.status == "active" ? "Activa" : "Inactiva"}</p>
                   <CardContent className='text-lg'>{activePromotion.description}</CardContent>
                 </div>
 
@@ -219,27 +236,43 @@ export const Promotion = () => {
                     </Accordion>
                   )}
 
-                  <div className='grid grid-cols-3 gap-4 text-sm text-gray-600'>
-                    <div>
-                      <p className='font-medium'>Duración</p>
-                      <p>{activePromotion.promotionDuration} días</p>
+                  {activePromotion.systemType === "points" && (
+                    <div className='grid grid-cols-3 gap-4 text-sm text-gray-600'>
+                      <div>
+                        <p className='font-medium'>Duración de los puntos</p>
+                        <p>{activePromotion.promotionDuration} días</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='font-medium'>Inicio</p>
-                      <p>{new Date(activePromotion.createdAt).toLocaleDateString()}</p>
+                  )}
+
+                  {activePromotion.systemType === "visits" && activePromotion.startDate && activePromotion.endDate && (
+                    <div className='grid grid-cols-3 gap-4 text-sm text-gray-600'>
+                      <div>
+                        <p className='font-medium'>Fecha Inicio</p>
+                        <p>{activePromotion.startDate.split("T")[0]}</p>
+                      </div>
+                      <div>
+                        <p className='font-medium'>Fecha Fin</p>
+                        <p>{activePromotion.endDate.split("T")[0]}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='font-medium'>Expiración</p>
-                      <p>{getPromotionExpiryDate(activePromotion.createdAt, activePromotion.promotionDuration).toLocaleDateString()}</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
               <div className='relative h-[400px] w-full max-w-[500px] rounded-2xl overflow-hidden shadow-xl mx-auto'>
                 <img src={imagePreview} alt='Promotion' className='object-cover w-full h-full' />
               </div>
+
+              {/* <Button
+                variant='contained'
+                className='w-full bg-[#5b7898] hover:bg-[#4a6277] text-lg py-6'
+                onClick={() => previewPromotionEmails(activePromotion._id)}
+              >
+                Enviar Promoción por Email a mis Clientes
+              </Button> */}
             </div>
+
           </CardContent>
 
           <PromotionMetrics metrics={activePromotion} />
