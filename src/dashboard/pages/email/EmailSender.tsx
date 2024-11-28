@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useDashboard } from "../../../hooks";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import api from "../../../utils/api";
+import { useNavigate } from "react-router-dom";
 
 import { CalendarToday as CalendarTodayIcon } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -138,6 +139,7 @@ export const EmailSender = () => {
   const [currentTab, setCurrentTab] = useState("design");
   const [emailDesign, setEmailDesign] = useState(null);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getPromotionsAndMetrics();
@@ -155,22 +157,87 @@ export const EmailSender = () => {
     setSubject(e.target.value);
   };
 
-  // Enviar correos (abre el diálogo de confirmación)
-  const handleSendEmails = async () => {
-    const totalEmails = contactSource === "csv" ? selectedCsvData.length : selectedClients.length;
-    setEmailCount(totalEmails);
+  const checkEmailContent = async () => {
+    try {
+      if (!subject || subject.trim() === "") {
+        toast.warning("Debes agregar un asunto al email");
+        return false;
+      }
 
+      const totalSelectedRecipients = contactSource === "csv" ? selectedCsvData.length : selectedClients.length;
+      if (totalSelectedRecipients === 0) {
+        toast.warning("Debes seleccionar al menos un destinatario");
+        return false;
+      }
+
+      // Verificar contenido del editor
+      const hasContent = await new Promise((resolve) => {
+        emailEditorRef.current?.editor?.exportHtml((data) => {
+          const { html, design } = data;
+
+          // Verificar si hay contenido real en el diseño
+          const hasDesignContent = design?.body?.rows?.some((row) => row.columns?.some((column) => column.contents?.length > 0));
+
+          // Verificar si el HTML tiene contenido significativo
+          const hasHtmlContent = html && html.trim() !== "" && !html.includes("Sin contenido aquí") && !html.includes("Arrastra el contenido desde la derecha");
+
+          resolve(hasDesignContent && hasHtmlContent);
+        });
+      });
+
+      if (!hasContent) {
+        toast.warning("Debes agregar contenido al email antes de enviarlo");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error al verificar contenido:", error);
+      toast.error("Error al verificar el contenido del email");
+      return false;
+    }
+  };
+
+  const handleSendEmails = async () => {
     if (currentTab === "recipients") {
       setCurrentTab("design");
-      if (emailDesign) {
-        setTimeout(() => {
+      toast.info("Revisa el diseño y envíalo cuando estés listo.");
+      // Esperar a que el editor est�� listo antes de cargar el diseño
+      setTimeout(() => {
+        if (emailEditorRef.current?.editor && emailDesign) {
           emailEditorRef.current.editor.loadDesign(emailDesign);
-        }, 1000);
-      }
-    } else {
+        }
+      }, 1000);
+      return;
+    }
+
+    const isValid = await checkEmailContent();
+    if (isValid) {
+      const totalEmails = contactSource === "csv" ? selectedCsvData.length : selectedClients.length;
+      setEmailCount(totalEmails);
       setOpenDialog(true);
     }
   };
+
+  const handleScheduleClick = async () => {
+    if (currentTab === "recipients") {
+      setCurrentTab("design");
+      toast.info("Revisa el diseño y prográmalo cuando estés listo.");
+      // Esperar a que el editor esté listo antes de cargar el diseño
+      setTimeout(() => {
+        if (emailEditorRef.current?.editor && emailDesign) {
+          emailEditorRef.current.editor.loadDesign(emailDesign);
+        }
+      }, 1000);
+      return;
+    }
+
+    const isValid = await checkEmailContent();
+    if (isValid) {
+      setShowScheduleDialog(true);
+    }
+  };
+
   const handleSectionChange = (section) => {
     setSelectedSection(section);
     if (section === "clients") {
@@ -215,9 +282,10 @@ export const EmailSender = () => {
     try {
       setOpenDialog(false);
 
-      // Mostrar mensaje de éxito inmediatamente
+      // Mostrar mensaje de éxito y redireccionar
       toast.success("La campaña de correos se ha iniciado correctamente. Recibirás una notificación por correo cuando se complete el envío.", {
-        autoClose: 8000,
+        autoClose: 3000,
+        onClose: () => navigate("/dashboard/email-campaign"),
       });
 
       let recipients;
@@ -227,14 +295,14 @@ export const EmailSender = () => {
           .filter((row) => selectedCsvData.includes(row.email) && row.email && /\S+@\S+\.\S+/.test(row.email))
           .map((row) => ({
             email: row.email,
-            name: row.name || "Cliente",
+            name: row.name || "",
           }));
       } else if (contactSource === "clients") {
         recipients = clients
           .filter((client) => selectedClients.includes(client.email) && client.email && /\S+@\S+\.\S+/.test(client.email))
           .map((client) => ({
             email: client.email,
-            name: client.name || "Cliente",
+            name: client.name || "",
           }));
       }
 
@@ -562,9 +630,9 @@ export const EmailSender = () => {
         subject,
         template: templateHtml,
         clients: recipients,
-        scheduledDate: selectedDate.toISOString(), // Asegurarnos de enviar en formato ISO
-        userId: accounts._id, // Agregar el ID del usuario
-        campaignName: subject, // Usar el asunto como nombre de campaña
+        scheduledDate: selectedDate.toISOString(),
+        userId: accounts._id,
+        campaignName: subject,
       };
 
       const response = await api.post("/api/email/schedule", formData);
@@ -574,7 +642,10 @@ export const EmailSender = () => {
           `Email programado para ${new Date(selectedDate).toLocaleString("es-ES", {
             dateStyle: "medium",
             timeStyle: "short",
-          })}`
+          })}`,
+          {
+            onClose: () => navigate("/dashboard/email-campaign"),
+          }
         );
 
         setShowScheduleDialog(false);
@@ -831,21 +902,10 @@ export const EmailSender = () => {
             </Button>
           </Box>
           <Box className='flex gap-2'>
-            <Button
-              variant='outlined'
-              startIcon={<CalendarTodayIcon />}
-              onClick={() => setShowScheduleDialog(true)}
-              disabled={isSendDisabled || (!selectedClients.length && !selectedCsvData.length)}
-            >
+            <Button variant='outlined' startIcon={<CalendarTodayIcon />} onClick={handleScheduleClick}>
               Programar Envío
             </Button>
-            <Button
-              variant='contained'
-              color='primary'
-              startIcon={<MailIcon />}
-              disabled={isSendDisabled || (!selectedClients.length && !selectedCsvData.length)}
-              onClick={handleSendEmails}
-            >
+            <Button variant='contained' color='primary' startIcon={<MailIcon />} onClick={handleSendEmails}>
               Enviar Email
             </Button>
           </Box>

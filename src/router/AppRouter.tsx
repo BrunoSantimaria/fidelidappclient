@@ -8,6 +8,7 @@ import { useAuthSlice } from "../hooks/useAuthSlice";
 import { useEffect, useRef } from "react";
 import { Landing } from "../landing/pages";
 import { PromotionClient } from "../promotion-client/pages";
+import "react-toastify/dist/ReactToastify.css";
 
 import "react-toastify/dist/ReactToastify.css";
 import { ClientPromotionCard } from "../promotion-client/pages/ClientPromotionCard";
@@ -47,17 +48,9 @@ export const AppRouter = () => {
   return (
     <>
       <ToastContainer
+        toastClassName={() => "relative  bg-white flex p-1 min-h-10 rounded-md justify-between overflow-hidden cursor-pointer"}
+        bodyClassName={() => "bg-white text-main flex text-sm font-medium block p-3"}
         position='bottom-center'
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable
-        pauseOnHover
-        theme='light'
-        limit={3}
       />
 
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
