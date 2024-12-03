@@ -122,6 +122,7 @@ export const PromotionClient = () => {
       setIsSubmitting(false);
     }
   };
+
   if (loading) {
     return (
       <Backdrop open>
@@ -233,7 +234,7 @@ export const PromotionClient = () => {
                       fontSize: "1.125rem",
                     }}
                   >
-                    {isSubmitting ? "Sumándose a la promoción..." : "SUMARME A LA PROMOCIÓN"}
+                    {isSubmitting ? <CircularProgress size={24} color='inherit' /> : "SUMARME A LA PROMOCIÓN"}
                   </Button>
                 </Box>
 
