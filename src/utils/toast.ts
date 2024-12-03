@@ -1,5 +1,4 @@
 import { toast, ToastOptions } from "react-toastify";
-import { FiCheck, FiAlertCircle, FiInfo, FiAlertTriangle } from "react-icons/fi";
 import { ReactElement } from 'react';
 
 interface CustomToastOptions extends ToastOptions {

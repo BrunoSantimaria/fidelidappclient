@@ -4,9 +4,9 @@ export const validateEmail = (email) => {
 };
 
 export const validatePassword = (password) => {
-  return password.length >= 6;
+  return password.trim().length >= 6;
 };
 
 export const validateName = (isRegister, name) => {
-  return isRegister ? (name.length > 0 ? "" : "El nombre es requerido") : "";
+  return isRegister ? (name.trim().length > 0 ? "" : "El nombre es requerido") : "";
 };

@@ -149,6 +149,11 @@ export const Report = () => {
   const dailyVisits = data.dailyData.map((entry) => entry.visits);
   const dailyRegistrations = data.dailyData.map((entry) => entry.registrations);
   const dailyPoints = data.dailyData.map((entry) => entry.points);
+  console.log("daily Labels" + dailyLabels + "dailyVisits" + dailyVisits + "dailyRegistrations" + dailyRegistrations + "daily points" + dailyPoints);
+  // Verifica si los datos están vacíos
+  if (dailyLabels.length === 0 || dailyVisits.length === 0 || dailyRegistrations.length === 0 || dailyPoints.length === 0) {
+    return <Typography color='error'>No hay datos disponibles para mostrar en el gráfico.</Typography>;
+  }
 
   return (
     <Box className='w-full px-4 md:w-[80%] md:ml-48'>
