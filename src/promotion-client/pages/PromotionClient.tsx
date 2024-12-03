@@ -94,17 +94,17 @@ export const PromotionClient = () => {
         accountId: accountId,
       });
 
-      // Establecer la cookie 'clientId' solo si el cliente se registra correctamente
-      const clientId = response.data.client._id;
-      document.cookie = `clientId=${clientId}; path=/`; // Establecer la cookie
       toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");
+
+      // Obtener el clientId de la respuesta y redirigir
+      const clientId = response.data.client._id;
+      console.log(response.data);
       handleNavigate(`/promotions/${clientId}/${id}`);
     } catch (error) {
-      if (error.response && error.response.data.error === "Client already has this promotion") {
+      if (error.response.data.error === "Client already has this promotion") {
         toast.info("Ya te encuentras en esta promoción. Serás redirigido a tu Fidelicard.");
-        console.log(document.cookie);
-        const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
 
+        const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
         const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
         console.log("clientIdCookie", clientIdCookie);
 
@@ -113,7 +113,6 @@ export const PromotionClient = () => {
           console.log("clientId extraído:", clientId);
           handleNavigate(`/promotions/${clientId}/${id}`);
         } else {
-          // Aquí podrías manejar el caso si no se encuentra la cookie
           console.error("La cookie 'clientId' no se encontró.");
         }
       } else {
@@ -123,7 +122,6 @@ export const PromotionClient = () => {
       setIsSubmitting(false);
     }
   };
-
   if (loading) {
     return (
       <Backdrop open>

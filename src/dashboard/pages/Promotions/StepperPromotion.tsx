@@ -69,5 +69,5 @@ export const StepperPromotion = ({ steps, currentStep }) => {
     </div>
   ));
 
-  return <section className=' p-4 flex flex-row  m-auto justify-center text-center w-3/4'>{displaySteps}</section>;
+  return <section className=' p-4 flex flex-row   m-auto justify-center text-center w-3/4'>{displaySteps}</section>;
 };

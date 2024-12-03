@@ -49,10 +49,11 @@ import {
   List,
   ListItem,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 
-// Icons
 import { Mail as MailIcon, Upload as UploadIcon, Bolt as BoltIcon, Save as SaveIcon, Description as DescriptionIcon } from "@mui/icons-material";
+import { CircleHelp } from "lucide-react";
 
 // Definir el componente ScheduleDialog fuera del componente principal
 const ScheduleDialog = ({ open, onClose, onConfirm }) => {
@@ -719,7 +720,10 @@ export const EmailSender = () => {
             <Tab label='Diseñar Email' value='design' />
             <Tab label='Destinatarios' value='recipients' />
           </Tabs>
-
+          <Alert severity='info'>
+            <AlertTitle>Variables Disponibles</AlertTitle>
+            Usa <code className='text-[#5b7898]'>{"{nombreCliente}"}</code> para personalizar tus correos.
+          </Alert>
           {currentTab === "design" && (
             <Box className='space-y-4'>
               <TextField
@@ -732,9 +736,15 @@ export const EmailSender = () => {
 
               <Box className='border rounded-md'>
                 <Alert severity='info'>
-                  <AlertTitle>Variables Disponibles</AlertTitle>
-                  Usa <code className='text-[#5b7898]'>{"{nombreCliente}"}</code> para personalizar tus correos.
+                  <AlertTitle>RRSS Automaticas en cada correo.</AlertTitle>
+                  Asegurate de configurar tus RRSS en ajustes para personalizar tus correos.
+                  <Tooltip title='Tus RRSS aparecerán como pie de correo'>
+                    <IconButton>
+                      <CircleHelp />{" "}
+                    </IconButton>
+                  </Tooltip>
                 </Alert>
+
                 <EmailEditor
                   ref={emailEditorRef}
                   options={emailEditorOptions}
