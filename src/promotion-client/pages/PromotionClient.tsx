@@ -31,33 +31,31 @@ export const PromotionClient = () => {
   };
 
   useEffect(() => {
-    // Check if 'clientId' cookie exists
+    // Check if 'clientid' cookie exists
     const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
-    const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientData"));
+    const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
     console.log("clientIdCookie", clientIdCookie);
 
     if (clientIdCookie) {
-      const clientData = JSON.parse(clientIdCookie.split("=")[1]); // Get the clientData object
-      const { clientId, promotionId } = clientData;
-      console.log(`/promotions/${promotionId}/${clientId}`);
-
-      // Check if the current promotion matches the promotion ID from the cookie
-      if (promotionId === id) {
-        handleNavigate(`/promotions/${clientId}/${promotionId}`); // Redirect to client-specific promotion page
-      } else {
-        handleNavigate(`/promotions/${promotionId}`); // Redirect to general promotion page
+      // Decode the URL-encoded string
+      const decodedCookieValue = decodeURIComponent(clientIdCookie.split("=")[1]);
+      try {
+        const clientIdData = JSON.parse(decodedCookieValue); // Now parse it
+        const clientId = clientIdData.clientId;
+        console.log(`/promotions/${clientId}/${id}`);
+        handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
+        return; // Exit the effect to avoid unnecessary API calls
+      } catch (error) {
+        console.error("Error parsing clientId cookie:", error);
       }
-
-      return; // Exit the effect to avoid unnecessary API calls
     }
 
-    // If the clientId cookie doesn't exist, fetch promotion details
     const fetchPromotion = async () => {
       try {
         const response = await api.get(`/api/promotions/${id}`);
         setPromotion(response.data.promotion);
         setAccountId(response.data.accountId);
-        setSocialMedia(user.accounts.socialMedia || {});
+        setSocialMedia(user.accounts.socialMedia || {}); // Extraer redes sociales del usuario
       } catch (error) {
         console.error("Error fetching promotion:", error);
       } finally {
