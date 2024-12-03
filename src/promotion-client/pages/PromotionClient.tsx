@@ -31,24 +31,33 @@ export const PromotionClient = () => {
   };
 
   useEffect(() => {
-    // Check if 'clientid' cookie exists
+    // Check if 'clientId' cookie exists
     const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
-    const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
+    const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientData"));
     console.log("clientIdCookie", clientIdCookie);
 
     if (clientIdCookie) {
-      const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
-      console.log(`/promotions/${clientId}/${id}`);
-      handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
+      const clientData = JSON.parse(clientIdCookie.split("=")[1]); // Get the clientData object
+      const { clientId, promotionId } = clientData;
+      console.log(`/promotions/${promotionId}/${clientId}`);
+
+      // Check if the current promotion matches the promotion ID from the cookie
+      if (promotionId === id) {
+        handleNavigate(`/promotions/${clientId}/${promotionId}`); // Redirect to client-specific promotion page
+      } else {
+        handleNavigate(`/promotions/${promotionId}`); // Redirect to general promotion page
+      }
+
       return; // Exit the effect to avoid unnecessary API calls
     }
 
+    // If the clientId cookie doesn't exist, fetch promotion details
     const fetchPromotion = async () => {
       try {
         const response = await api.get(`/api/promotions/${id}`);
         setPromotion(response.data.promotion);
         setAccountId(response.data.accountId);
-        setSocialMedia(user.accounts.socialMedia || {}); // Extraer redes sociales del usuario
+        setSocialMedia(user.accounts.socialMedia || {});
       } catch (error) {
         console.error("Error fetching promotion:", error);
       } finally {
