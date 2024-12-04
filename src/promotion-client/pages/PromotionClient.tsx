@@ -5,13 +5,13 @@ import { Backdrop, Button, CircularProgress, Input, Alert, Divider, Card, CardCo
 import { Facebook, Instagram, WhatsApp, Language } from "@mui/icons-material";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
-import background from "../../assets/fondocandado2.png";
+
 import { toast } from "react-toastify";
-import { Helmet } from "react-helmet-async";
+
 import React from "react";
-import keysPattern from "../../assets/fondocandado2.png";
 
 export const PromotionClient = () => {
+  const background = "https://res.cloudinary.com/di92lsbym/image/upload/q_auto,f_webp/v1733271849/FidelidApp/Assets/fondocandado2_jpqoov.png";
   const { id } = useParams();
   const { status, user } = useAuthSlice();
   const { handleNavigate } = useNavigateTo();
@@ -145,7 +145,7 @@ export const PromotionClient = () => {
           className='absolute inset-0 bg-cover bg-center'
           style={{
             backgroundImage: `url(${background})`,
-            opacity: 0.5,
+            opacity: 0.2,
           }}
         ></div>
         <div className='relative z-10'>

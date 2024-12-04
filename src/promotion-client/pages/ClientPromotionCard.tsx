@@ -36,11 +36,11 @@ import {
 import { toast } from "react-toastify";
 import Lottie from "react-lottie";
 import celebrationAnimation from "../../assets/celebration.json";
-import keyUrl from "../../assets/fondocandado2.png";
+
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { Helmet } from "react-helmet-async";
 import api from "../../utils/api";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const marioCoinSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav";
 const marioStarSound = "https://themushroomkingdom.net/sounds/wav/smb2/smb2_grow.wav";
