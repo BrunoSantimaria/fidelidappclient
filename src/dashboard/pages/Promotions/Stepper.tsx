@@ -24,7 +24,8 @@ export const Stepper = () => {
     rewards: [], // Usamos rewards para las recompensas
     isRecurrent: false,
     startDate: "",
-    endDate: ""
+    endDate: "",
+    daysOfWeek: [],
   });
 
   const steps = ["Cómo crear una promoción", "Sistema de promoción", "Detalles de la promoción", "Requisitos de la promoción"];
@@ -62,7 +63,8 @@ export const Stepper = () => {
       rewards: [],
       isRecurrent: false,
       startDate: "",
-      endDate: ""
+      endDate: "",
+      daysOfWeek: [],
     });
   }, [selectedSystem]);
 
@@ -112,11 +114,13 @@ export const Stepper = () => {
     formData.append("promotionRequirements[visitsRequired]", promotionRequirements.visitsRequired);
     formData.append("promotionRequirements[promotionDuration]", promotionRequirements.promotionDuration);
     formData.append("promotionRequirements[isRecurrent]", promotionRequirements.isRecurrent);
+    
 
     // Si el selectedSystem es visits entonces sumar start y end date
     if (selectedSystem === "visits") {
       formData.append("promotionRequirements[startDate]", promotionRequirements.startDate);
       formData.append("promotionRequirements[endDate]", promotionRequirements.endDate);
+      formData.append("promotionRequirements[daysOfWeek]", promotionRequirements.daysOfWeek); 
     }
 
     // Asegurarse de que `promotionRequirements.rewards` sea un array de objetos

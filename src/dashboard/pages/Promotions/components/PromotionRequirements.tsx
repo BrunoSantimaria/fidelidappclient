@@ -10,6 +10,7 @@ export const PromotionRequirements = ({
     rewards: [],
     startDate: "",
     endDate: "",
+    daysOfWeek: [],
   },
   setPromotionRequirements,
 }) => {
@@ -29,6 +30,8 @@ export const PromotionRequirements = ({
       ...prev,
       [name]: value,
     }));
+    console.log(promotionRequirements);
+
   };
 
   const handleRecurrentChange = (e) => {
@@ -58,6 +61,17 @@ export const PromotionRequirements = ({
     setRewards(updatedRewards);
   };
 
+  const daysMap = [
+    { name: "Lunes", value: 1 },
+    { name: "Martes", value: 2 },
+    { name: "Miércoles", value: 3 },
+    { name: "Jueves", value: 4 },
+    { name: "Viernes", value: 5 },
+    { name: "Sábado", value: 6 },
+    { name: "Domingo", value: 7 },
+  ];
+
+
   // Verificar si las recompensas son necesarias para el envío
   const canSubmit = rewards.length > 0;
   const pageTransition = {
@@ -72,21 +86,7 @@ export const PromotionRequirements = ({
   return (
     <motion.form initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='space-y-4'>
       <h2 className='text-2xl font-bold text-main mb-4'>Requisitos de la promoción</h2>
-      {system === "visits" && (
-        <div className='flex items-center space-x-2'>
-          <input
-            type='checkbox'
-            id='isRecurrent'
-            name='isRecurrent'
-            checked={promotionRequirements.isRecurrent || false}
-            onChange={handleRecurrentChange}
-            className='w-4 h-4 p-2 border bg-white border-main rounded-md'
-          />
-          <label htmlFor='isRecurrent' className='text-sm font-medium'>
-            ¿Es recurrente? Es decir si el beneficio se puede canjear varias veces.
-          </label>
-        </div>
-      )}
+
 
       {system === "visits" && (
         <div>
@@ -121,6 +121,7 @@ export const PromotionRequirements = ({
           />
         </div>
       )}
+
       {system === "visits" && (
         <div>
           <label htmlFor='endDate' className='block text-sm font-medium mb-2'>
@@ -137,6 +138,63 @@ export const PromotionRequirements = ({
           />
         </div>
       )}
+
+      {system === "visits" && (
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Días de la semana en que aplica
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {daysMap.map((day) => (
+              <label key={day.value} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="daysOfWeek"
+                  value={day.value}
+                  checked={promotionRequirements.daysOfWeek.includes(day.value)}
+                  onChange={(e) => {
+                    const { value, checked } = e.target;
+                    const numericValue = parseInt(value, 10);
+                
+                    setPromotionRequirements((prev) => {
+                      const updatedDays = checked
+                        ? [...prev.daysOfWeek, numericValue] // Agrega el día si está seleccionado
+                        : prev.daysOfWeek.filter((d) => d !== numericValue); // Remueve el día si no está seleccionado
+                
+                      return {
+                        ...prev,
+                        daysOfWeek: updatedDays,
+                      };
+                    });
+                  console.log(promotionRequirements); // Agregar esta línea para verificar los cambios en la variable promotionRequirements
+                  }}
+                  className="w-4 h-4"
+                />
+                {day.name}
+              </label>
+            ))}
+          </div>
+        </div>
+
+
+      )}
+
+      {system === "visits" && (
+        <div className='flex items-center space-x-2'>
+          <input
+            type='checkbox'
+            id='isRecurrent'
+            name='isRecurrent'
+            checked={promotionRequirements.isRecurrent || false}
+            onChange={handleRecurrentChange}
+            className='w-4 h-4 p-2 border bg-white border-main rounded-md'
+          />
+          <label htmlFor='isRecurrent' className='text-sm font-small'>
+            ¿Es recurrente? Es decir si el beneficio se puede canjear varias veces y se repetirá durante la duración de la promoción.
+          </label>
+        </div>
+      )}
+
 
       {system === "points" && (
         <div>

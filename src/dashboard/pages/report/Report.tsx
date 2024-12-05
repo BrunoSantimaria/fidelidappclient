@@ -7,6 +7,8 @@ import {
   Visibility as VisibilityIcon,
   CardGiftcard as CardGiftcardIcon,
   Campaign as CampaignIcon,
+  Star as StarIcon,
+  Group as GroupIcon,
 } from "@mui/icons-material";
 import LinearProgress from "@mui/material/LinearProgress";
 import api from "../../../utils/api";
@@ -17,6 +19,9 @@ interface DailyData {
   visits: number;
   registrations: number;
   points: number;
+  emailSent: number;
+  emailOpened: number;
+  emailClicked: number;
 }
 
 interface ClientData {
@@ -26,12 +31,28 @@ interface ClientData {
   redeemCount: number;
 }
 
+interface campaignsData {
+  id: string;
+  name: string;
+  status: string;
+  totalSent: number;
+  totalOpens: number;
+  totalClicks: number;
+}
+
 interface ReportData {
+  findex: number;
+  accountClients: number;
   totalClients: number;
+  totalCampaigns: number;
   totalPoints: number;
   totalVisits: number;
   totalRedeemCount: number;
   totalPromotions: number;
+  totalEmailsSent: number;
+  totalEmailOpens: number;
+  totalEmailClicks: number;
+  campaigns: campaignsData[];
   dailyData: DailyData[];
   visitDataByClient: ClientData[];
   pointDataByClient: ClientData[];
@@ -51,10 +72,10 @@ const LoadingReport = ({ progress }: { progress: number }) => (
 
 // Componente para las métricas
 const MetricCard = ({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) => (
-  <Card sx={{ p: 2, minWidth: 200, display: "flex", alignItems: "center", gap: 2 }}>
+  <Card sx={{ p: 2, minWidth: 250, display: "flex", alignItems: "center", gap: 2 }}>
     {icon}
     <Box>
-      <Typography variant='h6'>{value}</Typography>
+      <Typography variant='h6'>{value}{title === "Índice Fidelidad" ? "%" : ""}</Typography>
       <Typography variant='body2' color='text.secondary'>
         {title}
       </Typography>
@@ -76,18 +97,18 @@ const ClientMetricsTable = ({ title, subtitle, data, dataType }: { title: string
         <thead>
           <tr>
             <th style={{ textAlign: "left", padding: "8px", position: "sticky", top: 0, background: "white" }}>Cliente</th>
-            <th style={{ textAlign: "right", padding: "8px", position: "sticky", top: 0, background: "white" }}>
+            <th style={{ textAlign: "center", padding: "8px", position: "sticky", top: 0, background: "white" }}>
               {dataType === "visits" ? "Visitas" : "Puntos"}
             </th>
-            <th style={{ textAlign: "right", padding: "8px", position: "sticky", top: 0, background: "white" }}>Canjes</th>
+            <th style={{ textAlign: "center", padding: "8px", position: "sticky", top: 0, background: "white" }}>Canjes</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
             <tr key={index}>
               <td style={{ padding: "8px" }}>{item.client}</td>
-              <td style={{ textAlign: "right", padding: "8px" }}>{dataType === "visits" ? item.visits : item.points}</td>
-              <td style={{ textAlign: "right", padding: "8px" }}>{item.redeemCount}</td>
+              <td style={{ textAlign: "center", padding: "8px" }}>{dataType === "visits" ? item.visits : item.points}</td>
+              <td style={{ textAlign: "center", padding: "8px" }}>{item.redeemCount}</td>
             </tr>
           ))}
         </tbody>
@@ -95,6 +116,43 @@ const ClientMetricsTable = ({ title, subtitle, data, dataType }: { title: string
     </Box>
   </>
 );
+
+
+const CampaingMetricsTable = ({ title, subtitle, data, dataType }: { title: string; subtitle: string; data: campaignsData[]; dataType: "campaings" }) => (
+  <>
+    <Typography variant='h6' gutterBottom>
+      {title}
+    </Typography>
+    <Typography variant='body2' color='text.secondary' gutterBottom>
+      {subtitle}
+    </Typography>
+    <Box sx={{ maxHeight: { xs: 300, md: 400 }, overflow: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={{ textAlign: "left", padding: "8px", position: "sticky", top: 0, background: "white" }}>Nombre</th>
+            <th style={{ textAlign: "center", padding: "8px", position: "sticky", top: 0, background: "white" }}>Estado</th>
+            <th style={{ textAlign: "center", padding: "8px", position: "sticky", top: 0, background: "white" }}>Enviados</th>
+            <th style={{ textAlign: "center", padding: "8px", position: "sticky", top: 0, background: "white" }}>Abiertos</th>
+            <th style={{ textAlign: "center", padding: "8px", position: "sticky", top: 0, background: "white" }}>Clickeados</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <tr key={index}>
+              <td style={{ padding: "8px" }}>{item.name}</td>
+              <td style={{ textAlign: "center", padding: "8px" }}>{item.status}</td>
+              <td style={{ textAlign: "center", padding: "8px" }}>{item.totalSent}</td>
+              <td style={{ textAlign: "center", padding: "8px" }}>{item.totalOpens}</td>
+              <td style={{ textAlign: "center", padding: "8px" }}>{item.totalClicks}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Box>
+  </>
+);
+
 
 export const Report = () => {
   const [data, setData] = useState<ReportData | null>(null);
@@ -110,7 +168,7 @@ export const Report = () => {
       try {
         progressTimer = setInterval(() => {
           setProgress((prev) => Math.min(prev + 10, 90));
-        }, 500);
+        }, 50);
 
         const response = await api.post(
           "/api/promotions/getDashboardMetrics",
@@ -119,7 +177,7 @@ export const Report = () => {
             signal: controller.signal,
           }
         );
-        console.log(response.data);
+        //console.log(response.data);
         setData(response.data);
         setProgress(100);
       } catch (error) {
@@ -149,9 +207,12 @@ export const Report = () => {
   const dailyVisits = data.dailyData.map((entry) => entry.visits);
   const dailyRegistrations = data.dailyData.map((entry) => entry.registrations);
   const dailyPoints = data.dailyData.map((entry) => entry.points);
+  const dailyEmailsSent = data.dailyData.map((entry) => entry.emailSent);
+  const dailyEmailOpens = data.dailyData.map((entry) => entry.emailOpened);
+  const dailyEmailClicks = data.dailyData.map((entry) => entry.emailClicked);
 
   return (
-    <Box className='w-full px-4 md:w-[80%] md:ml-48'>
+    <Box className='w-full px-4 md:w-[90%] md:ml-32'>
       <Stack spacing={4} sx={{ py: { xs: 2, md: 6 } }}>
         <Typography variant='h6' gutterBottom>
           Métricas globales {data.Name}
@@ -161,20 +222,32 @@ export const Report = () => {
           spacing={2}
           sx={{
             flexWrap: "wrap",
-            gap: 2,
             justifyContent: { xs: "space-around", md: "center" },
           }}
         >
-          <MetricCard title='Clientes Registrados' value={data.totalClients} icon={<PeopleIcon />} />
-          <MetricCard title='Puntos Acumulados' value={data.totalPoints} icon={<StarsIcon />} />
-          <MetricCard title='Visitas Totales' value={data.totalVisits} icon={<VisibilityIcon />} />
-          <MetricCard title='Canjes Realizados' value={data.totalRedeemCount} icon={<CardGiftcardIcon />} />
+          <MetricCard title='Índice Fidelidad' value={data.findex} icon={<StarIcon />} />
+          <MetricCard title='Total Clientes' value={data.accountClients} icon={<GroupIcon />} />
           <MetricCard title='Promociones Activas' value={data.totalPromotions} icon={<CampaignIcon />} />
         </Stack>
 
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            flexWrap: "wrap",
+            justifyContent: { xs: "space-around", md: "center" },
+          }}
+        >
+          <MetricCard title='Clientes en Promociones' value={data.totalClients} icon={<PeopleIcon />} />
+          <MetricCard title='Puntos Acumulados' value={data.totalPoints} icon={<StarsIcon />} />
+          <MetricCard title='Visitas Totales' value={data.totalVisits} icon={<VisibilityIcon />} />
+          <MetricCard title='Canjes Realizados' value={data.totalRedeemCount} icon={<CardGiftcardIcon />} />
+        </Stack>
+
+
         <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
           <Typography variant='h6' gutterBottom>
-            Tus clientes en los últimos 14 días
+            Tus clientes
           </Typography>
           <Typography variant='body2' color='text.secondary' gutterBottom>
             Análisis de visitas, registros y puntos acumulados
@@ -217,6 +290,62 @@ export const Report = () => {
             />
           </Card>
         </Stack>
+
+        <Typography variant='h6' gutterBottom>
+          Tus campañas de email
+        </Typography>
+
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            flexWrap: "wrap",
+            justifyContent: { xs: "space-around", md: "center" },
+          }}
+        >
+          <MetricCard title='Campañas Email' value={data.totalCampaigns} icon={<CampaignIcon />} />
+          <MetricCard title='Emails Enviados' value={data.totalEmailsSent} icon={<PeopleIcon />} />
+          <MetricCard title='Emails Abiertos' value={data.totalEmailOpens} icon={<StarsIcon />} />
+          <MetricCard title='Clicks en Emails' value={data.totalEmailClicks} icon={<VisibilityIcon />} />
+        </Stack>
+
+        <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
+          <Typography variant='h6' gutterBottom>
+            Tus campañas de email
+          </Typography>
+          <Typography variant='body2' color='text.secondary' gutterBottom>
+            Análisis de emails enviados, abiertos y clieckeados
+          </Typography>
+          <Box sx={{ height: { xs: 300, md: 400 }, mt: 2 }}>
+            <LineChart
+              series={[
+                { data: dailyEmailsSent, label: "Enviados", color: "#4ade80" },
+                { data: dailyEmailOpens, label: "Abiertos", color: "#ff9999" },
+                { data: dailyEmailClicks, label: "Clicks", color: "#ffcc00" },
+              ]}
+              xAxis={[
+                {
+                  scaleType: "band",
+                  data: dailyLabels,
+                  tickLabelStyle: { fontSize: 12 },
+                },
+              ]}
+              margin={{ left: 50, right: 20, top: 20, bottom: 30 }}
+            />
+          </Box>
+        </Card>
+
+        <Card sx={{ flex: 1, borderTop: 3, borderColor: "primary.main", p: { xs: 2, md: 3 } }}>
+          <CampaingMetricsTable
+            title='Campañas de Email Marketing'
+            subtitle='Emails enviados, abiertos y clieckeados'
+            data={data.campaigns}
+            dataType='campaings'
+          />
+        </Card>
+
+
+
       </Stack>
     </Box>
   );

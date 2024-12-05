@@ -35,7 +35,7 @@ const ClientPromotionsTable = ({ clientPromotions, onRedirect }) => {
                 <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
                   <span
                     className={`inline-block h-2 w-2 rounded-full ${
-                      promo.status === "Active" ? "bg-green-500" : promo.status === "Expired" ? "bg-red-500" : "bg-yellow-500"
+                      promo.status === "Active" ? "bg-green-500" : promo.status === "Inactive" ? "bg-red-500" : "bg-yellow-500"
                     }`}
                   />
                   <Typography variant="body2">{promo.status}</Typography>

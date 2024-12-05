@@ -144,7 +144,7 @@ export const PromotionClient = () => {
         <div className='relative z-10'>
           <div className='p-2 bg-white w-[30%] justify-center mx-auto my-10 rounded-md text-main cursor-pointer hover:bg-main/60 duration-300'>
           
-          Esta promoción ha finalizado.</div>
+          Esta promoción está inactiva.</div>
           <div
             onClick={() => handleNavigate("/")}
             className='p-2 bg-main w-[30%] justify-center mx-auto my-10 rounded-md text-white cursor-pointer hover:bg-main/60 duration-300'

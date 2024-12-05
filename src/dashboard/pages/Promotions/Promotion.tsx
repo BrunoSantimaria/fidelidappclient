@@ -111,6 +111,7 @@ export const Promotion = () => {
         imageUrl: activePromotion.imageUrl,
         startDate: activePromotion.startDate,
         endDate: activePromotion.endDate,
+        daysOfWeek: activePromotion.daysOfWeek,
       });
       setImagePreview(activePromotion.imageUrl); // Mostrar la imagen actual
     }
@@ -168,6 +169,22 @@ export const Promotion = () => {
       handleCloseModal(); // Cierra el modal después de la operación
     }
   };
+
+  function renderDaysOfWeek(daysArray) {
+    const daysMap = {
+      1: 'Lunes',
+      2: 'Martes',
+      3: 'Miércoles',
+      4: 'Jueves',
+      5: 'Viernes',
+      6: 'Sábado',
+      7: 'Domingo',
+    };
+
+    // Map numbers to day names and join with commas
+    return daysArray.map(day => daysMap[day] || '').filter(Boolean).join(', ');
+  }
+
 
   // Mostrar el backdrop mientras se carga
   if (loading) {
@@ -255,8 +272,16 @@ export const Promotion = () => {
                         <p className='font-medium'>Fecha Fin</p>
                         <p>{activePromotion.endDate.split("T")[0]}</p>
                       </div>
+                      {activePromotion.daysOfWeek.length > 0 && (
+                        <div>
+                          <p className='font-medium'>Días Activa</p>
+                          <p>{renderDaysOfWeek(activePromotion.daysOfWeek)}</p>
+                        </div>
+                      )}
                     </div>
                   )}
+
+
                 </div>
               </div>
 

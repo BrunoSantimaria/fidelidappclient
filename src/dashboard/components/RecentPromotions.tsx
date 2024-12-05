@@ -57,7 +57,15 @@ export const RecentPromotions = ({ promotions = [] }: RecentPromotionsProps) => 
                   </p>
                 </div>
               </div>
-              <span className='px-2 py-1 rounded-full text-xs bg-green-100 text-green-800'>Activa</span>
+              <span
+                className={`px-2 py-1 rounded-full text-xs ${promotion.status === "active"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-800"
+                  }`}
+              >
+                {promotion.status === "active" ? "Activa" : "Inactiva"}
+              </span>
+
             </div>
           ))
         )}
