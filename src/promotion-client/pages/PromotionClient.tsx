@@ -5,13 +5,13 @@ import { Backdrop, Button, CircularProgress, Input, Alert, Divider, Card, CardCo
 import { Facebook, Instagram, WhatsApp, Language } from "@mui/icons-material";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
-import background from "../../assets/fondocandado2.png";
+
 import { toast } from "react-toastify";
-import { Helmet } from "react-helmet-async";
+
 import React from "react";
-import keysPattern from "../../assets/fondocandado2.png";
 
 export const PromotionClient = () => {
+  const background = "https://res.cloudinary.com/di92lsbym/image/upload/q_auto,f_webp/v1733271849/FidelidApp/Assets/fondocandado2_jpqoov.png";
   const { id } = useParams();
   const { status, user } = useAuthSlice();
   const { handleNavigate } = useNavigateTo();
@@ -37,10 +37,17 @@ export const PromotionClient = () => {
     console.log("clientIdCookie", clientIdCookie);
 
     if (clientIdCookie) {
-      const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
-      console.log(`/promotions/${clientId}/${id}`);
-      handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
-      return; // Exit the effect to avoid unnecessary API calls
+      // Decode the URL-encoded string
+      const decodedCookieValue = decodeURIComponent(clientIdCookie.split("=")[1]);
+      try {
+        const clientIdData = JSON.parse(decodedCookieValue); // Now parse it
+        const clientId = clientIdData.clientId;
+        console.log(`/promotions/${clientId}/${id}`);
+        handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
+        return; // Exit the effect to avoid unnecessary API calls
+      } catch (error) {
+        console.error("Error parsing clientId cookie:", error);
+      }
     }
 
     const fetchPromotion = async () => {
@@ -101,18 +108,19 @@ export const PromotionClient = () => {
       console.log(response.data);
       handleNavigate(`/promotions/${clientId}/${id}`);
     } catch (error) {
-      console.log(error.response.data.error);
       if (error.response.data.error === "Client already has this promotion") {
         toast.info("Ya te encuentras en esta promoción. Serás redirigido a tu Fidelicard.");
 
         const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
         const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
-        console.log(clientIdCookie);
+        console.log("clientIdCookie", clientIdCookie);
+
         if (clientIdCookie) {
-          const clientId = clientIdCookie.split("=")[1]; // Extract the value of clientid
-          console.log(`/promotions/${clientId}/${id}`);
-          handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
-          return; // Exit the effect to avoid unnecessary API calls
+          const clientId = clientIdCookie.split("=")[1];
+          console.log("clientId extraído:", clientId);
+          handleNavigate(`/promotions/${clientId}/${id}`);
+        } else {
+          console.error("La cookie 'clientId' no se encontró.");
         }
       } else {
         toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
@@ -163,7 +171,7 @@ export const PromotionClient = () => {
           className='absolute inset-0 bg-cover bg-center'
           style={{
             backgroundImage: `url(${background})`,
-            opacity: 0.5,
+            opacity: 0.2,
           }}
         ></div>
         <div className='relative z-10'>
@@ -191,7 +199,7 @@ export const PromotionClient = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: `url(${keysPattern})`,
+        backgroundImage: `url(${background})`,
         backgroundRepeat: "repeat",
         backgroundSize: "700px",
         py: 8,
@@ -238,11 +246,30 @@ export const PromotionClient = () => {
                 }}
               >
                 <Box className='space-y-4'>
-                  <Input fullWidth placeholder='Nombre' value={clientName} onChange={handleNameChange} sx={{ bgcolor: "white", p: 1.5 }} />
-                  <Input fullWidth type='email' placeholder='Email' value={clientEmail} onChange={handleEmailChange} sx={{ bgcolor: "white", p: 1.5 }} />
+                  <Input
+                    fullWidth
+                    placeholder='Nombre'
+                    autoComplete='name'
+                    name='name'
+                    value={clientName}
+                    onChange={handleNameChange}
+                    sx={{ bgcolor: "white", p: 1.5 }}
+                  />
+                  <Input
+                    fullWidth
+                    autoComplete='email'
+                    name='email'
+                    type='email'
+                    placeholder='Email'
+                    value={clientEmail}
+                    onChange={handleEmailChange}
+                    sx={{ bgcolor: "white", p: 1.5 }}
+                  />
                   <Input
                     fullWidth
                     type='tel'
+                    autoComplete='tel'
+                    name='tel'
                     placeholder='Número de teléfono (opcional)'
                     value={phoneNumber}
                     onChange={handlePhoneNumberChange}
@@ -260,7 +287,7 @@ export const PromotionClient = () => {
                       fontSize: "1.125rem",
                     }}
                   >
-                    {isSubmitting ? "Sumándose a la promoción..." : "SUMARME A LA PROMOCIÓN"}
+                    {isSubmitting ? <CircularProgress size={24} color='inherit' /> : "SUMARME A LA PROMOCIÓN"}
                   </Button>
                 </Box>
 

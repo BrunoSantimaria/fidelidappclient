@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { ModalLanding } from "../components/ModalLanding";
-import pattern from "../../assets/fondocandado2.png";
 import { Button } from "@mui/material";
 
 export const Pattern = () => {
   const [open, setOpen] = useState(false);
-
+  const pattern = "https://res.cloudinary.com/di92lsbym/image/upload/q_auto,f_webp/v1733271849/FidelidApp/Assets/fondocandado2_jpqoov.png";
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 

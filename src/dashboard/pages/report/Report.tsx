@@ -211,6 +211,13 @@ export const Report = () => {
   const dailyEmailOpens = data.dailyData.map((entry) => entry.emailOpened);
   const dailyEmailClicks = data.dailyData.map((entry) => entry.emailClicked);
 
+  console.log("daily Labels" + dailyLabels + "dailyVisits" + dailyVisits + "dailyRegistrations" + dailyRegistrations + "daily points" + dailyPoints);
+  // Verifica si los datos están vacíos
+  if (dailyLabels.length === 0 || dailyVisits.length === 0 || dailyRegistrations.length === 0 || dailyPoints.length === 0) {
+    return <Typography color='error'>No hay datos disponibles para mostrar en el gráfico.</Typography>;
+  }
+
+
   return (
     <Box className='w-full px-4 md:w-[90%] md:ml-32'>
       <Stack spacing={4} sx={{ py: { xs: 2, md: 6 } }}>

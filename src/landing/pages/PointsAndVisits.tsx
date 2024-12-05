@@ -5,58 +5,84 @@ import { useNavigateTo } from "../../hooks/useNavigateTo";
 
 export const PointsAndVisits = () => {
   const containerRef = React.useRef(null);
-  const isInView = useInView(containerRef, { once: false });
+  const isInView = useInView(containerRef, { once: true });
   const { handleNavigate } = useNavigateTo();
-  const imageUrl = "https://res.cloudinary.com/di92lsbym/image/upload/v1731076385/ozo2cn9nqjypxofkljf4.png";
+
+  const imageUrl = "https://res.cloudinary.com/di92lsbym/image/upload/q_auto,f_auto/v1731076385/ozo2cn9nqjypxofkljf4.webp";
+
+  const textContent = {
+    title: "Tu negocio, tu sistema: canjea por puntos o visitas 🌟",
+    description: `
+      Con nuestro sistema flexible, elige la opción que mejor se adapte a tu negocio: 
+      canjea promociones según visitas o acumula puntos para recompensas. 
+      ¡Haz que cada visita o compra cuente y construye relaciones duraderas!
+    `,
+    subDescription: "Regístrate y comienza a premiar a tus clientes de manera única:",
+    cta: "Regístrate ahora para empezar",
+    imageCaption: "Sistema de fidelización de clientes con puntos y recompensas personalizables.",
+  };
 
   return (
-    <div>
-      <Divider className='w-[70%] md:w-[50%] opacity-20 my-16 m-auto' />
-      <div ref={containerRef} className='flex flex-col md:flex-row md:mt-10 px-6 md:w-[80%] md:justify-center md:m-auto'>
-        {/* Sección de la imagen a la derecha */}
-        <motion.div
-          className='text-center order-2 md:order-1 md:w-1/2'
-          initial={{ x: 200, opacity: 0 }}
-          animate={isInView ? { x: 0, opacity: 1 } : {}}
-          transition={{ duration: 0.8 }}
-        >
-          <img src={imageUrl} alt='Sistema de Fidelización' className='w-[900px] h-auto mx-auto' />
-          <p className='mt-0 font-semibold text-gray-700'>
-            ¡Adapta tus promociones y recompensas según las necesidades de tu negocio para motivar a tus clientes a regresar!
-          </p>
-        </motion.div>
+    <>
+      {/* Metadatos para SEO */}
+      <script type='application/ld+json'>
+        {`
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Sistema de Fidelización de Clientes",
+          "description": "Plataforma flexible para negocios que permite canjear puntos o visitas por recompensas, diseñada para aumentar la lealtad de tus clientes.",
+          "image": "${imageUrl}",
+          "url": "https://fidelidapp.cl",
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://fidelidapp.cl"
+          }
+        }
+        `}
+      </script>
 
-        {/* Sección de texto a la izquierda */}
-        <motion.div
-          className='mt-10 md:mt-36 md:w-1/2 order-1 md:order-2'
-          initial={{ x: -200, opacity: 0 }}
-          animate={isInView ? { x: 0, opacity: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
-          <div className='text-center text-3xl font-bold mb-6'>Tu negocio, tu sistema: canjea por puntos o visitas 🌟</div>
-          <div className='w-full justify-center m-auto text-center text-lg text-gray-700'>
-            Con nuestro sistema flexible, elige la opción que mejor se adapte a tu negocio: canjea promociones según visitas o acumula puntos para recompensas.
-            <p className='underline underline-offset-4'>¡Haz que cada visita o cada compra cuente y construye relaciones duraderas!</p>
-          </div>
+      <section ref={containerRef}>
+        <Divider className='w-[70%] md:w-[50%] opacity-20 my-16 mx-auto' />
+        <div className='flex flex-col md:flex-row md:mt-10 px-6 md:w-[80%] md:justify-center md:m-auto'>
+          {/* Imagen con texto alternativo enriquecido */}
           <motion.div
-            className='w-full mt-6 justify-center m-auto text-center text-lg text-gray-700'
-            initial={{ x: -200, opacity: 0 }}
-            animate={isInView ? { x: 0, opacity: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.8 }}
+            className='text-center order-2 md:order-1 md:w-1/2'
+            initial={{ opacity: 0, x: 200 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8 }}
           >
-            <span className='font-bold'>Regístrate</span> y comienza a premiar a tus clientes de manera única:
+            <img src={imageUrl} alt={textContent.imageCaption} loading='lazy' className='w-[900px] h-auto mx-auto' />
+            <p className='mt-0 font-semibold text-gray-700'>{textContent.imageCaption}</p>
           </motion.div>
+
+          {/* Contenido semántico */}
           <motion.div
-            className='justify-center w-2/3 m-auto text-center p-2 mt-6 mb-6 md:mb-0 bg-main rounded-md text-white cursor-pointer'
-            initial={{ x: -200, opacity: 0 }}
-            animate={isInView ? { x: 0, opacity: 1 } : {}}
-            transition={{ duration: 0.8, delay: 1.2 }}
-            onClick={() => handleNavigate("/auth/login")}
+            className='mt-10 md:mt-36 md:w-1/2 order-1 md:order-2'
+            initial={{ opacity: 0, x: -200 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Regístrate ahora para empezar
+            <h1 className='text-center text-3xl font-bold mb-6'>{textContent.title}</h1>
+            <p className='w-full text-center text-lg text-gray-700 mx-auto mb-4'>{textContent.description}</p>
+            <p className='underline underline-offset-4 text-lg text-center'>{textContent.subDescription}</p>
+
+            <motion.div
+              className='flex justify-center items-center mt-6 mb-6 md:mb-0'
+              initial={{ opacity: 0, x: -200 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.8, delay: 1.2 }}
+            >
+              <button
+                className='px-6 py-3 bg-main text-white font-semibold rounded-md shadow-lg hover:bg-main-dark cursor-pointer'
+                onClick={() => handleNavigate("/auth/login")}
+              >
+                {textContent.cta}
+              </button>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
-    </div>
+        </div>
+      </section>
+    </>
   );
 };

@@ -49,7 +49,7 @@ export const StepperPromotion = ({ steps, currentStep }) => {
   }, [steps, currentStep]);
 
   const displaySteps = newStep.map((step, index) => (
-    <div key={index} className={`${index !== newStep.length - 1 ? "w-full flex items-center " : "flex items-center"}`}>
+    <div key={index} className={`${index !== newStep.length - 1 ? "w-full  flex items-center " : "flex items-center "}`}>
       <div className='relative flex flex-col items-center text-teal-600'>
         <motion.div
           initial={{ scale: 1 }} // Estado inicial de escala
@@ -69,5 +69,5 @@ export const StepperPromotion = ({ steps, currentStep }) => {
     </div>
   ));
 
-  return <section className='mx-4 p-4 flex justify-between items-center'>{displaySteps}</section>;
+  return <section className=' p-4 flex flex-row   m-auto justify-center text-center w-3/4'>{displaySteps}</section>;
 };

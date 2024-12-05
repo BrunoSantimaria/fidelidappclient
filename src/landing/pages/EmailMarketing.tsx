@@ -1,6 +1,5 @@
 import React from "react";
 import { motion, useInView } from "framer-motion"; // Importamos Framer Motion y useInView
-import emailmarketing from "../../assets/emailmarketing.png";
 
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 
@@ -20,7 +19,11 @@ export const EmailMarketing = () => {
           animate={isInView ? { x: 0, opacity: 1 } : {}}
           transition={{ duration: 0.8 }}
         >
-          <img src={emailmarketing} alt='Email Marketing FidelidApp' className='w-[900px] h-auto mx-auto' />
+          <img
+            src='https://res.cloudinary.com/di92lsbym/image/upload/f_webp/q_auto/v1733268444/FidelidApp/Assets/emailmarketing_kfwq53.png'
+            alt='Email Marketing FidelidApp'
+            className='w-[900px] h-auto mx-auto'
+          />
           <p className='mt-0 font-semibold text-gray-700'>
             ¡Gestiona tus clientes y envíales campañas de email marketing para mantenerlos al tanto de tus últimas promociones y novedades!
           </p>

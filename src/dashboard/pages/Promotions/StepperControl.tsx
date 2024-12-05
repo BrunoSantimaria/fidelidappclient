@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 
 export const StepperControl = ({ handleClick, currentStep, steps, isNextDisabled, handleSubmit }) => {
-  // Función que maneja el click en el botón siguiente o anterior
-  const handleButtonClick = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleButtonClick = async () => {
     if (currentStep === steps.length) {
-      // Si estamos en el último paso, ejecutar handleSubmit
-      handleSubmit();
+      setLoading(true);
+      await handleSubmit();
+      setLoading(false);
     } else {
-      // Si no, solo cambiar al siguiente paso
       handleClick("next");
     }
   };
@@ -23,8 +24,12 @@ export const StepperControl = ({ handleClick, currentStep, steps, isNextDisabled
       </button>
 
       {/* Botón de "Siguiente" o "Enviar" */}
-      <button className={`w-32 py-2 ${isNextDisabled ? "bg-gray-300" : "bg-main"} text-white rounded-lg`} onClick={handleButtonClick} disabled={isNextDisabled}>
-        {currentStep === steps.length ? "Enviar" : "Siguiente"}
+      <button
+        className={`w-32 py-2 ${isNextDisabled || loading ? "bg-gray-300" : "bg-main"} text-white rounded-lg`}
+        onClick={handleButtonClick}
+        disabled={isNextDisabled || loading}
+      >
+        {loading ? "Enviando..." : currentStep === steps.length ? "Enviar" : "Siguiente"}
       </button>
     </div>
   );

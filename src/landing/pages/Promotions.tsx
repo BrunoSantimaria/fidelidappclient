@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion, useInView } from "framer-motion";
-import promotion1 from "../../assets/promotions.png";
 import { Divider } from "@mui/material";
 
 export const Promotions = () => {
@@ -12,9 +11,7 @@ export const Promotions = () => {
   const [isPromotionOpen, setIsPromotionOpen] = useState(false);
 
   // Función para alternar la promoción abierta/cerrada
-  const togglePromotion = () => {
-    setIsPromotionOpen((prev) => !prev);
-  };
+  const togglePromotion = () => setIsPromotionOpen((prev) => !prev);
 
   // Animación común para los elementos cuando entran en vista
   const animationProps = {
@@ -30,7 +27,12 @@ export const Promotions = () => {
         {!isPromotionOpen && (
           <>
             <motion.div className='text-center order-2 md:order-1 md:w-1/2' {...animationProps}>
-              <img src={promotion1} alt='Promociones activas' className='w-[800px] h-auto mx-auto' />
+              <img
+                src='https://res.cloudinary.com/di92lsbym/image/upload/q_auto,f_webp/v1731076385/ozo2cn9nqjypxofkljf4.png'
+                alt='Promociones activas'
+                className='w-[800px] h-auto mx-auto'
+                loading='lazy'
+              />
               <p className='mt-4 font-semibold text-gray-700'>¡Diseña, comparte y fideliza a tus clientes con nuestras herramientas de promociones activas!</p>
             </motion.div>
 
@@ -50,7 +52,7 @@ export const Promotions = () => {
               </div>
 
               <motion.div
-                className='w-full  mt-6 justify-center m-auto text-center text-lg text-gray-700'
+                className='w-full mt-6 justify-center m-auto text-center text-lg text-gray-700'
                 {...{
                   ...animationProps,
                   transition: { ...animationProps.transition, delay: 0.8 },
@@ -65,6 +67,8 @@ export const Promotions = () => {
                 initial={{ x: 200, opacity: 0 }}
                 animate={isInView ? { x: 0, opacity: 1 } : {}}
                 transition={{ duration: 0.8, delay: 1.2 }}
+                role='button'
+                aria-label='Mira cómo funciona la promoción'
               >
                 Mira cómo funciona
               </motion.div>
@@ -74,17 +78,21 @@ export const Promotions = () => {
 
         {/* Si la promoción está abierta, mostramos el iframe con la promoción */}
         {isPromotionOpen && (
-          <div className='w-full flex flex-col justify-center  mt-8'>
+          <div className='w-full flex flex-col justify-center mt-8'>
             <iframe
               src='https://www.fidelidapp.cl/promotion/672b9d62dc9c051bc3c313ef'
               title='Promoción FidelidApp'
               width='100%'
               height='800'
               style={{ border: "none" }}
+              loading='lazy'
+              aria-label='Ventana de promoción FidelidApp'
             />
             <span
               onClick={togglePromotion}
               className='p-2 mt-2 flex justify-center m-auto w-full rounded-md hover:bg-main/70 bg-main duration-700 text-white cursor-pointer mx-0 text-center'
+              role='button'
+              aria-label='Cerrar ventana de promoción'
             >
               Cerrar ventana.
             </span>
