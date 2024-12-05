@@ -172,7 +172,7 @@ export const PromotionClient = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: `url(${keysPattern})`,
+        backgroundImage: `url(${background})`,
         backgroundRepeat: "repeat",
         backgroundSize: "700px",
         py: 8,
@@ -220,7 +220,15 @@ export const PromotionClient = () => {
               >
                 <Box className='space-y-4'>
                   <Input fullWidth placeholder='Nombre' value={clientName} onChange={handleNameChange} sx={{ bgcolor: "white", p: 1.5 }} />
-                  <Input fullWidth type='email' placeholder='Email' value={clientEmail} onChange={handleEmailChange} sx={{ bgcolor: "white", p: 1.5 }} />
+                  <Input
+                    fullWidth
+                    autocomplete
+                    type='email'
+                    placeholder='Email'
+                    value={clientEmail}
+                    onChange={handleEmailChange}
+                    sx={{ bgcolor: "white", p: 1.5 }}
+                  />
                   <Input
                     fullWidth
                     type='tel'
