@@ -219,10 +219,19 @@ export const PromotionClient = () => {
                 }}
               >
                 <Box className='space-y-4'>
-                  <Input fullWidth placeholder='Nombre' value={clientName} onChange={handleNameChange} sx={{ bgcolor: "white", p: 1.5 }} />
                   <Input
                     fullWidth
-                    autocomplete
+                    placeholder='Nombre'
+                    autoComplete='name'
+                    name='name'
+                    value={clientName}
+                    onChange={handleNameChange}
+                    sx={{ bgcolor: "white", p: 1.5 }}
+                  />
+                  <Input
+                    fullWidth
+                    autoComplete='email'
+                    name='email'
                     type='email'
                     placeholder='Email'
                     value={clientEmail}
@@ -232,6 +241,8 @@ export const PromotionClient = () => {
                   <Input
                     fullWidth
                     type='tel'
+                    autoComplete='tel'
+                    name='tel'
                     placeholder='Número de teléfono (opcional)'
                     value={phoneNumber}
                     onChange={handlePhoneNumberChange}
