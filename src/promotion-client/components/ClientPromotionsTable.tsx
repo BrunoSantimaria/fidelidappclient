@@ -17,21 +17,21 @@ const ClientPromotionsTable = ({ clientPromotions, onRedirect }) => {
         <TableHead>
           <TableRow>
             <TableCell align="center">Título</TableCell>
-            <TableCell align="center">Estado</TableCell>
+            {/* <TableCell align="center">Estado</TableCell> */}
             <TableCell align="center">Visitas / Puntos</TableCell>
             <TableCell align="center">Requerido</TableCell>
             <TableCell align="center">Tipo</TableCell>
             <TableCell align="center">Fin de Vigencia</TableCell>
-            <TableCell align="center">Acciones</TableCell>
+            {/* <TableCell align="center">Acciones</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
           {clientPromotions.map((promo) => (
             <TableRow key={promo.id}>
-              <TableCell align="center">
+              <TableCell align="left">
                 <Typography variant="body2" fontWeight="bold">{promo.title}</Typography>
               </TableCell>
-              <TableCell align="center">
+              {/* <TableCell align="center">
                 <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
                   <span
                     className={`inline-block h-2 w-2 rounded-full ${
@@ -40,7 +40,7 @@ const ClientPromotionsTable = ({ clientPromotions, onRedirect }) => {
                   />
                   <Typography variant="body2">{promo.status}</Typography>
                 </Box>
-              </TableCell>
+              </TableCell> */}
               <TableCell align="center">
                 {promo.systemType === "points" ? promo.pointsEarned : promo.actualVisits}
               </TableCell>
@@ -52,7 +52,7 @@ const ClientPromotionsTable = ({ clientPromotions, onRedirect }) => {
                   <Typography variant="body2">{formatDate(promo.endDate)}</Typography>
                 </Box>
               </TableCell>
-              <TableCell align="center">
+              {/* <TableCell align="center">
                 <Button
                   variant="contained"
                   size="small"
@@ -61,7 +61,7 @@ const ClientPromotionsTable = ({ clientPromotions, onRedirect }) => {
                 >
                   Ver Detalles
                 </Button>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>

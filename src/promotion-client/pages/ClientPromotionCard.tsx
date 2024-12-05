@@ -138,7 +138,7 @@ export const ClientPromotionCard = () => {
 
         // Manejo de estados de la promoción
         if (response.data.promotion.status === "Expired") {
-          toast.error("Esta promoción ha expirado! Presiona el botón para reiniciarla.");
+          toast.error("Esta promoción ha expirado!");
         }
 
         if (response.data.promotion.status === "Pending") {
@@ -379,31 +379,33 @@ export const ClientPromotionCard = () => {
                 </div>
               )}
               {promotionDetails.systemType === "points" && (
-                <div className='space-y-1'>
-                  <Typography color='textSecondary' variant='caption'>
-                    Puntos Ganados
-                  </Typography>
-                  <div className='font-medium'>{promotion.pointsEarned}</div>
-                </div>
+                <>
+                  <div className='space-y-1'>
+                    <Typography color='textSecondary' variant='caption'>
+                      Puntos Ganados
+                    </Typography>
+                    <div className='font-medium'>{promotion.pointsEarned}</div>
+                  </div>
+                  <div className='space-y-1'>
+                    <Typography color='textSecondary' variant='caption'>
+                      Fecha de Registro
+                    </Typography>
+                    <div className='font-medium flex items-center space-x-1'>
+                      <Calendar fontSize='small' />
+                      <span>{formatDate(promotion.addedDate)}</span>
+                    </div>
+                  </div>
+                  <div className='space-y-1'>
+                    <Typography color='textSecondary' variant='caption'>
+                      Fin de Vigencia
+                    </Typography>
+                    <div className='font-medium flex items-center space-x-1'>
+                      <Calendar fontSize='small' />
+                      <span>{formatDate(promotion.endDate)}</span>
+                    </div>
+                  </div>
+                </>
               )}
-              <div className='space-y-1'>
-                <Typography color='textSecondary' variant='caption'>
-                  Fecha de Registro
-                </Typography>
-                <div className='font-medium flex items-center space-x-1'>
-                  <Calendar fontSize='small' />
-                  <span>{formatDate(promotion.addedDate)}</span>
-                </div>
-              </div>
-              <div className='space-y-1'>
-                <Typography color='textSecondary' variant='caption'>
-                  Fin de Vigencia
-                </Typography>
-                <div className='font-medium flex items-center space-x-1'>
-                  <Calendar fontSize='small' />
-                  <span>{formatDate(promotion.endDate)}</span>
-                </div>
-              </div>
             </Box>
 
             {/* Contenido principal - Solo mostrar si no es sistema de puntos o si estamos en la vista de detalles */}
@@ -448,8 +450,6 @@ export const ClientPromotionCard = () => {
               </Box>
             )}
 
-            {/* Agregar el botón de canjear y animación cuando se completan las visitas */}
-
             {/* Sistema de Puntos/Visitas */}
             {promotionDetails.systemType === "points" ? (
               <>
@@ -484,18 +484,6 @@ export const ClientPromotionCard = () => {
                         </Card>
                       );
                     })}
-
-                    {/* Lista de promociones del cliente */}
-                    <div className='flex flex-col md:flex-row gap-4'>
-                      <div className='flex-1'>
-                        <div className='flex flex-col'>
-                          <span className='font-bold text-main font-lato text-xl md:text-3xl'>Tus otras promociones </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <ClientPromotionsTable clientPromotions={clientPromotions} onRedirect={handleRedirect} />
-
 
                     {/* Social Media y Logo centrados */}
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
@@ -542,6 +530,17 @@ export const ClientPromotionCard = () => {
             ) : (
               ""
             )}
+
+            {/* Lista de promociones del cliente */}
+            <div className='flex flex-col md:flex-row gap-4'>
+              <div className='flex-1'>
+                <div className='flex flex-col'>
+                  <span className='font-bold text-main font-lato text-xl md:text-3xl'>Tus otras promociones </span>
+                </div>
+              </div>
+            </div>
+
+            <ClientPromotionsTable clientPromotions={clientPromotions} onRedirect={handleRedirect} />
           </CardContent>
           {(promotion.status === "Completed" || promotion.status === "Redeemed") && promotionDetails.promotionRecurrent === "True" && (
             <Box sx={{ my: 3, display: "flex", justifyContent: "center" }}>
