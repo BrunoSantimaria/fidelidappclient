@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { LineChart } from "@mui/x-charts";
 import { Box, Stack, Typography, Card, CircularProgress } from "@mui/material";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
+import Grid from '@mui/material/Grid2';
 import {
   People as PeopleIcon,
   Stars as StarsIcon,
@@ -40,8 +42,15 @@ interface campaignsData {
   totalClicks: number;
 }
 
+interface contactMetrics {
+  totalWithEmail: number;
+  totalWithPhone: number;
+  totalClients: number;
+}
+
 interface ReportData {
   findex: number;
+  contactMetrics: contactMetrics;
   accountClients: number;
   totalClients: number;
   totalCampaigns: number;
@@ -72,11 +81,26 @@ const LoadingReport = ({ progress }: { progress: number }) => (
 
 // Componente para las métricas
 const MetricCard = ({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) => (
-  <Card sx={{ p: 2, minWidth: 250, display: "flex", alignItems: "center", gap: 2 }}>
+  <Card sx={{ p: 2, minWidth: 250, maxWidth: 250, maxHeight: 100, display: "flex", alignItems: "center", gap: 2 }}>
     {icon}
     <Box>
       <Typography variant='h6'>{value}{title === "Índice Fidelidad" ? "%" : ""}</Typography>
       <Typography variant='body2' color='text.secondary'>
+        {title}
+      </Typography>
+    </Box>
+  </Card>
+);
+
+const FIndexCard = ({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) => (
+  <Card sx={{ p: 2, minWidth: 250, maxWidth: 250, minHeight: 275, display: "flex", alignItems: "center", gap: 3, backgroundColor: "primary.main", color: "white" }}>
+    {/* Change icon color dependent on value */}
+    {value >= 80 && <StarsIcon sx={{ fontSize: 40, color: "#4ade80" }} />}
+    {value >= 50 && value < 80 && <StarsIcon sx={{ fontSize: 40, color: "#ffcc00" }} />}
+    {value < 50 && <StarsIcon sx={{ fontSize: 40, color: "#ff9999" }} />}
+    <Box>
+      <Typography variant='h6'>{value} %</Typography>
+      <Typography variant='body2' color='white'>
         {title}
       </Typography>
     </Box>
@@ -153,6 +177,40 @@ const CampaingMetricsTable = ({ title, subtitle, data, dataType }: { title: stri
   </>
 );
 
+// const ContactPieChart = ({ metrics }: { metrics: contactMetrics }) => {
+//   console.log('metrics:', metrics);
+
+//   // Prepare data for the pie chart
+//   const data = [
+//     { name: 'With Email', value: metrics[0].totalWithEmail },
+//     { name: 'With Phone', value: metrics[0].totalWithPhone },
+//   ];
+
+//   const COLORS = ['#8884d8', '#82ca9d', '#ff8c00']; // Colors for the segments
+
+//   return (
+//     <ResponsiveContainer width="100%" height={250}>
+//       <PieChart>
+//         <Pie
+//           data={data}
+//           dataKey="value"
+//           nameKey="name"
+//           cx="50%"
+//           cy="50%"
+//           outerRadius={80}
+//           label
+//         >
+//           {data.map((entry, index) => (
+//             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+//           ))}
+//         </Pie>
+//         <Tooltip />
+//         <Legend />
+//       </PieChart>
+//     </ResponsiveContainer>
+//   );
+// };
+
 
 export const Report = () => {
   const [data, setData] = useState<ReportData | null>(null);
@@ -211,7 +269,6 @@ export const Report = () => {
   const dailyEmailOpens = data.dailyData.map((entry) => entry.emailOpened);
   const dailyEmailClicks = data.dailyData.map((entry) => entry.emailClicked);
 
-  console.log("daily Labels" + dailyLabels + "dailyVisits" + dailyVisits + "dailyRegistrations" + dailyRegistrations + "daily points" + dailyPoints);
   // Verifica si los datos están vacíos
   if (dailyLabels.length === 0 || dailyVisits.length === 0 || dailyRegistrations.length === 0 || dailyPoints.length === 0) {
     return <Typography color='error'>No hay datos disponibles para mostrar en el gráfico.</Typography>;
@@ -222,34 +279,80 @@ export const Report = () => {
     <Box className='w-full px-4 md:w-[90%] md:ml-32'>
       <Stack spacing={4} sx={{ py: { xs: 2, md: 6 } }}>
         <Typography variant='h6' gutterBottom>
-          Métricas globales {data.Name}
+          Así ha evolucinado la fideldidad de tus clientes {data.Name ? "en " + data.Name : ""}
         </Typography>
-        <Stack
-          direction='row'
-          spacing={2}
-          sx={{
-            flexWrap: "wrap",
-            justifyContent: { xs: "space-around", md: "center" },
-          }}
-        >
-          <MetricCard title='Índice Fidelidad' value={data.findex} icon={<StarIcon />} />
-          <MetricCard title='Total Clientes' value={data.accountClients} icon={<GroupIcon />} />
-          <MetricCard title='Promociones Activas' value={data.totalPromotions} icon={<CampaignIcon />} />
-        </Stack>
 
-        <Stack
-          direction='row'
+        <Grid
+          container
           spacing={2}
-          sx={{
-            flexWrap: "wrap",
-            justifyContent: { xs: "space-around", md: "center" },
-          }}
+          sx={{ justifyContent: { xs: 'space-around', md: 'space-around' } }}
         >
-          <MetricCard title='Clientes en Promociones' value={data.totalClients} icon={<PeopleIcon />} />
-          <MetricCard title='Puntos Acumulados' value={data.totalPoints} icon={<StarsIcon />} />
-          <MetricCard title='Visitas Totales' value={data.totalVisits} icon={<VisibilityIcon />} />
-          <MetricCard title='Canjes Realizados' value={data.totalRedeemCount} icon={<CardGiftcardIcon />} />
-        </Stack>
+
+          <Grid xs={3} md={3} rowSpacing={2}>
+            <FIndexCard
+              title='Índice Fidelidad'
+              value={data.findex}
+              icon={<StarIcon />}
+            />
+          </Grid>
+
+          <Grid xs={12} md={6} container direction="column" spacing={2}>
+            <Grid>
+              <MetricCard
+                title='Total Clientes'
+                value={data.accountClients}
+                icon={<GroupIcon />}
+              />
+            </Grid>
+
+            <Grid>
+              <MetricCard
+                title='Clientes en Promociones'
+                value={data.totalClients}
+                icon={<PeopleIcon />}
+              />
+            </Grid>
+
+            <Grid>
+              <MetricCard
+                title='Promociones Activas'
+                value={data.totalPromotions}
+                icon={<CampaignIcon />}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid xs={12} md={2} container direction="column" spacing={2}>
+            <Grid>
+              <MetricCard
+                title='Puntos Acumulados'
+                value={data.totalPoints}
+                icon={<StarsIcon />}
+              />
+            </Grid>
+            <Grid>
+              <MetricCard
+                title='Visitas Totales'
+                value={data.totalVisits}
+                icon={<VisibilityIcon />}
+              />
+            </Grid>
+            <Grid>
+              <MetricCard
+                title='Canjes Realizados'
+                value={data.totalRedeemCount}
+                icon={<CardGiftcardIcon />}
+              />
+            </Grid>
+          </Grid>
+
+
+
+        </Grid>
+
+        {/* <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
+          <ContactPieChart metrics={data.contactMetrics} />
+        </Card> */}
 
 
         <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
@@ -265,6 +368,67 @@ export const Report = () => {
                 { data: dailyVisits, label: "Visitas", color: "#4ade80" },
                 { data: dailyRegistrations, label: "Registros", color: "#ff9999" },
                 { data: dailyPoints, label: "Puntos", color: "#ffcc00" },
+              ]}
+              xAxis={[
+                {
+                  scaleType: "band",
+                  data: dailyLabels,
+                  tickLabelStyle: { fontSize: 12 },
+                },
+              ]}
+              margin={{ left: 50, right: 20, top: 20, bottom: 30 }}
+            />
+          </Box>
+        </Card>
+
+
+
+        <Typography variant='h6' gutterBottom>
+          Tus campañas de email
+        </Typography>
+
+        <Grid
+          container
+          spacing={2}
+          sx={{ justifyContent: { xs: 'space-around', md: 'space-around' } }}
+        >
+          <Grid>
+            <MetricCard title='Campañas Email' value={data.totalCampaigns} icon={<CampaignIcon />} />
+          </Grid>
+          <Grid>
+            <MetricCard title='Emails Enviados' value={data.totalEmailsSent} icon={<PeopleIcon />} />
+          </Grid>
+          <Grid>
+            <MetricCard title='Emails Abiertos' value={data.totalEmailOpens} icon={<StarsIcon />} />
+          </Grid>
+          <Grid>
+            <MetricCard title='Clicks en Emails' value={data.totalEmailClicks} icon={<VisibilityIcon />} />
+
+          </Grid>
+        </Grid>
+
+        <Card sx={{ flex: 1, borderTop: 3, borderColor: "primary.main", p: { xs: 2, md: 3 } }}>
+          <CampaingMetricsTable
+            title='Campañas de Email Marketing'
+            subtitle='Emails enviados, abiertos y clieckeados'
+            data={data.campaigns}
+            dataType='campaings'
+          />
+        </Card>
+
+        <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
+          <Typography variant='h6' gutterBottom>
+            Tus campañas de email
+          </Typography>
+          <Typography variant='body2' color='text.secondary' gutterBottom>
+            Análisis de emails enviados, abiertos y clieckeados
+          </Typography>
+          <Box sx={{ height: { xs: 300, md: 400 }, mt: 2 }}>
+            <LineChart
+              series={[
+                { data: dailyEmailsSent, label: "Enviados", color: "#4ade80" },
+                { data: dailyEmailOpens, label: "Abiertos", color: "#ff9999" },
+                { data: dailyEmailClicks, label: "Clicks", color: "#ffcc00" },
               ]}
               xAxis={[
                 {
@@ -297,59 +461,6 @@ export const Report = () => {
             />
           </Card>
         </Stack>
-
-        <Typography variant='h6' gutterBottom>
-          Tus campañas de email
-        </Typography>
-
-        <Stack
-          direction='row'
-          spacing={2}
-          sx={{
-            flexWrap: "wrap",
-            justifyContent: { xs: "space-around", md: "center" },
-          }}
-        >
-          <MetricCard title='Campañas Email' value={data.totalCampaigns} icon={<CampaignIcon />} />
-          <MetricCard title='Emails Enviados' value={data.totalEmailsSent} icon={<PeopleIcon />} />
-          <MetricCard title='Emails Abiertos' value={data.totalEmailOpens} icon={<StarsIcon />} />
-          <MetricCard title='Clicks en Emails' value={data.totalEmailClicks} icon={<VisibilityIcon />} />
-        </Stack>
-
-        <Card sx={{ p: { xs: 2, md: 3 }, borderTop: 3, borderColor: "primary.main" }}>
-          <Typography variant='h6' gutterBottom>
-            Tus campañas de email
-          </Typography>
-          <Typography variant='body2' color='text.secondary' gutterBottom>
-            Análisis de emails enviados, abiertos y clieckeados
-          </Typography>
-          <Box sx={{ height: { xs: 300, md: 400 }, mt: 2 }}>
-            <LineChart
-              series={[
-                { data: dailyEmailsSent, label: "Enviados", color: "#4ade80" },
-                { data: dailyEmailOpens, label: "Abiertos", color: "#ff9999" },
-                { data: dailyEmailClicks, label: "Clicks", color: "#ffcc00" },
-              ]}
-              xAxis={[
-                {
-                  scaleType: "band",
-                  data: dailyLabels,
-                  tickLabelStyle: { fontSize: 12 },
-                },
-              ]}
-              margin={{ left: 50, right: 20, top: 20, bottom: 30 }}
-            />
-          </Box>
-        </Card>
-
-        <Card sx={{ flex: 1, borderTop: 3, borderColor: "primary.main", p: { xs: 2, md: 3 } }}>
-          <CampaingMetricsTable
-            title='Campañas de Email Marketing'
-            subtitle='Emails enviados, abiertos y clieckeados'
-            data={data.campaigns}
-            dataType='campaings'
-          />
-        </Card>
 
 
 
