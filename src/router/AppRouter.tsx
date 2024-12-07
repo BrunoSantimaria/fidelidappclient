@@ -20,6 +20,9 @@ import { PromotionQrLanding } from "../landing/components/PromotionQrLanding";
 
 import { PromotionPage } from "../dashboard/pages/Promotions/PromotionPage";
 import { ToastContainer } from "react-toastify";
+import { LandingPage } from "../promotion-client/pages/LandingPage";
+import FideliCard from "@/promotion-client/pages/FideliCard";
+import Layout from "@/promotion-client/pages/Layout";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
@@ -72,13 +75,17 @@ export const AppRouter = () => {
                 <Route path='/' element={<Landing refs={refs} />} />
                 <Route path='/thankyou' element={<ThankYou />} />
                 <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
+                <Route path='/landingpage' element={<Layout />}>
+                  <Route index element={<LandingPage />} />
+                  <Route path='fidelicard' element={<FideliCard />} />
+                </Route>
                 <Route path='/auth/*' element={<AuthRoutes />} />
                 <Route path='/dashboard' element={<Navigate to='/' replace />} />
               </>
             ) : (
               <>
                 <Route path='/' element={<Landing refs={refs} />} />
-
+                <Route path='/landingpage' element={<LandingPage />} />
                 <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
                 <Route path='/thankyou' element={<ThankYou />} />
                 <Route path='/dashboard/promotions' element={<PromotionPage />} />
