@@ -35,22 +35,14 @@ export default function Layout() {
 
   return (
     <div className='relative w-full h-screen '>
-      {/* La tarjeta (Fidelicard) que se muestra encima */}
       {isCardVisible && (
-        <div
-          key='fidelicard'
-          className={`absolute w-full h-full ${animationClass} z-20`} // Usamos z-index para asegurarnos de que esté encima
-        >
+        <div key='fidelicard' className={`absolute w-full h-full ${animationClass} z-20`}>
           <Outlet context={{ onNavigate: handleRouteChange }} />
         </div>
       )}
 
-      {/* La landing page queda en el fondo (si está oculta) */}
       {!isCardVisible && (
-        <div
-          key='landingpage'
-          className='absolute w-full h-full animate__animated animate__fadeInLeft z-10' // Aseguramos que la landing está detrás de la fidelicard
-        >
+        <div key='landingpage' className='absolute w-full h-full animate__animated animate__fadeInLeft z-10'>
           <Outlet context={{ onNavigate: handleRouteChange }} />
         </div>
       )}

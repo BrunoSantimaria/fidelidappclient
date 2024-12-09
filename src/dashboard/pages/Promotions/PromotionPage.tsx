@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, Typography, Button, Grid, Table, Box, Chip, Tooltip, IconButton } from "@mui/material";
 import {
@@ -8,9 +9,6 @@ import {
   Redeem as RewardsIcon,
   HelpOutline as HelpIcon,
 } from "@mui/icons-material";
-import { Calendar, Edit, MoreHorizontal, Share2, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "@mui/material";
 
 import { TablePromotions } from "../../components";
 import { useDashboard } from "../../../hooks";
@@ -29,29 +27,44 @@ const pageTransition = {
 export const PromotionPage = () => {
   const { user } = useAuthSlice();
   const { metrics, plan } = useDashboard();
-  console.log(metrics);
+
+  const [updatedMetrics, setUpdatedMetrics] = useState(metrics); // Estado local para las métricas
+
+  useEffect(() => {
+    setUpdatedMetrics(metrics); // Actualizar las métricas cuando cambian
+  }, [metrics]);
+
+  const handlePromotionDelete = () => {
+    // Aquí, actualiza las métricas cuando se elimina una promoción
+    const updatedStats = {
+      ...updatedMetrics,
+      activePromotions: updatedMetrics.activePromotions - 1, // Restar una promoción
+    };
+    setUpdatedMetrics(updatedStats);
+  };
+
   const statsCards = [
     {
       title: "Programas activos",
-      value: `${metrics?.activePromotions || 0}/ ${plan?.promotionLimit || 50}`,
+      value: `${updatedMetrics?.activePromotions || 0}/ ${plan?.promotionLimit || 50}`,
       icon: <PackageIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
       tooltip: "Número de programas de fidelización activos",
     },
     {
       title: "Clientes Registrados",
-      value: `${metrics?.registeredClients || 0} / ${plan?.clientLimit || "Ilimitado"}`,
+      value: `${updatedMetrics?.registeredClients || 0} / ${plan?.clientLimit || "Ilimitado"}`,
       icon: <UsersIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
       tooltip: "Total de clientes registrados en tus programas",
     },
     {
       title: "Visitas Totales",
-      value: metrics?.totalVisits || 0,
+      value: updatedMetrics?.totalVisits || 0,
       icon: <VisitsIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
       tooltip: "Número total de visitas registradas",
     },
     {
       title: "Promociones Canjeadas",
-      value: metrics?.redeemedPromotions || 0,
+      value: updatedMetrics?.redeemedPromotions || 0,
       icon: <RewardsIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
       tooltip: "Total de promociones canjeadas por tus clientes",
     },
@@ -139,7 +152,7 @@ export const PromotionPage = () => {
           </Grid>
 
           {/* Tabla de Programas */}
-          <TablePromotions />
+          <TablePromotions onDelete={handlePromotionDelete} />
         </motion.div>
       </div>
     </div>

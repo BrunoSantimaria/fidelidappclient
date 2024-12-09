@@ -31,7 +31,6 @@ export const PromotionRequirements = ({
       [name]: value,
     }));
     console.log(promotionRequirements);
-
   };
 
   const handleRecurrentChange = (e) => {
@@ -71,7 +70,6 @@ export const PromotionRequirements = ({
     { name: "Domingo", value: 7 },
   ];
 
-
   // Verificar si las recompensas son necesarias para el envío
   const canSubmit = rewards.length > 0;
   const pageTransition = {
@@ -86,7 +84,6 @@ export const PromotionRequirements = ({
   return (
     <motion.form initial='hidden' animate='visible' exit='hidden' variants={pageTransition} className='space-y-4'>
       <h2 className='text-2xl font-bold text-main mb-4'>Requisitos de la promoción</h2>
-
 
       {system === "visits" && (
         <div>
@@ -141,44 +138,42 @@ export const PromotionRequirements = ({
 
       {system === "visits" && (
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Días de la semana en que aplica
-          </label>
-          <div className="flex flex-wrap gap-2">
+          <label className='block text-sm font-medium mb-2'>Días de la semana en que aplica</label>
+          <div className='flex flex-wrap gap-2'>
             {daysMap.map((day) => (
-              <label key={day.value} className="flex items-center gap-2">
+              <label key={day.value} className='flex items-center gap-2'>
                 <input
-                  type="checkbox"
-                  name="daysOfWeek"
+                  type='checkbox'
+                  name='daysOfWeek'
                   value={day.value}
                   checked={promotionRequirements.daysOfWeek.includes(day.value)}
                   onChange={(e) => {
                     const { value, checked } = e.target;
                     const numericValue = parseInt(value, 10);
-                
+
                     setPromotionRequirements((prev) => {
                       const updatedDays = checked
                         ? [...prev.daysOfWeek, numericValue] // Agrega el día si está seleccionado
                         : prev.daysOfWeek.filter((d) => d !== numericValue); // Remueve el día si no está seleccionado
-                
+
                       return {
                         ...prev,
                         daysOfWeek: updatedDays,
                       };
                     });
-                  console.log(promotionRequirements); // Agregar esta línea para verificar los cambios en la variable promotionRequirements
+                    console.log(promotionRequirements);
                   }}
-                  className="w-4 h-4"
+                  className='hidden peer'
                 />
+                <span className='flex items-center justify-center w-6 h-6 border-2 border-main rounded-md peer-checked:bg-main peer-checked:text-white transition duration-200'>
+                  {promotionRequirements.daysOfWeek.includes(day.value) && "✔"}
+                </span>
                 {day.name}
               </label>
             ))}
           </div>
         </div>
-
-
       )}
-
       {system === "visits" && (
         <div className='flex items-center space-x-2'>
           <input
@@ -194,8 +189,6 @@ export const PromotionRequirements = ({
           </label>
         </div>
       )}
-
-
       {system === "points" && (
         <div>
           <label htmlFor='promotionDuration' className='block text-sm font-medium mb-2'>
@@ -212,7 +205,6 @@ export const PromotionRequirements = ({
           />
         </div>
       )}
-
       {system === "points" && (
         <div className='flex flex-col mt-4 space-y-2 mb-2 m-auto justify-center text-center'>
           <label htmlFor='rewardPoints' className='block mb-2 text-sm font-medium text-left'>
