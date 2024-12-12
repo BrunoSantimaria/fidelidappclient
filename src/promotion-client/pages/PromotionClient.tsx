@@ -83,6 +83,7 @@ export const PromotionClient = () => {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     if (emailError || nameError || !clientEmail || !clientName) {
       toast.info("Por favor completa todos los campos obligatorios");
       return;
@@ -151,7 +152,7 @@ export const PromotionClient = () => {
   //       ></div>
   //       <div className='relative z-10'>
   //         <div className='p-2 bg-white w-[30%] justify-center mx-auto my-10 rounded-md text-main cursor-pointer hover:bg-main/60 duration-300'>
-          
+
   //         Esta promoción está inactiva.</div>
   //         <div
   //           onClick={() => handleNavigate("/")}
@@ -176,7 +177,8 @@ export const PromotionClient = () => {
         ></div>
         <div className='relative z-10'>
           <div className='p-2 bg-white w-[30%] justify-center mx-auto my-10 rounded-md text-main cursor-pointer hover:bg-main/60 duration-300'>
-          Esta promoción no existe.</div>
+            Esta promoción no existe.
+          </div>
           <div
             onClick={() => handleNavigate("/")}
             className='p-2 bg-main w-[30%] justify-center mx-auto my-10 rounded-md text-white cursor-pointer hover:bg-main/60 duration-300'

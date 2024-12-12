@@ -47,7 +47,6 @@ const marioCoinSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_coin.w
 const marioStarSound = "https://themushroomkingdom.net/sounds/wav/smb2/smb2_grow.wav";
 const marioNewLifeSound = "https://themushroomkingdom.net/sounds/wav/smb/smb_1-up.wav";
 
-// Agregar esta función antes del componente ClientPromotionCard
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);

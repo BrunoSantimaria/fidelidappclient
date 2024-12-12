@@ -125,10 +125,9 @@ export const useAuthSlice = () => {
     dispatch(onLogOut(""));
   };
   const refreshAccount = async () => {
-    console.log("click");
-
     try {
       const currentUserResponse = await api.get("/auth/current");
+      console.log("🚀 ~ refreshAccount ~ currentUserResponse:", currentUserResponse);
       const { accounts, plan } = currentUserResponse.data;
 
       localStorage.setItem("accounts", JSON.stringify(accounts));

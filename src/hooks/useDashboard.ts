@@ -70,6 +70,7 @@ export const useDashboard = () => {
         const clientsResp = await api.get("/api/clients/getAccountClients", {
           params: { accountId: accounts._id },
         });
+
         if (clientsResp?.data) {
           dispatch(setClients(clientsResp.data.clients));
         }

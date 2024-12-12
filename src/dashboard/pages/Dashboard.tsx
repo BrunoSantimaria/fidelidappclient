@@ -1,23 +1,21 @@
 import { useEffect, useState, useMemo } from "react";
 import { useDashboard } from "../../hooks/useDashboard";
 import { Package2, Users, PieChart, Calendar, Mail, CheckCircle2, Plus } from "lucide-react";
-
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import { MetricCard } from "../components/MetricCard";
 import { QuickActions } from "../components/QuickActions";
 import { RecentPromotions } from "../components/RecentPromotions";
-
 import moment from "moment";
 import "moment/locale/es";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
+import { Pagination } from "@mui/material";
 
-// Configurar moment para usar español
 moment.locale("es");
 
-// Hook personalizado para manejar los datos del dashboard
 const useDashboardData = () => {
   const [error, setError] = useState(null);
   const { metrics, plan, promotions, getPromotionsAndMetrics, clients, loadingPromotions, loadingClients, loadingAgendas } = useDashboard();
+  console.log("🚀 ~ useDashboardData ~ clients:", clients);
 
   useEffect(() => {
     const loadData = async () => {
@@ -52,7 +50,7 @@ export const Dashboard = () => {
 
   const clientsPerPage = 3;
 
-  const getInitials = (name: string) => {
+  const getInitials = (name) => {
     return name
       .split(" ")
       .map((word) => word[0])
@@ -61,27 +59,20 @@ export const Dashboard = () => {
   };
 
   const sortedClients = useMemo(() => {
-    if (!clients || !promotions) return [];
+    // Comprobamos si hay clientes, de no ser así retornamos un array vacío.
+    if (!clients || clients.length === 0) return [];
 
-    return [...clients]
-      .filter(
-        (client) =>
-          client.addedpromotions &&
-          client.addedpromotions.length > 0 &&
-          client.addedpromotions.some((promo) => promotions.some((myPromo) => myPromo._id === promo.promotion))
-      )
-      .sort((a, b) => {
-        const dateA = new Date(a.addedpromotions[0].addedDate);
-        const dateB = new Date(b.addedpromotions[0].addedDate);
-        return dateB.getTime() - dateA.getTime();
-      })
-      .slice(0, 20);
-  }, [clients, promotions]);
-
+    return clients; // Sin filtro, mostramos todos los clientes disponibles.
+  }, [clients]);
   const indexOfLastClient = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
   const currentClients = sortedClients.slice(indexOfFirstClient, indexOfLastClient);
+  console.log("🚀 ~ Dashboard ~ sortedClients:", sortedClients);
   const totalPages = Math.ceil(sortedClients.length / clientsPerPage);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
 
   if (loadingPromotions) {
     return (
@@ -218,10 +209,6 @@ export const Dashboard = () => {
                 <div className='flex items-center justify-center h-full'>
                   <span className='text-gray-500'>No hay clientes registrados</span>
                 </div>
-              ) : !sortedClients ? (
-                <div className='flex items-center justify-center h-full'>
-                  <span className='text-gray-500'>Cargando clientes...</span>
-                </div>
               ) : (
                 <>
                   <div className='space-y-4'>
@@ -247,25 +234,7 @@ export const Dashboard = () => {
                   </div>
 
                   {/* Paginación */}
-                  <div className='flex justify-center gap-2 pt-4 mt-auto border-t'>
-                    <button
-                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className='px-2 py-1 text-sm rounded bg-slate-100 disabled:opacity-50'
-                    >
-                      Anterior
-                    </button>
-                    <span className='px-2 py-1 text-sm'>
-                      Página {currentPage} de {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className='px-2 py-1 text-sm rounded bg-slate-100 disabled:opacity-50'
-                    >
-                      Siguiente
-                    </button>
-                  </div>
+                  <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color='primary' className='mt-4 flex justify-center' />
                 </>
               )}
             </div>

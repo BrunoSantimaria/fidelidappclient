@@ -19,17 +19,19 @@ import {
   CircularProgress,
   Select,
   MenuItem,
+  DialogContentText,
 } from "@mui/material";
 import Papa from "papaparse";
 import { useDropzone } from "react-dropzone";
 import { UploadFile, PersonAdd, PersonOff } from "@mui/icons-material";
-import howtouse from "../../../assets/Mi video-1.gif";
+
 import { useDashboard } from "../../../hooks";
 import api from "../../../utils/api";
 import { toast } from "react-toastify";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
-import { ReactTyped, Typed } from "react-typed";
+import { ReactTyped } from "react-typed";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
+import { Trash2 } from "lucide-react";
 
 // Definir el tipo para los clientes
 interface Client {
@@ -47,10 +49,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const { refreshAccount } = useAuthSlice();
   const { accounts, getPromotionsAndMetrics, clients, promotions, plan } = useDashboard();
-  const [displayedClients, setDisplayedClients] = useState<Client[]>(clients); // Inicializar con los clientes
-  const [showHowToUse, setShowHowToUse] = useState(false);
-  console.log("clientes", accounts.clients);
-
+  const [displayedClients, setDisplayedClients] = useState<Client[]>(clients);
   const [newClientName, setNewClientName] = useState("");
   const [newClientEmail, setNewClientEmail] = useState("");
   const { handleNavigate } = useNavigateTo();
@@ -58,36 +57,26 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false); // Estado para el loading
 
+  const handleDeleteClient = async (id: string) => {
+    try {
+      const clientId = id;
+      const accountId = accounts._id;
+      const resp = await api.delete(`/api/clients/deleteclient`, { data: { accountId, clientId } });
+      toast.info("Cliente eliminado");
+
+      refreshAccount();
+      setDisplayedClients(resp.data);
+      console.log(resp.data);
+    } catch (error) {
+      toast.error("Hubo un problema al eliminar. Intenta nuevamente.");
+    }
+  };
+
   useEffect(() => {
     getPromotionsAndMetrics();
-    setDisplayedClients(accounts.clients);
+    setDisplayedClients(accounts?.clients);
     refreshAccount();
-  }, []); // Asegúrate de actualizar los clientes cuando cambien
-
-  // Controlar la paginación
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  function formatClientName(name: string) {
-    const trimmedName = name.trim();
-    if (trimmedName) {
-      return trimmedName
-        .split(" ")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(" ");
-    }
-    return "";
-  }
-
-  function formatClientEmail(email: string) {
-    return email.trim().toLowerCase();
-  }
-
+  }, []);
   const addClient = async () => {
     if (newClientName && newClientEmail) {
       const formattedName = formatClientName(newClientName);
@@ -110,21 +99,12 @@ const ClientTable: React.FC<ClientTableProps> = () => {
 
       try {
         const response = await api.post("/api/clients/addClient", newClient);
-
-        // Actualizar el estado local con el nuevo cliente
-        setDisplayedClients((prevClients) => [
-          ...prevClients,
-          {
-            name: formattedName,
-            email: formattedEmail,
-            addedPromotions: [],
-          },
-        ]);
+        console.log("🚀 ~ addClient ~ newClient:", newClient);
 
         toast.info(`Cliente ${formattedName} agregado.`);
+
         setNewClientName("");
         setNewClientEmail("");
-        await getPromotionsAndMetrics();
       } catch (error) {
         if (error.response?.data?.message === "Client already exists in this account") {
           toast.info("El cliente ya existe.");
@@ -132,29 +112,55 @@ const ClientTable: React.FC<ClientTableProps> = () => {
           toast.error("Error al agregar cliente.");
         }
         console.error("Error al agregar cliente", error);
+      } finally {
+        refreshAccount();
+        setDisplayedClients(accounts?.clients);
       }
     }
   };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+  useEffect(() => {}, [refreshAccount, setDisplayedClients]);
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+  function formatClientName(name: string) {
+    const trimmedName = name.trim();
+    if (trimmedName) {
+      return trimmedName
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
+    }
+    return "";
+  }
+
+  function formatClientEmail(email: string) {
+    return email.trim().toLowerCase();
+  }
+
   const getClientPromotion = (client: Client) => {
-    console.log(client);
-
-    console.log("Promotions:", promotions);
-    console.log("Client Added Promotions:", client.addedpromotions);
-
-    // Inicializa addedpromotions como array vacío si está undefined
     const addedPromotions = client.addedpromotions || [];
 
-    // Verifica que promotions exista
     if (!promotions) {
       return null;
     }
 
-    // Filtra las promociones que coincidan con los IDs en client.addedpromotions
     const clientPromotions = promotions.filter((promo) => addedPromotions.some((addedPromo) => addedPromo.promotion === promo._id));
 
-    console.log("Client Promotions:", clientPromotions);
-
-    // Devuelve las promociones o null si no hay coincidencias
     return clientPromotions.length > 0 ? clientPromotions : null;
   };
 
@@ -252,7 +258,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   const confirmCsvClients = async () => {
     setLoading(true);
     setOpenDialog(false);
-    console.log(csvClients);
 
     try {
       const validClients = csvClients.filter((client) => client.name && client.email);
@@ -364,7 +369,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
             overflow: "hidden",
           }}
         >
-          {!accounts.clients.length ? (
+          {!accounts.clients?.length ? (
             <section className='p-8 text-center'>
               <div className='flex flex-col items-center space-y-4'>
                 <PersonOff sx={{ fontSize: 48, color: "#5b7898" }} />
@@ -381,38 +386,69 @@ const ClientTable: React.FC<ClientTableProps> = () => {
                       <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Email</TableCell>
                       <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Teléfono</TableCell>
                       <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Promociones</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: "#5b7898" }}>Eliminar</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {clients
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .reverse()
-                      .map((client) => {
-                        const clientPromotions = getClientPromotion(client); // Obtener promociones del cliente
-                        return (
-                          <TableRow hover key={client.email}>
-                            <TableCell>{client.name}</TableCell>
-                            <TableCell>{client.email}</TableCell>
-                            <TableCell>{client.phoneNumber || "-"}</TableCell>
-                            <TableCell>
-                              {clientPromotions ? (
-                                <Select value='' displayEmpty>
-                                  <MenuItem value='' disabled>
-                                    Promociones
-                                  </MenuItem>
-                                  {clientPromotions.map((promo) => (
-                                    <MenuItem key={promo._id} value={promo._id} onClick={() => handleNavigate(`/promotion/${promo._id}`)}>
-                                      {promo.title}
+                    {clients && clients.length > 0 ? (
+                      clients
+                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        .reverse()
+                        .map((client) => {
+                          const clientPromotions = getClientPromotion(client); // Obtener promociones del cliente
+                          return (
+                            <TableRow hover key={client.email}>
+                              <TableCell>{client.name}</TableCell>
+                              <TableCell>{client.email}</TableCell>
+                              <TableCell>{client.phoneNumber || "-"}</TableCell>
+                              <TableCell>
+                                {clientPromotions ? (
+                                  <Select value='' displayEmpty>
+                                    <MenuItem value='' disabled>
+                                      Promociones
                                     </MenuItem>
-                                  ))}
-                                </Select>
-                              ) : (
-                                "Sin promociones"
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                                    {clientPromotions.map((promo) => (
+                                      <MenuItem key={promo._id} value={promo._id} onClick={() => handleNavigate(`/promotion/${promo._id}`)}>
+                                        {promo.title}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                ) : (
+                                  "Sin promociones"
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Trash2 onClick={handleClickOpen} className='text-red-600 w-5 justify-center flex cursor-pointer' />
+                                <Dialog open={open} onClose={handleClose} aria-labelledby='alert-dialog-title' aria-describedby='alert-dialog-description'>
+                                  <DialogTitle id='alert-dialog-title'>{`¿Estás seguro de eliminar al cliente?`}</DialogTitle>
+                                  <DialogContent>
+                                    <DialogContentText id='alert-dialog-description'>Esta acción no se puede deshacer.</DialogContentText>
+                                  </DialogContent>
+                                  <DialogActions>
+                                    <Button onClick={handleClose}>Cancelar</Button>
+                                    <Button
+                                      onClick={() => {
+                                        handleDeleteClient(client._id);
+                                        handleClose();
+                                      }}
+                                      color='error'
+                                      autoFocus
+                                    >
+                                      Eliminar
+                                    </Button>
+                                  </DialogActions>
+                                </Dialog>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} textAlign='center'>
+                          No hay clientes disponibles
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -428,7 +464,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
                 }}
                 rowsPerPageOptions={[5, 10, 25]}
                 component='div'
-                count={clients.length}
+                count={clients?.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

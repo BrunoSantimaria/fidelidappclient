@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -41,7 +41,7 @@ const getSystemType = (type: string | undefined) => {
   }
 };
 
-export const TablePromotions = () => {
+export const TablePromotions = ({ onDelete }) => {
   const { metrics, plan, promotions, deletePromotion } = useDashboard();
   const { handleNavigate } = useNavigateTo();
 
@@ -50,6 +50,13 @@ export const TablePromotions = () => {
   const [promotionToDelete, setPromotionToDelete] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedPromotionId, setSelectedPromotionId] = useState<string | null>(null);
+
+  // Estado local para las promociones
+  const [localPromotions, setLocalPromotions] = useState(promotions || []);
+
+  useEffect(() => {
+    setLocalPromotions(promotions || []);
+  }, [promotions]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, promotionId: string) => {
     setAnchorEl(event.currentTarget);
@@ -89,9 +96,15 @@ export const TablePromotions = () => {
 
   const handleDeleteConfirmed = async () => {
     if (promotionToDelete) {
+      // Eliminar la promoción del servidor
       await deletePromotion(promotionToDelete);
       toast.info("Promoción eliminada.");
+
+      // Eliminar la promoción localmente para actualizar el estado
+      setLocalPromotions((prevPromotions) => prevPromotions.filter((promotion) => promotion._id !== promotionToDelete));
+
       setDialogOpen(false);
+      onDelete();
     }
   };
 
@@ -121,7 +134,7 @@ export const TablePromotions = () => {
         </Box>
 
         <CardContent>
-          {promotions?.length ? (
+          {localPromotions.length ? (
             <TableContainer sx={{ overflowX: "auto" }}>
               <Table>
                 <TableHead>
@@ -132,7 +145,7 @@ export const TablePromotions = () => {
                       Fecha Inicio
                     </TableCell>
                     <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                      Fecha Fin 
+                      Fecha Fin
                     </TableCell>
                     <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
                       Status
@@ -145,7 +158,7 @@ export const TablePromotions = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {promotions?.map((promotion) => (
+                  {localPromotions.map((promotion) => (
                     <TableRow key={promotion._id}>
                       <TableCell>
                         <Link to={`/dashboard/promotion/${promotion._id}`} style={{ textDecoration: "none", color: "#5b7898", fontWeight: 500 }}>
@@ -234,12 +247,7 @@ export const TablePromotions = () => {
           </ListItemIcon>
           Copiar enlace
         </MenuItem>
-        <MenuItem onClick={handleEdit}>
-          <ListItemIcon>
-            <Edit fontSize='small' />
-          </ListItemIcon>
-          Editar
-        </MenuItem>
+
         <MenuItem
           onClick={() => {
             if (selectedPromotionId) handleDelete(selectedPromotionId);
