@@ -44,7 +44,7 @@ export const PromotionRequirements = ({
     const { name, value } = e.target;
     setNewReward((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value.trim(),
     }));
   };
 
@@ -70,7 +70,6 @@ export const PromotionRequirements = ({
     { name: "Domingo", value: 7 },
   ];
 
-  // Verificar si las recompensas son necesarias para el envío
   const canSubmit = rewards.length > 0;
   const pageTransition = {
     hidden: { opacity: 0, y: 50 },
@@ -215,7 +214,7 @@ export const PromotionRequirements = ({
               <input
                 name='points'
                 type='number'
-                value={newReward.points}
+                value={newReward.points.trim()}
                 onChange={handleRewardChange}
                 className='w-full  mr-6  p-4 h-12 border  bg-white border-main rounded-md'
                 placeholder='Puntos'

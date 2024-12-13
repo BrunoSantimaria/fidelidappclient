@@ -31,7 +31,7 @@ export const PromotionClient = () => {
   };
 
   useEffect(() => {
-    // Check if 'clientId' exists in local storage
+
     const clientIdDataString = localStorage.getItem("clientId");
     console.log("clientIdDataString", clientIdDataString);
 
@@ -42,6 +42,7 @@ export const PromotionClient = () => {
         console.log(`/promotions/${clientId}/${id}`);
         handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the local storage key exists
         return; // Exit the effect to avoid unnecessary API calls
+
       } catch (error) {
         console.error("Error parsing clientId from local storage:", error);
       }
@@ -52,7 +53,7 @@ export const PromotionClient = () => {
         const response = await api.get(`/api/promotions/${id}`);
         setPromotion(response.data.promotion);
         setAccountId(response.data.accountId);
-        setSocialMedia(user.accounts.socialMedia || {}); // Extraer redes sociales del usuario
+        setSocialMedia(user.accounts.socialMedia || {});
       } catch (error) {
         console.error("Error fetching promotion:", error);
       } finally {
@@ -101,7 +102,6 @@ export const PromotionClient = () => {
 
       toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");
 
-      // Cliente creado exitosamente
       const clientId = response.data.client._id;
       saveClientId(clientId);
       toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");

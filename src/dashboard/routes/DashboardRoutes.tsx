@@ -74,7 +74,7 @@ export const DashboardRoutes = () => {
       return () => clearInterval(interval);
     }
   }, [user?.id]);
-
+  console.log(metrics?.activePromotions >= plan?.promotionLimit);
   return (
     <>
       <Navigation />
@@ -114,7 +114,7 @@ export const DashboardRoutes = () => {
         <Route
           path='/promotions/create'
           element={
-            metrics?.activePromotions < plan?.promotionLimit ? (
+            metrics?.activePromotions <= plan?.promotionLimit ? (
               <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
                 <Stepper />
               </motion.div>
