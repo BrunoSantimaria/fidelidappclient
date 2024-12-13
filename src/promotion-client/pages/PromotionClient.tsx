@@ -31,20 +31,18 @@ export const PromotionClient = () => {
   };
 
   useEffect(() => {
-    // Check if 'clientid' cookie exists
     const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
     const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
     console.log("clientIdCookie", clientIdCookie);
 
     if (clientIdCookie) {
-      // Decode the URL-encoded string
       const decodedCookieValue = decodeURIComponent(clientIdCookie.split("=")[1]);
       try {
-        const clientIdData = JSON.parse(decodedCookieValue); // Now parse it
+        const clientIdData = JSON.parse(decodedCookieValue);
         const clientId = clientIdData.clientId;
         console.log(`/promotions/${clientId}/${id}`);
-        handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the cookie exists
-        return; // Exit the effect to avoid unnecessary API calls
+        handleNavigate(`/promotions/${clientId}/${id}`);
+        return;
       } catch (error) {
         console.error("Error parsing clientId cookie:", error);
       }
@@ -55,7 +53,7 @@ export const PromotionClient = () => {
         const response = await api.get(`/api/promotions/${id}`);
         setPromotion(response.data.promotion);
         setAccountId(response.data.accountId);
-        setSocialMedia(user.accounts.socialMedia || {}); // Extraer redes sociales del usuario
+        setSocialMedia(user.accounts.socialMedia || {});
       } catch (error) {
         console.error("Error fetching promotion:", error);
       } finally {
@@ -104,7 +102,6 @@ export const PromotionClient = () => {
 
       toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");
 
-      // Obtener el clientId de la respuesta y redirigir
       const clientId = response.data.client._id;
       console.log(response.data);
       handleNavigate(`/promotions/${clientId}/${id}`);

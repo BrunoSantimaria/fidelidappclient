@@ -1,332 +1,338 @@
 "use client";
 
-import { useState } from "react";
-import { Facebook, Instagram, Twitter, Menu, Star, Gift, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Facebook, Instagram, Phone, Globe, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { Alert } from "@mui/material";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const promotions = [
-  {
-    id: 1,
-    title: "¡Aprovecha nuestra promoción de Jueves! 🎉",
-    description: "Hoy tienes un 20% de descuento en todos nuestros platos principales.",
-    image: "https://juanluisboschgutierrez.com/wp-content/uploads/2020/01/Comida-de-latinoamerica.jpg",
-    terms: "Tope $25.000CLP. Una promoción por mesa/grupo. Válido los días jueves.",
-    rewardSystem: "Descuento",
-    systemType: "discount",
-    isHot: true,
-  },
-  {
-    id: 2,
-    title: "Fusion Latina te Premia: Acumula Puntos y canjea",
-    description: "Acumula puntos y canjea.",
-    image:
-      "https://www.mycentraljersey.com/gcdn/authoring/authoring-images/2023/08/23/PCNJ/70660467007-mexi-bar-view-3.jpeg?crop=1207,682,x0,y42&width=1207&height=603&format=pjpg&auto=webp",
-    terms:
-      "Se otorga 1 punto a su FideliCard con una compra mínima de $15.000CLP. Los puntos no son transferibles. Solo se puede canjear una promoción al día.",
-    systemType: "points",
-    rewardSystem: [
-      {
-        points: 5,
-        title: "Bebida gratis.",
-      },
-      {
-        points: 10,
-        title: "50% OFF en pizzas.",
-      },
-      {
-        points: 15,
-        title: "Media pizza y bebida gratis.",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Lunes de Locura: ¡2x1 en Cócteles! 🍹",
-    description: "Comienza tu semana con el pie derecho. Todos los lunes, disfruta de nuestros cócteles en promoción 2x1.",
-    image: "https://cdn7.kiwilimon.com/articuloimagen/30105/28194.jpg",
-    terms: "Válido solo los lunes. Máximo 3 promociones por mesa. No acumulable con otras ofertas.",
-    rewardSystem: "2x1 en cócteles",
-    systemType: "discount",
-    isHot: false,
-  },
-];
+import "react-pdf/dist/Page/TextLayer.css";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import api from "@/utils/api";
+import { FaWhatsapp } from "react-icons/fa";
+import { AuthDialog } from "../utils/AuthDialog";
+import { useAuth } from "../utils/AuthContext";
+import { useNavigateTo } from "@/hooks/useNavigateTo";
 
-const socialLinks = [
-  { icon: Facebook, href: "https://facebook.com/nuestrorestaurante" },
-  { icon: Instagram, href: "https://instagram.com/nuestrorestaurante" },
-  { icon: Twitter, href: "https://twitter.com/nuestrorestaurante" },
-];
+interface SocialMedia {
+  instagram: string;
+  facebook: string;
+  whatsapp: string;
+  website: string;
+}
 
-const menuItems = [
-  {
-    category: "Entradas",
-    items: [
-      { name: "Tostones con mojo", price: "7.99" },
-      { name: "Ceviche peruano", price: "9.99" },
-      { name: "Empanadas de carne", price: "8.49" },
-      { name: "Arepitas de queso", price: "6.99" },
-      { name: "Guacamole con totopos", price: "5.99" },
-    ],
-  },
-  {
-    category: "Platos principales",
-    items: [
-      { name: "Ropa Vieja", price: "16.99" },
-      { name: "Feijoada", price: "17.99" },
-      { name: "Asado Argentino", price: "19.99" },
-      { name: "Mole Poblano con Pollo", price: "18.99" },
-      { name: "Sopa de Mariscos", price: "15.99" },
-      { name: "Pabellón Criollo", price: "17.49" },
-      { name: "Lomo Saltado", price: "18.49" },
-    ],
-  },
-  {
-    category: "Postres",
-    items: [
-      { name: "Churros con chocolate", price: "6.99" },
-      { name: "Tres Leches", price: "7.49" },
-      { name: "Dulce de Leche Flan", price: "5.99" },
-      { name: "Coconut Flan", price: "6.49" },
-      { name: "Helado de Maracuya", price: "5.49" },
-    ],
-  },
-  {
-    category: "Bebidas",
-    items: [
-      { name: "Mojito Cubano", price: "8.99" },
-      { name: "Caipirinha", price: "9.49" },
-      { name: "Pisco Sour", price: "9.99" },
-      { name: "Agua de Jamaica", price: "4.99" },
-      { name: "Tinto de Verano", price: "6.49" },
-      { name: "Aguardiente", price: "7.99" },
-      { name: "Chicha Morada", price: "5.99" },
-      { name: "Tequila Sunrise", price: "8.49" },
-    ],
-  },
-];
+interface Promotion {
+  _id: string;
+  title: string;
+  description: string;
+  conditions: string;
+  imageUrl: string;
+  systemType: string;
+  daysOfWeek: number[];
+  status: string;
+}
+
+interface Account {
+  _id: string;
+  name: string;
+  logo: string;
+  socialMedia: SocialMedia;
+  promotions: Promotion[];
+  card?: string[];
+}
 
 export function LandingPage() {
-  const { onNavigate } = useOutletContext();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [selectedPromotion, setSelectedPromotion] = useState(null);
-  const [isRegistering, setIsRegistering] = useState(true);
-  const [showMenu, setShowMenu] = useState(false);
+  const { slug } = useParams();
+  console.log("🚀 ~ LandingPage ~ slug:", slug);
+  const { login, logout, isLoggedInForAccount, getClientId } = useAuth(); // Use the new auth context
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggedIn(true);
+  const [account, setAccount] = useState<Account | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
+  const [numPages, setNumPages] = useState<number | null>(null);
+
+  // Cargar la información de la cuenta
+  const getAccInfo = async () => {
+    if (!slug) return;
+    setLoading(true);
+    try {
+      const response = await api.get(`/api/landing/${slug}`);
+      console.log("🚀 ~ getAccInfo ~ response.data:", response.data);
+      setAccount(response.data);
+      if (response.data.card) setNumPages(response.data.card.length);
+    } catch (error) {
+      console.error("Error al obtener la información de la cuenta", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    getAccInfo();
+  }, [slug]);
+
+  // Días de la semana en español
+  const daysOfWeek = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+  // Verificar si una promoción está activa
+  const isPromotionHot = (promotion: Promotion): boolean => {
+    const today = new Date().getDay();
+    return promotion.status === "active" && promotion.daysOfWeek.includes(today);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggedIn(true);
+  // Generar los enlaces de redes sociales
+  const getSocialLinks = () => {
+    if (!account?.socialMedia) return [];
+    return [
+      { icon: Facebook, href: account.socialMedia.facebook },
+      { icon: Instagram, href: account.socialMedia.instagram },
+      { icon: FaWhatsapp, href: `https://wa.me/${account.socialMedia.whatsapp}` },
+      { icon: Globe, href: account.socialMedia.website },
+    ].filter((link) => link.href);
+  };
+  const { handleNavigate } = useNavigateTo();
+  const sortedPromotions = account?.promotions
+    ? [...account.promotions].sort((a, b) => {
+        // Programas de puntos siempre arriba
+        if (a.systemType === "points") return -1;
+        if (b.systemType === "points") return 1;
+
+        // Promoción activa del día ('hot') en segundo lugar
+        if (isPromotionHot(a)) return -1;
+        if (isPromotionHot(b)) return 1;
+
+        // El resto por startDate cronológicamente
+        const dateA = new Date(a.startDate || 0).getTime();
+        const dateB = new Date(b.startDate || 0).getTime();
+        return dateA - dateB;
+      })
+    : [];
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
-  const handlePromotionRegister = (promotionId: number) => {
-    console.log(`Registrado a la promoción ${promotionId}`);
-    setSelectedPromotion(null);
+  const goToNextPage = () => {
+    if (numPages && currentPage < numPages) {
+      setCurrentPage(currentPage + 1);
+    }
   };
-
-  const isThursday = new Date().getDay() === 4;
-
+  const clientId = getClientId(account?._id);
+  console.log("Retrieved ClientId:", clientId);
   return (
-    <div className='min-h-screen bg-gradient-to-br from-gray-100 to-gray-400 py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='max-w-4xl mx-auto space-y-8'>
-        <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className='text-center'>
-          <h1 className='text-5xl font-bold text-main'>Fusion Latina</h1>
-          <p className='mt-2 text-lg w-full md:w-2/3 justify-center m-auto text-gray-500'>
-            ¡Regístrate y empieza a sumar puntos! 🌟 Entérate de nuestras promociones y obtén grandes beneficios 🎉
-          </p>
-        </motion.div>
+    <motion.div
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className='min-h-screen bg-gradient-to-tr from-slate-400 to-slate-700 py-12 px-4 sm:px-6 lg:px-8 text-white'
+    >
+      <div className='max-w-4xl md:max-w-5xl lg:max-w-6xl mx-auto space-y-8'>
+        {/* Componente de carga */}
+        {loading ? (
+          <div className='flex justify-center items-center min-h-[400px]'>
+            <div className='spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-white' role='status'>
+              <span className='sr-only'>Cargando...</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Título de la página */}
+            <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className='text-center'>
+              <h1 className='text-5xl font-bold text-white mb-2'>{account?.name || "Restaurante"}</h1>
+              <p className='mt-2 text-lg w-full md:w-2/3 justify-center m-auto text-gray-300'>
+                ¡Regístrate y empieza a sumar puntos! 🌟 Entérate de nuestras promociones y obtén grandes beneficios 🎉
+              </p>
+            </motion.div>
 
-        <div className='flex justify-center space-x-4'>
-          <Dialog open={showMenu} onOpenChange={setShowMenu}>
-            <DialogTrigger asChild>
-              <Button className='bg-main hover:bg-blue-700 duration-700 text-white font-bold'>Ver nuestra carta</Button>
-            </DialogTrigger>
-            <DialogContent className='w-full h-[80vh] overflow-y-scroll p-2 px-4 max-w-[90%] bg-white'>
-              <DialogHeader>
-                <DialogTitle className='mt-12 text-main'>Nuestra Carta</DialogTitle>
-              </DialogHeader>
-              <div className='grid gap-4 py-4'>
-                {menuItems.map((category, index) => (
-                  <div key={index}>
-                    <h3 className='text-lg font-semibold mb-2 text-main'>{category.category}</h3>
-                    <ul className='space-y-2'>
-                      {category.items.map((item, itemIndex) => (
-                        <li key={itemIndex} className='flex justify-between text-gray-700'>
-                          <span>{item.name}</span>
-                          <span className='font-semibold'>${item.price}</span>
-                        </li>
-                      ))}
-                    </ul>
+            {/* Botones de acción */}
+            <div className='flex flex-col justify-center space-y-6'>
+              <Button
+                onClick={() => setIsPdfDialogOpen(true)}
+                className='bg-[#3a3b40] p-6 hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300'
+              >
+                Ver nuestra carta
+              </Button>
+
+              {/* Renderizar botones según estado de autenticación */}
+              {!isLoggedInForAccount(account?._id) && account && (
+                <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                  <AuthDialog
+                    accountId={account._id}
+                    onAuthSuccess={(userId, token, clientId) => {
+                      console.log("Auth Success Details:", {
+                        accountId: account._id,
+                        userId,
+                        token,
+                        clientId,
+                      });
+                      login(account._id, userId, token, clientId);
+                      getAccInfo();
+                    }}
+                  />
+                </motion.div>
+              )}
+
+              {isLoggedInForAccount(account?._id || "") && (
+                <>
+                  <Button
+                    onClick={() => {
+                      console.log(slug, clientId);
+                      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
+                    }}
+                    className='bg-[#3a3b40] hover:bg-[#4a4b50] p-6 text-white font-bold transition-colors duration-300'
+                  >
+                    Mi FideliCard <CreditCard />
+                  </Button>
+
+                  {/* <Button onClick={() => logout(account?._id)} className='bg-[#3a3b40] hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300'>
+                    Cerrar Sesión
+                  </Button>*/}
+                </>
+              )}
+            </div>
+
+            <Dialog open={isPdfDialogOpen} onOpenChange={setIsPdfDialogOpen}>
+              <DialogContent className='p-0 bg-transparent flex justify-center items-center'>
+                <DialogHeader className='sr-only'>
+                  <DialogTitle>Nuestra Carta</DialogTitle>
+                </DialogHeader>
+                <div className='w-full md:w-full md:h-[80vh] flex flex-col items-center justify-center'>
+                  {/* Image Viewer */}
+                  {account?.card && (
+                    <div className='flex justify-center items-center w-full h-full'>
+                      <img
+                        src={account.card[currentPage - 1]}
+                        alt={`Page ${currentPage}`}
+                        className='w-auto h-auto max-w-full md:w-screen md:h-screen max-h-full object-contain shadow-lg'
+                      />
+                    </div>
+                  )}
+
+                  <div className='flex justify-center space-x-4 bg-black/50 p-4 backdrop-blur-sm mt-4'>
+                    <Button onClick={goToPrevPage} disabled={currentPage === 1} className='bg-[#3a3b40] hover:bg-[#4a4b50] text-white px-4 py-2'>
+                      Anterior
+                    </Button>
+                    <span className='text-white flex items-center'>
+                      {currentPage} / {numPages}
+                    </span>
+                    <Button onClick={goToNextPage} disabled={currentPage === numPages} className='bg-[#3a3b40] hover:bg-[#4a4b50] text-white px-4 py-2'>
+                      Siguiente
+                    </Button>
                   </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            {/* Promociones activas */}
+            <div>
+              <h2 className='text-2xl font-bold text-white mb-4 text-center'>Nuestras Promociones</h2>
+              <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
+                {sortedPromotions?.map((promo) => {
+                  const today = new Date().getDay();
+                  const isHot = isPromotionHot(promo);
+                  const applicableDays = promo.daysOfWeek.map((day) => daysOfWeek[day]).join(", ");
+
+                  return (
+                    <Dialog key={promo._id}>
+                      <DialogTrigger asChild>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Card className='bg-[#3a3b40] shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative overflow-hidden h-full'>
+                            <CardContent
+                              className={`${
+                                isHot ? "border-4 border-transparent bg-clip-border shadow-fire" : ""
+                              } p-6 bg-gradient-to-br from-[#4a4b50] to-[#3a4b40] text-white rounded-lg h-full flex flex-col justify-between`}
+                            >
+                              {isHot ||
+                                (promo.systemType === "points" && (
+                                  <span className='absolute top-0 right-0 py-1 px-3 text-sm bg-red-600 text-white rounded-full font-bold'>Hot</span>
+                                ))}
+                              <h2 className='text-xl font-semibold'>{promo.title}</h2>
+                              <p className='mt-2 text-gray-300'>{promo.description}</p>
+                              <p className={`${promo.systemType === "points" && "hidden"} mt-2 text-sm text-gray-400`}>Válido: {applicableDays}</p>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      </DialogTrigger>
+                      <DialogContent className='bg-[#28292d] w-[95%] pt-20 text-white'>
+                        <DialogHeader className='mt-16 flex flex-col m-auto justify-center'>
+                          <DialogTitle className='text-white text-2xl'>{promo.title}</DialogTitle>
+                          <DialogDescription className='text-gray-300'>{promo.description}</DialogDescription>
+                        </DialogHeader>
+                        <div className='mt-4 space-y-4 flex flex-col justify-center'>
+                          <img src={promo.imageUrl} alt={promo.title} className='w-full md:m-auto md:w-[30vw] rounded-lg' />
+                          {promo.systemType === "points" && promo.rewards?.length > 0 && (
+                            <div className='mt-4 '>
+                              <h3 className='text-lg font-semibold text-white'>Recompensas</h3>
+                              <ul className='divide-y  bg-gradient-to-tr from-slate-400 to-slate-700 divide-gray-200 rounded-lg border border-gray-300 bg-white shadow-md'>
+                                {promo.rewards.map((reward) => (
+                                  <li key={reward._id} className='flex items-center justify-between p-4 hover:bg-gray-50 transition'>
+                                    <div>
+                                      <p className='text-sm font-medium text-white'>{reward.description}</p>
+                                    </div>
+                                    <span className='inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-main'>
+                                      {reward.points} puntos
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {/* Conditional Alert for Non-Applicable Days */}
+                          {!isHot && promo.systemType === "visits" && (
+                            <Alert severity='warning' className='text-sm text-white bg-[#4a4b50]'>
+                              Esta promoción solo está disponible los días: {applicableDays}. Hoy ({daysOfWeek[today]}) no es un día válido para esta promoción.
+                            </Alert>
+                          )}
+
+                          {/* Conditions Alert */}
+                          <Alert severity='info' className='text-sm text-gray-300 bg-[#3a3b40]'>
+                            {promo.conditions}
+                          </Alert>
+                        </div>
+                        <DialogFooter>
+                          {isLoggedInForAccount(account?._id || "") ? (
+                            <Alert severity='success' className='w-full text-sm text-white bg-[#4a4b50]'>
+                              ¡Estás automáticamente registrado en todas nuestras promociones!
+                            </Alert>
+                          ) : (
+                            <Alert severity='success' className='w-full text-sm text-white bg-[#4a4b50]'>
+                              ¡<span className='font-bold'>Registrate</span> para empezar a sumar puntos y canjear promociones!
+                            </Alert>
+                          )}
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Logo y redes sociales */}
+            <div className='flex flex-col justify-center'>
+              <div className='m-auto mb-6'>{account?.logo && <img src={account.logo} className='w-[14rem] h-auto' alt={`${account.name} Logo`} />}</div>
+              <div className='flex flex-row space-x-4 m-auto'>
+                {getSocialLinks().map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-white hover:text-gray-300 transition-colors duration-300'
+                  >
+                    <link.icon size={24} />
+                  </a>
                 ))}
               </div>
-            </DialogContent>
-          </Dialog>
-
-          <Button className='bg-main hover:bg-blue-700 text-white font-bold' onClick={() => onNavigate("/landingpage/fidelicard")}>
-            Mi FideliCard
-          </Button>
-        </div>
-        <Card className='bg-white'>
-          <CardContent className='p-6'>
-            {isRegistering ? (
-              <form onSubmit={handleRegister} className='space-y-4'>
-                <h2 className='text-xl font-semibold text-main'>Regístrate</h2>
-                <Input
-                  type='email'
-                  placeholder='Tu correo electrónico'
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className='border-gray-300'
-                />
-                <Input
-                  type='text'
-                  placeholder='Tu número de teléfono'
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  className='border-gray-300'
-                />
-                <Button type='submit' className='w-full bg-main hover:bg-blue-700 text-white font-bold'>
-                  Regístrate
-                </Button>
-                <p className='text-sm text-gray-600 text-center mt-2'>
-                  ¿Ya estás registrado?{" "}
-                  <span onClick={() => setIsRegistering(false)} className='text-main cursor-pointer hover:underline'>
-                    Iniciar sesión
-                  </span>
-                </p>
-              </form>
-            ) : (
-              <form onSubmit={handleLogin} className='space-y-4'>
-                <h2 className='text-xl font-semibold text-main'>Inicia sesión</h2>
-                <Input
-                  type='email'
-                  placeholder='Tu correo electrónico'
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className='border-gray-300'
-                />
-                <Button type='submit' className='w-full bg-main hover:bg-blue-700 text-white font-bold'>
-                  Iniciar sesión
-                </Button>
-                <p className='text-sm text-gray-600 text-center mt-2'>
-                  ¿No tienes cuenta?{" "}
-                  <span onClick={() => setIsRegistering(true)} className='text-main cursor-pointer hover:underline'>
-                    Regístrate
-                  </span>
-                </p>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-        <div>
-          <h2 className='text-2xl font-bold text-main mb-4 text-center'>Nuestras Promociones Activas</h2>
-          {isThursday && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className='bg-yellow-100 p-4 rounded-lg mb-4 text-center'
-            >
-              <h3 className='text-xl font-bold text-yellow-800'>¡Aprovecha nuestra promoción de Jueves! 🎉</h3>
-              <p className='text-yellow-700'>Hoy tienes un 20% de descuento en todos nuestros platos principales.</p>
-            </motion.div>
-          )}
-          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-            {promotions.map((promo, index) => (
-              <Dialog key={promo.id}>
-                <DialogTrigger asChild>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Card className='bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative overflow-hidden h-full'>
-                      <CardContent
-                        className={`${
-                          index === 0 ? "border-4 border-transparent bg-clip-border shadow-fire" : ""
-                        } p-6 bg-gradient-to-br from-main to-main/80 text-white rounded-lg h-full flex flex-col justify-between`}
-                      >
-                        {index === 0 && <span className='absolute top-0 right-0 py-1 px-3 text-sm bg-red-600 text-white rounded-full font-bold'>Hot</span>}
-                        <h2 className='text-xl font-semibold'>{promo.title}</h2>
-                        <p className='mt-2'>{promo.description}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </DialogTrigger>
-                <DialogContent className='bg-white w-[95%]'>
-                  <DialogHeader className='mt-16'>
-                    <DialogTitle className='text-main text-2xl'>{promo.title}</DialogTitle>
-                    <DialogDescription className='text-gray-600'>{promo.description}</DialogDescription>
-                  </DialogHeader>
-                  <div className='mt-4 space-y-4'>
-                    <img src={promo.image} alt={promo.title} className='w-full rounded-lg' />
-                    <Alert severity='info' className='text-sm text-gray-600'>
-                      {promo.terms}
-                    </Alert>
-
-                    {promo.systemType === "points" ? (
-                      <div>
-                        <p className='font-bold text-main'>Recompensas:</p>
-                        <ul className='list-inside list-disc space-y-1'>
-                          {promo.rewardSystem.map((reward, index) => (
-                            <li key={index} className='text-sm text-gray-600'>
-                              <span className='font-semibold'>{reward.points} puntos:</span> {reward.title}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <p className='font-bold text-main'>Recompensas: {promo.rewardSystem}</p>
-                    )}
-                  </div>
-                  <DialogFooter>
-                    {isLoggedIn ? (
-                      <Button onClick={() => handlePromotionRegister(promo.id)} className='bg-main hover:bg-blue-700 text-white font-bold'>
-                        Registrarme a esta promoción
-                      </Button>
-                    ) : (
-                      <Alert color='success' className='bg-gray-200'>
-                        ¡<span className='font-bold'>Registrate</span> para empezar a sumar puntos y canjear promociones!
-                      </Alert>
-                    )}
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            ))}
-          </div>
-        </div>
-
-        <div className='flex flex-col justify-center '>
-          <div className='m-auto mb-6'>
-            {" "}
-            <img src='https://res.cloudinary.com/di92lsbym/image/upload/v1733535098/1-removebg-preview_qz4dzl.png' className='w-32 h-32' />
-          </div>
-
-          <div className='flex flex-row space-x-4 m-auto '>
-            {" "}
-            {socialLinks.map((link, index) => (
-              <a key={index} href={link.href} target='_blank' rel='noopener noreferrer' className='text-main hover:text-blue-800'>
-                <link.icon size={24} />
-              </a>
-            ))}
-          </div>
-        </div>
+            </div>
+          </>
+        )}
       </div>
-      <footer className='mt-8 text-center text-gray-500'>
-        <p>&copy; {new Date().getFullYear()} FidelidApp. Todos los derechos reservados.</p>
-      </footer>
-    </div>
+    </motion.div>
   );
 }

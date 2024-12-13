@@ -1,71 +1,54 @@
-import { useEffect, useState, useMemo } from "react";
-import { FloatingWhatsApp } from "react-floating-whatsapp";
-import { useLocation } from "react-router";
+import React from "react";
+import { FaWhatsapp } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
 
-const FloatingWhatsAppButton = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
-  const location = useLocation();
-  const allowedRoutes = ["/", "/auth"];
-  const whatsappNumber = useMemo(() => "56996706983", []);
-  const message = useMemo(() => "¡Hola! ¿En qué puedo ayudarte?", []);
-
-  useEffect(() => {
-    if (!localStorage.getItem("whatsappButtonShown")) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-        localStorage.setItem("whatsappButtonShown", "true");
-      }, 3000);
-
-      const notificationTimer = setTimeout(() => {
-        setShowNotification(true);
-      }, 3000);
-
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(notificationTimer);
-      };
-    }
-  }, []);
-
-  if (!allowedRoutes.includes(location.pathname)) {
-    return null;
-  }
+const WhatsAppButton = () => {
+  const location = useLocation(); // Hook para obtener la ruta actual
+  const whatsappNumber = "56996706983";
+  const message = "Hola, quiero consultar.";
 
   const handleClick = () => {
     if (window.gtag) {
-      window.gtag("event", "gtm.click", {
+      window.gtag("event", "click", {
         event_category: "engagement",
-        event_label: "Floating WhatsApp Button",
+        event_label: "WhatsApp Button",
         value: 1,
       });
     }
   };
 
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+  // Mostrar solo si estamos en la ruta raíz
+  if (location.pathname !== "/") {
+    return null;
+  }
+
   return (
-    <FloatingWhatsApp
-      phoneNumber={whatsappNumber}
-      accountName='Álvaro'
-      chatMessage={message}
-      notificationDelay={5}
+    <a
+      id='whatsapp-button'
+      href={whatsappUrl}
+      target='_blank'
+      rel='noopener noreferrer'
       onClick={handleClick}
-      avatar='https://res.cloudinary.com/di92lsbym/image/upload/q_auto,f_webp/v1731025035/WhatsApp_Image_2024-11-07_at_9.02.33_PM_upob6c.jpg'
-      allowClickAway
-      notification={showNotification}
-      notificationSound
-      messageDelay={2}
-      allowEsc
-      placeholder='Escribe tu mensaje...'
-      chatboxHeight={400}
-      statusMessage='Responde típicamente en media hora'
-      isOpen={isOpen}
-      styles={{
-        bottom: 40,
-        right: 50,
+      className='animate-pulse'
+      style={{
+        position: "fixed",
+        bottom: "40px",
+        right: "30px",
+        backgroundColor: "#25D366",
+        color: "white",
+        padding: "20px 20px",
+        borderRadius: "50px",
+        textDecoration: "none",
+        fontWeight: "bold",
+        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
         zIndex: 10,
       }}
-    />
+    >
+      <FaWhatsapp className='w-8 h-8' id='whatsapp-button' />
+    </a>
   );
 };
 
-export default FloatingWhatsAppButton;
+export default WhatsAppButton;

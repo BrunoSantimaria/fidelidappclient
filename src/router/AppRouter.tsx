@@ -5,7 +5,7 @@ import FloatingWhatsAppButton from "../layaout/components/FloatingWhatsAppButton
 import { Box } from "@mui/material";
 import { DashboardRoutes } from "../dashboard/routes/DashboardRoutes";
 import { useAuthSlice } from "../hooks/useAuthSlice";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Landing } from "../landing/pages";
 import { PromotionClient } from "../promotion-client/pages";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,8 +22,32 @@ import { PromotionPage } from "../dashboard/pages/Promotions/PromotionPage";
 import { ToastContainer } from "react-toastify";
 import { LandingPage } from "../promotion-client/pages/LandingPage";
 import FideliCard from "@/promotion-client/pages/FideliCard";
-import Layout from "@/promotion-client/pages/Layout";
+import { AuthProvider } from "@/promotion-client/utils/AuthContext";
+import { LandingClientRoutes } from "@/promotion-client/pages/LandingClientRoutes";
+import WhatsAppButton from "../layaout/components/FloatingWhatsAppButton";
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+
+    return this.props.children;
+  }
+}
 export const AppRouter = () => {
   const { status } = useAuthSlice();
 
@@ -50,53 +74,58 @@ export const AppRouter = () => {
 
   return (
     <>
-      <ToastContainer
-        toastClassName={() => "relative  bg-white flex p-1 min-h-10 rounded-md justify-between overflow-hidden cursor-pointer"}
-        bodyClassName={() => "bg-white text-main flex text-sm font-medium block p-3"}
-        position='bottom-center'
-      />
+      <ErrorBoundary>
+        <AuthProvider>
+          <ToastContainer
+            toastClassName={() => "relative  bg-white flex p-1 min-h-10 rounded-md justify-between overflow-hidden cursor-pointer"}
+            bodyClassName={() => "bg-white text-main flex text-sm font-medium block p-3"}
+            position='bottom-center'
+          />
 
-      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
-        <FloatingWhatsAppButton />
-        <NavBar refs={refs} />
-        <Box sx={{ flexGrow: 1 }}>
-          <Routes>
-            {/* Ruta de promoción accesible para todos */}
-            <Route path='/agendas/:agendaId' element={<Agenda />} />
-            <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
-            <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
-            <Route path='/promotions/:id' element={<PromotionClient />} />
-            <Route path='/promotion/:id' element={<PromotionClient />} />
-            <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
-            <Route path='/thankyou' element={<ThankYou />} />
-            {status === "non-authenticated" ? (
-              <>
+          <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", width: "100%" }}>
+            <div id='whatsapp-button'>
+              <WhatsAppButton />
+            </div>
+            <NavBar refs={refs} />
+            <Box sx={{ flexGrow: 1 }}>
+              <Routes>
+                {/* Ruta de promoción accesible para todos */}
                 <Route path='/agendas/:agendaId' element={<Agenda />} />
-                <Route path='/' element={<Landing refs={refs} />} />
+                <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
+                <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
+                <Route path='/promotions/:id' element={<PromotionClient />} />
+                <Route path='/promotion/:id' element={<PromotionClient />} />
+                <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
                 <Route path='/thankyou' element={<ThankYou />} />
-                <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
-                <Route path='/landingpage' element={<Layout />}>
-                  <Route index element={<LandingPage />} />
-                  <Route path='fidelicard' element={<FideliCard />} />
-                </Route>
-                <Route path='/auth/*' element={<AuthRoutes />} />
-                <Route path='/dashboard' element={<Navigate to='/' replace />} />
-              </>
-            ) : (
-              <>
-                <Route path='/' element={<Landing refs={refs} />} />
-                <Route path='/landingpage' element={<LandingPage />} />
-                <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
-                <Route path='/thankyou' element={<ThankYou />} />
-                <Route path='/dashboard/promotions' element={<PromotionPage />} />
-                <Route path='/dashboard/*' element={<DashboardRoutes />} />
-              </>
-            )}
-            <Route path='*' element={<Navigate to='/' replace />} />
-          </Routes>
-        </Box>
-        <Footer refs={refs} />
-      </Box>
+                <Route path='/landing/:slug' element={<LandingPage />} />
+                {status === "non-authenticated" ? (
+                  <>
+                    <Route path='/agendas/:agendaId' element={<Agenda />} />
+                    <Route path='/' element={<Landing refs={refs} />} />
+                    <Route path='/thankyou' element={<ThankYou />} />
+                    <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
+                    <Route path='/landing/:slug/*' element={<LandingClientRoutes />} />
+
+                    <Route path='/auth/*' element={<AuthRoutes />} />
+                    <Route path='/dashboard' element={<Navigate to='/' replace />} />
+                  </>
+                ) : (
+                  <>
+                    <Route path='/' element={<Landing refs={refs} />} />
+
+                    <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
+                    <Route path='/thankyou' element={<ThankYou />} />
+                    <Route path='/dashboard/promotions' element={<PromotionPage />} />
+                    <Route path='/dashboard/*' element={<DashboardRoutes />} />
+                  </>
+                )}
+                <Route path='*' element={<Navigate to='/' replace />} />
+              </Routes>
+            </Box>
+            <Footer refs={refs} />
+          </Box>
+        </AuthProvider>
+      </ErrorBoundary>
     </>
   );
 };

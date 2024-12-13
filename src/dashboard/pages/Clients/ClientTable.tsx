@@ -253,7 +253,7 @@ const ClientTable: React.FC<ClientTableProps> = () => {
     );
   };
 
-  const batchSize = 200; // Define el tamaño del lote
+  const batchSize = 200;
 
   const confirmCsvClients = async () => {
     setLoading(true);
@@ -261,20 +261,14 @@ const ClientTable: React.FC<ClientTableProps> = () => {
 
     try {
       const validClients = csvClients.filter((client) => client.name && client.email);
-      console.log("Clientes válidos a enviar:", validClients);
 
       for (let i = 0; i < validClients.length; i += batchSize) {
         const clientBatch = validClients.slice(i, i + batchSize);
-        console.log(`Enviando lote de ${clientBatch.length} clientes:`, clientBatch);
 
-        // Enviar cada lote al servidor
         const response = await api.post("/api/clients/addClientsBatch", {
           accountId: accounts._id,
           clientsData: clientBatch,
         });
-
-        // Imprimir la respuesta del servidor para depuración
-        console.log("Respuesta del servidor:", response.data);
       }
 
       toast.info("Clientes agregados correctamente");
@@ -289,7 +283,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
   return (
     <section className='w-full'>
       <div className='w-[95%] flex flex-col md:flex-col m-auto justify-between mb-10'>
-        {/* Inputs para agregar cliente manualmente */}
         <div className='flex flex-col md:flex-row m-auto mb-8 w-[95%] space-y-2 md:space-y-0 md:space-x-2 md:justify-center'>
           <TextField
             label='Nombre'
@@ -343,7 +336,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
           </Button>
         </div>
 
-        {/* Componente Dropzone */}
         <div className='w-[95%] m-auto mb-8'>
           <Paper
             elevation={0}
@@ -492,7 +484,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Backdrop de carga */}
         <Backdrop
           sx={{
             color: "#fff",

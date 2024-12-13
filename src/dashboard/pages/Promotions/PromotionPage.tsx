@@ -31,7 +31,7 @@ export const PromotionPage = () => {
   const [updatedMetrics, setUpdatedMetrics] = useState(metrics); // Estado local para las métricas
 
   useEffect(() => {
-    setUpdatedMetrics(metrics); // Actualizar las métricas cuando cambian
+    setUpdatedMetrics(metrics);
   }, [metrics]);
 
   const handlePromotionDelete = () => {

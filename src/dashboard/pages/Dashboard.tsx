@@ -15,6 +15,7 @@ moment.locale("es");
 const useDashboardData = () => {
   const [error, setError] = useState(null);
   const { metrics, plan, promotions, getPromotionsAndMetrics, clients, loadingPromotions, loadingClients, loadingAgendas } = useDashboard();
+  console.log("🚀 ~ useDashboardData ~ metrics:", metrics);
   console.log("🚀 ~ useDashboardData ~ clients:", clients);
 
   useEffect(() => {
@@ -126,7 +127,7 @@ export const Dashboard = () => {
           ) : (
             <MetricCard
               title='Clientes Registrados'
-              value={`${metrics?.registeredClients || 0} /${plan?.clientLimit || " Ilimitado"}`}
+              value={`${clients?.length || 0} /${plan?.clientLimit || " Ilimitado"}`}
               icon={<Users className='w-4 h-4 text-[#5b7898]' />}
             />
           )}
@@ -135,7 +136,6 @@ export const Dashboard = () => {
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-          {/* Mostrar Primeros Pasos solo si no está completado */}
           {progress !== 100 && (
             <div className='bg-white rounded-lg border border-t-4 border-black/20 border-t-[#5b7898] p-6 relative'>
               <h2 className={`text-xl font-bold ${progress === 100 ? "text-white" : "text-[#5b7898]"}`}>Primeros Pasos</h2>
