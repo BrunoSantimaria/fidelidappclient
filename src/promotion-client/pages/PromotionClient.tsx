@@ -31,20 +31,20 @@ export const PromotionClient = () => {
   };
 
   useEffect(() => {
-    const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
-    const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
-    console.log("clientIdCookie", clientIdCookie);
 
-    if (clientIdCookie) {
-      const decodedCookieValue = decodeURIComponent(clientIdCookie.split("=")[1]);
+    const clientIdDataString = localStorage.getItem("clientId");
+    console.log("clientIdDataString", clientIdDataString);
+
+    if (clientIdDataString) {
       try {
-        const clientIdData = JSON.parse(decodedCookieValue);
+        const clientIdData = JSON.parse(clientIdDataString); // Parse the stored string
         const clientId = clientIdData.clientId;
         console.log(`/promotions/${clientId}/${id}`);
-        handleNavigate(`/promotions/${clientId}/${id}`);
-        return;
+        handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the local storage key exists
+        return; // Exit the effect to avoid unnecessary API calls
+
       } catch (error) {
-        console.error("Error parsing clientId cookie:", error);
+        console.error("Error parsing clientId from local storage:", error);
       }
     }
 
@@ -103,29 +103,36 @@ export const PromotionClient = () => {
       toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");
 
       const clientId = response.data.client._id;
-      console.log(response.data);
+      saveClientId(clientId);
+      toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");
       handleNavigate(`/promotions/${clientId}/${id}`);
+
     } catch (error) {
-      if (error.response.data.error === "Client already has this promotion") {
-        toast.info("Ya te encuentras en esta promoción. Serás redirigido a tu Fidelicard.");
-
-        const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
-        const clientIdCookie = cookies.find((cookie) => cookie.startsWith("clientId"));
-        console.log("clientIdCookie", clientIdCookie);
-
-        if (clientIdCookie) {
-          const clientId = clientIdCookie.split("=")[1];
-          console.log("clientId extraído:", clientId);
-          handleNavigate(`/promotions/${clientId}/${id}`);
+      if (error.response?.data?.error === "Client already has this promotion") {
+        // Cliente ya existe; obtener el clientId del error
+        const clientId = error.response.data.clientId; // Asegúrate de que tu API lo incluya
+        if (clientId) {
+          saveClientId(clientId); // Guardar en localStorage y cookies
+          toast.info("Ya te encuentras en esta promoción. Serás redirigido a tu Fidelicard.");
+          handleNavigate(`/promotions/${clientId}/${id}`); // Redirigir
         } else {
-          console.error("La cookie 'clientId' no se encontró.");
+          console.error("El clientId no se devolvió en el error de la API.");
+          toast.error("Error al procesar tu solicitud. Inténtalo de nuevo.");
         }
       } else {
+        // Otro tipo de error
+        console.error("Error inesperado al sumarte a la promoción:", error);
         toast.error("Error al sumarte a la promoción. Inténtalo de nuevo.");
       }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Función para guardar el clientId en localStorage
+  const saveClientId = (clientId) => {
+    // Guardar en localStorage
+    localStorage.setItem("clientId", JSON.stringify({ clientId }));
   };
 
   if (loading) {
