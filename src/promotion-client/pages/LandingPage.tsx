@@ -79,9 +79,6 @@ export function LandingPage() {
   useEffect(() => {
     getAccInfo();
   }, [slug]);
-  useEffect(() => {
-    getAccInfo();
-  }, [slug]);
 
   // Días de la semana en español
   const daysOfWeek = [null, "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];

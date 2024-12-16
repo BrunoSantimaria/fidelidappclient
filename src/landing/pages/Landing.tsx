@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import React, { Suspense, lazy } from "react";
 
@@ -22,6 +22,21 @@ export const Landing = ({ refs }) => {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
+  const LoadingFallback = () => (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        backgroundColor: "black",
+        color: "white",
+      }}
+    >
+      <CircularProgress color='inherit' />
+    </Box>
+  );
+
   return (
     <Box
       sx={{
@@ -36,7 +51,7 @@ export const Landing = ({ refs }) => {
         overflowY: "hidden",
       }}
     >
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingFallback />}>
         <motion.div ref={refs.homeRef} initial='hidden' whileInView='visible' variants={fadeIn} transition={{ duration: 0.5 }}>
           <Home refs={refs.promotionRef} />
         </motion.div>
