@@ -261,7 +261,7 @@ export function LandingPage() {
             </Dialog>
             {/* Promociones activas */}
             <div>
-              <h2 className='text-2xl font-bold text-white mb-4 text-center'>Nuestras Promociones</h2>
+              <h2 className={`${!sortedPromotions.length && "hidden"} text-2xl font-bold text-white mb-4 text-center`}>Nuestras Promociones</h2>
               <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
                 {sortedPromotions?.map((promo) => {
                   const isHot = isPromotionHot(promo);
