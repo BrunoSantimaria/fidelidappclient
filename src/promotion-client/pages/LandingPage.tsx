@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Facebook, Instagram, Phone, Globe, CreditCard } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Facebook, Instagram, Phone, Globe, CreditCard, Box, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
-import { Alert } from "@mui/material";
+import { Alert, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 
 import "react-pdf/dist/Page/TextLayer.css";
@@ -16,6 +16,8 @@ import { FaWhatsapp } from "react-icons/fa";
 import { AuthDialog } from "../utils/AuthDialog";
 import { useAuth } from "../utils/AuthContext";
 import { useNavigateTo } from "@/hooks/useNavigateTo";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { sortPromotions } from "../utils/SortPromotions";
 
 interface SocialMedia {
   instagram: string;
@@ -47,11 +49,9 @@ interface Account {
 export function LandingPage() {
   const { slug } = useParams();
   console.log("🚀 ~ LandingPage ~ slug:", slug);
-  const { login, logout, isLoggedInForAccount, getClientId } = useAuth(); // Use the new auth context
-
+  const { login, logout, isLoggedInForAccount, getClientId } = useAuth();
   const [account, setAccount] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
   const [numPages, setNumPages] = useState<number | null>(null);
 
@@ -64,6 +64,7 @@ export function LandingPage() {
       console.log("🚀 ~ getAccInfo ~ response.data:", response.data);
       setAccount(response.data);
       if (response.data.card) setNumPages(response.data.card.length);
+      console.log("🚀 ~ getAccInfo ~ account:", account);
     } catch (error) {
       console.error("Error al obtener la información de la cuenta", error);
     } finally {
@@ -75,41 +76,58 @@ export function LandingPage() {
   }, [slug]);
 
   // Días de la semana en español
-  const daysOfWeek = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+  const daysOfWeek = [null, "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-  // Verificar si una promoción está activa
-  const isPromotionHot = (promotion: Promotion): boolean => {
+  const isPromotionHot = (promotion) => {
+    console.log("🚀 ~ isPromotionHot ~ promotion:", promotion);
     const today = new Date().getDay();
-    return promotion.status === "active" && promotion.daysOfWeek.includes(today);
-  };
+    const adjustedToday = today === 0 ? 7 : today;
 
+    console.log("Raw Promotion Status:", promotion?.status);
+    console.log("Trimmed Lowercase Status:", promotion?.status?.toLowerCase().trim());
+
+    const isActive = promotion?.status?.toLowerCase().trim() === "active";
+    const isDayIncluded = promotion.daysOfWeek.includes(adjustedToday);
+
+    console.log("Is Active:", isActive);
+    console.log("Is Day Included:", isDayIncluded);
+
+    return isActive && isDayIncluded;
+  };
   // Generar los enlaces de redes sociales
   const getSocialLinks = () => {
     if (!account?.socialMedia) return [];
     return [
       { icon: Facebook, href: account.socialMedia.facebook },
       { icon: Instagram, href: account.socialMedia.instagram },
-      { icon: FaWhatsapp, href: `https://wa.me/${account.socialMedia.whatsapp}` },
+      {
+        icon: FaWhatsapp,
+        href: account.socialMedia.whatsapp ? `https://wa.me/${account.socialMedia.whatsapp}` : null,
+      },
       { icon: Globe, href: account.socialMedia.website },
-    ].filter((link) => link.href);
+    ].filter((link) => link.href); // Filtrar los enlaces que no tienen `href`
   };
+  const formatDescription = (description) => {
+    // Reemplazar los saltos de línea '\n' con el componente <br />
+    return description.split("\n").map((line, index) => (
+      <span key={index}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
+  const formatConditions = (conditions) => {
+    // Reemplazar los '\r\n' por <br />
+    return conditions.split("\r\n").map((line, index) => (
+      <span key={index}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
+
   const { handleNavigate } = useNavigateTo();
-  const sortedPromotions = account?.promotions
-    ? [...account.promotions].sort((a, b) => {
-        // Programas de puntos siempre arriba
-        if (a.systemType === "points") return -1;
-        if (b.systemType === "points") return 1;
-
-        // Promoción activa del día ('hot') en segundo lugar
-        if (isPromotionHot(a)) return -1;
-        if (isPromotionHot(b)) return 1;
-
-        // El resto por startDate cronológicamente
-        const dateA = new Date(a.startDate || 0).getTime();
-        const dateB = new Date(b.startDate || 0).getTime();
-        return dateA - dateB;
-      })
-    : [];
+  const sortedPromotions = sortPromotions(account?.promotions, isPromotionHot);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -125,6 +143,7 @@ export function LandingPage() {
     }
   };
   const clientId = getClientId(account?._id);
+  console.log(sortedPromotions);
   console.log("Retrieved ClientId:", clientId);
   return (
     <motion.div
@@ -152,14 +171,23 @@ export function LandingPage() {
             </motion.div>
 
             {/* Botones de acción */}
+
             <div className='flex flex-col justify-center space-y-6'>
               <Button
                 onClick={() => setIsPdfDialogOpen(true)}
-                className='bg-[#3a3b40] p-6 hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300'
+                className={`${!account?.card && "hidden"} bg-[#3a3b40] p-6 hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300`}
               >
                 Ver nuestra carta
               </Button>
-
+              <Button
+                onClick={() => window.open(account?.googleBusiness, "_blank")}
+                className={`${
+                  !account?.googleBusiness && "hidden"
+                } bg-yellow-500 hover:bg-yellow-600 text-black w-full m-auto font-bold p-6 transition-colors duration-300 flex items-center space-x-2`}
+              >
+                <Star className='w-6 h-6 fill-current' />
+                <span>Valóranos en Google</span>
+              </Button>
               {/* Renderizar botones según estado de autenticación */}
               {!isLoggedInForAccount(account?._id) && account && (
                 <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -183,7 +211,6 @@ export function LandingPage() {
                 <>
                   <Button
                     onClick={() => {
-                      console.log(slug, clientId);
                       handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
                     }}
                     className='bg-[#3a3b40] hover:bg-[#4a4b50] p-6 text-white font-bold transition-colors duration-300'
@@ -191,9 +218,12 @@ export function LandingPage() {
                     Mi FideliCard <CreditCard />
                   </Button>
 
-                  {/* <Button onClick={() => logout(account?._id)} className='bg-[#3a3b40] hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300'>
+                  <Button
+                    onClick={() => logout(account?._id)}
+                    className='bg-[#3a3b40] p-6 hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300'
+                  >
                     Cerrar Sesión
-                  </Button>*/}
+                  </Button>
                 </>
               )}
             </div>
@@ -232,12 +262,47 @@ export function LandingPage() {
             {/* Promociones activas */}
             <div>
               <h2 className='text-2xl font-bold text-white mb-4 text-center'>Nuestras Promociones</h2>
-              <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
+              <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
                 {sortedPromotions?.map((promo) => {
-                  const today = new Date().getDay();
                   const isHot = isPromotionHot(promo);
-                  const applicableDays = promo.daysOfWeek.map((day) => daysOfWeek[day]).join(", ");
+                  console.log("🚀 ~ {sortedPromotions?.map ~ promo:", promo);
+                  const daysOfWeek = [null, "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
+                  // Día actual (ajustado al rango 1-7)
+                  const today = new Date().getDay();
+                  const normalizeText = (text) => text.toLowerCase().trim().replace(/\.$/, "");
+
+                  const applicableDays = [...new Set(promo.daysOfWeek)] // Elimina duplicados
+                    .filter((day) => day >= 1 && day <= 7) // Filtra valores fuera de rango
+                    .sort((a, b) => a - b) // Ordena los días
+                    .map((day) => {
+                      const dayName = daysOfWeek[day];
+                      return day === today ? `${dayName}` : dayName;
+                    });
+
+                  console.log("Applicable Days (raw):", applicableDays);
+
+                  // Formatear `applicableDays` a días normalizados
+                  const normalizedApplicableDays = applicableDays.map(normalizeText);
+
+                  // Formatear `formattedDays`
+                  const formattedDays =
+                    applicableDays.length > 0
+                      ? applicableDays.slice(0, -1).join(", ") + (applicableDays.length > 1 ? " y " : "") + applicableDays[applicableDays.length - 1] + "."
+                      : "";
+
+                  console.log("Formatted Days:", formattedDays);
+
+                  // Extraer y normalizar los días de `formattedDays`
+                  const formattedDaysList = formattedDays
+                    .replace(/ y /g, ",") // Cambia " y " por ","
+                    .split(",") // Divide en días individuales
+                    .map(normalizeText); // Normaliza cada día
+
+                  console.log("Formatted Days (list):", formattedDaysList);
+
+                  // Verificar si algún día de `formattedDaysList` está en `normalizedApplicableDays`
+                  const hasMatchingDay = formattedDaysList.some((day) => normalizedApplicableDays.includes(day));
                   return (
                     <Dialog key={promo._id}>
                       <DialogTrigger asChild>
@@ -253,8 +318,9 @@ export function LandingPage() {
                                   <span className='absolute top-0 right-0 py-1 px-3 text-sm bg-red-600 text-white rounded-full font-bold'>Hot</span>
                                 ))}
                               <h2 className='text-xl font-semibold'>{promo.title}</h2>
-                              <p className='mt-2 text-gray-300'>{promo.description}</p>
-                              <p className={`${promo.systemType === "points" && "hidden"} mt-2 text-sm text-gray-400`}>Válido: {applicableDays}</p>
+                              <p className='mt-2 text-gray-300'>{formatDescription(promo.description)}</p>
+
+                              <p className={`${promo.systemType === "points" && "hidden"} mt-2 text-sm text-gray-400`}>Válido: {formattedDays}</p>
                             </CardContent>
                           </Card>
                         </motion.div>
@@ -268,14 +334,14 @@ export function LandingPage() {
                           <img src={promo.imageUrl} alt={promo.title} className='w-full md:m-auto md:w-[30vw] rounded-lg' />
                           {promo.systemType === "points" && promo.rewards?.length > 0 && (
                             <div className='mt-4 '>
-                              <h3 className='text-lg font-semibold text-white'>Recompensas</h3>
+                              <h3 className='text-lg font-semibold text-white mb-4'>Recompensas</h3>
                               <ul className='divide-y  bg-gradient-to-tr from-slate-400 to-slate-700 divide-gray-200 rounded-lg border border-gray-300 bg-white shadow-md'>
                                 {promo.rewards.map((reward) => (
-                                  <li key={reward._id} className='flex items-center justify-between p-4 hover:bg-gray-50 transition'>
+                                  <li key={reward._id} className='flex flex-col items-center justify-between p-4 hover:bg-gray-50 transition'>
                                     <div>
                                       <p className='text-sm font-medium text-white'>{reward.description}</p>
                                     </div>
-                                    <span className='inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-main'>
+                                    <span className='inline-flex mt-6 items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-main'>
                                       {reward.points} puntos
                                     </span>
                                   </li>
@@ -292,20 +358,26 @@ export function LandingPage() {
 
                           {/* Conditions Alert */}
                           <Alert severity='info' className='text-sm text-gray-300 bg-[#3a3b40]'>
-                            {promo.conditions}
+                            {formatConditions(promo.conditions)}
                           </Alert>
-                        </div>
-                        <DialogFooter>
                           {isLoggedInForAccount(account?._id || "") ? (
                             <Alert severity='success' className='w-full text-sm text-white bg-[#4a4b50]'>
-                              ¡Estás automáticamente registrado en todas nuestras promociones!
+                              ¡Estás automáticamente registrado en todas nuestras promociones! <br></br>
+                              <span
+                                className='cursor-pointer font-bold text-main'
+                                onClick={() => {
+                                  handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
+                                }}
+                              >
+                                Ir a tu FideliCard
+                              </span>
                             </Alert>
                           ) : (
                             <Alert severity='success' className='w-full text-sm text-white bg-[#4a4b50]'>
                               ¡<span className='font-bold'>Registrate</span> para empezar a sumar puntos y canjear promociones!
                             </Alert>
                           )}
-                        </DialogFooter>
+                        </div>
                       </DialogContent>
                     </Dialog>
                   );

@@ -9,6 +9,7 @@ import api from "@/utils/api";
 import { useAuth } from "./AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { motion } from "framer-motion";
+import { toast as toastify } from "../../utils/toast";
 
 interface AuthProps {
   accountId: string;
@@ -86,18 +87,11 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
       const updatedPromotions = [...new Set([...existingPromotions, ...(response.data?.addedPromotions ?? [])])];
       localStorage.setItem("addedPromotions", JSON.stringify(updatedPromotions));
 
-      toast({
-        title: "Registro Exitoso",
-        description: "Te has registrado correctamente en esta cuenta.",
-      });
+      toastify.success(`Registro Exitoso.`);
 
       onAuthSuccess();
     } catch (error: any) {
-      toast({
-        title: "Registro Fallido",
-        description: error.response?.data?.error || "Ocurrió un error durante el registro",
-        variant: "destructive",
-      });
+      toastify.error("Registro fallido");
     }
   };
 
@@ -159,7 +153,7 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
 
   return (
     <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className='bg-[#28292d] w-[95%] mt-6 mx-auto flex flex-col justify-center'>
+      <Card className='bg-[#28292d] w-[95%]  mx-auto flex flex-col justify-center'>
         <CardContent className='p-6'>
           <form onSubmit={handleSubmit} className='space-y-4'>
             <h2 className='text-xl font-semibold text-white'>{isRegistering ? "Regístrate" : "Inicia sesión"}</h2>
