@@ -91,7 +91,9 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
 
       onAuthSuccess();
     } catch (error: any) {
-      toastify.error("Registro fallido");
+      console.log(error);
+      if (error.response.data.error === "El cliente ya está registrado en esta cuenta") return toastify.info("Ya te encuentras asociado a la cuenta.");
+      toastify.error(error);
     }
   };
 

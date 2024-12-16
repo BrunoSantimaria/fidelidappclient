@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Facebook, Instagram, Phone, Globe, CreditCard, Box, Star } from "lucide-react";
+import { Facebook, Instagram, Globe, CreditCard, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
-import { Alert, Typography } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
+import { Alert } from "@mui/material";
+import { useParams } from "react-router-dom";
 
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -16,8 +16,9 @@ import { FaWhatsapp } from "react-icons/fa";
 import { AuthDialog } from "../utils/AuthDialog";
 import { useAuth } from "../utils/AuthContext";
 import { useNavigateTo } from "@/hooks/useNavigateTo";
-import { Scanner } from "@yudiel/react-qr-scanner";
+
 import { sortPromotions } from "../utils/SortPromotions";
+import { toast as toastify } from "../../utils/toast";
 
 interface SocialMedia {
   instagram: string;
@@ -48,7 +49,7 @@ interface Account {
 
 export function LandingPage() {
   const { slug } = useParams();
-  console.log("🚀 ~ LandingPage ~ slug:", slug);
+
   const { login, logout, isLoggedInForAccount, getClientId } = useAuth();
   const [account, setAccount] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,12 +62,13 @@ export function LandingPage() {
     setLoading(true);
     try {
       const response = await api.get(`/api/landing/${slug}`);
-      console.log("🚀 ~ getAccInfo ~ response.data:", response.data);
+
       setAccount(response.data);
+      document.title = `${response.data.name} | FidelidApp`;
       if (response.data.card) setNumPages(response.data.card.length);
-      console.log("🚀 ~ getAccInfo ~ account:", account);
     } catch (error) {
-      console.error("Error al obtener la información de la cuenta", error);
+      console.error(error);
+      toastify.error("Error al obtener la información de la cuenta");
     } finally {
       setLoading(false);
     }
@@ -79,18 +81,11 @@ export function LandingPage() {
   const daysOfWeek = [null, "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
   const isPromotionHot = (promotion) => {
-    console.log("🚀 ~ isPromotionHot ~ promotion:", promotion);
     const today = new Date().getDay();
     const adjustedToday = today === 0 ? 7 : today;
 
-    console.log("Raw Promotion Status:", promotion?.status);
-    console.log("Trimmed Lowercase Status:", promotion?.status?.toLowerCase().trim());
-
     const isActive = promotion?.status?.toLowerCase().trim() === "active";
     const isDayIncluded = promotion.daysOfWeek.includes(adjustedToday);
-
-    console.log("Is Active:", isActive);
-    console.log("Is Day Included:", isDayIncluded);
 
     return isActive && isDayIncluded;
   };
@@ -143,8 +138,7 @@ export function LandingPage() {
     }
   };
   const clientId = getClientId(account?._id);
-  console.log(sortedPromotions);
-  console.log("Retrieved ClientId:", clientId);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -50 }}
@@ -174,12 +168,6 @@ export function LandingPage() {
                 <AuthDialog
                   accountId={account._id}
                   onAuthSuccess={(userId, token, clientId) => {
-                    console.log("Auth Success Details:", {
-                      accountId: account._id,
-                      userId,
-                      token,
-                      clientId,
-                    });
                     login(account._id, userId, token, clientId);
                     getAccInfo();
                   }}
@@ -204,8 +192,6 @@ export function LandingPage() {
                   <span>Valóranos en Google</span>
                 </Button>
               )}
-
-              {/* Renderizar botones según estado de autenticación */}
 
               {isLoggedInForAccount(account?._id || "") && (
                 <>
@@ -265,7 +251,7 @@ export function LandingPage() {
               <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
                 {sortedPromotions?.map((promo) => {
                   const isHot = isPromotionHot(promo);
-                  console.log("🚀 ~ {sortedPromotions?.map ~ promo:", promo);
+
                   const daysOfWeek = [null, "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
                   // Día actual (ajustado al rango 1-7)
@@ -280,8 +266,6 @@ export function LandingPage() {
                       return day === today ? `${dayName}` : dayName;
                     });
 
-                  console.log("Applicable Days (raw):", applicableDays);
-
                   // Formatear `applicableDays` a días normalizados
                   const normalizedApplicableDays = applicableDays.map(normalizeText);
 
@@ -291,15 +275,11 @@ export function LandingPage() {
                       ? applicableDays.slice(0, -1).join(", ") + (applicableDays.length > 1 ? " y " : "") + applicableDays[applicableDays.length - 1] + "."
                       : "";
 
-                  console.log("Formatted Days:", formattedDays);
-
                   // Extraer y normalizar los días de `formattedDays`
                   const formattedDaysList = formattedDays
                     .replace(/ y /g, ",") // Cambia " y " por ","
                     .split(",") // Divide en días individuales
                     .map(normalizeText); // Normaliza cada día
-
-                  console.log("Formatted Days (list):", formattedDaysList);
 
                   // Verificar si algún día de `formattedDaysList` está en `normalizedApplicableDays`
                   const hasMatchingDay = formattedDaysList.some((day) => normalizedApplicableDays.includes(day));
@@ -374,7 +354,18 @@ export function LandingPage() {
                             </Alert>
                           ) : (
                             <Alert severity='success' className='w-full text-sm text-white bg-[#4a4b50]'>
-                              ¡<span className='font-bold'>Registrate</span> para empezar a sumar puntos y canjear promociones!
+                              ¡
+                              <DialogClose asChild>
+                                <span
+                                  onClick={() => {
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                  }}
+                                  className='font-bold cursor-pointer'
+                                >
+                                  Registrate
+                                </span>
+                              </DialogClose>{" "}
+                              para empezar a sumar puntos y canjear promociones!
                             </Alert>
                           )}
                         </div>

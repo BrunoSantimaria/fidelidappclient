@@ -27,7 +27,7 @@ const toastConfig: Record<string, CustomToastOptions> = {
     ...defaultOptions,
     style: {
       ...defaultOptions.style,
-      background: "#f0fdf4",
+
       border: "1px solid #86efac",
       color: "#166534",
     },
@@ -36,7 +36,7 @@ const toastConfig: Record<string, CustomToastOptions> = {
     ...defaultOptions,
     style: {
       ...defaultOptions.style,
-      background: "#fef2f2",
+
       border: "1px solid #fecaca",
       color: "#991b1b",
     },
@@ -45,7 +45,7 @@ const toastConfig: Record<string, CustomToastOptions> = {
     ...defaultOptions,
     style: {
       ...defaultOptions.style,
-      background: "#f0f9ff",
+
       border: "1px solid #bae6fd",
       color: "#075985",
     },
@@ -54,7 +54,7 @@ const toastConfig: Record<string, CustomToastOptions> = {
     ...defaultOptions,
     style: {
       ...defaultOptions.style,
-      background: "#fffbeb",
+
       border: "1px solid #fde68a",
       color: "#92400e",
     },
