@@ -79,7 +79,26 @@ const defaultOptions = {
     preserveAspectRatio: "xMidYMid slice",
   },
 };
+const getFormattedDateTimeChile = () => {
+  // Crear una nueva fecha
+  const now = new Date();
 
+  // Configurar la zona horaria de Chile
+  const options = {
+    timeZone: "America/Santiago",
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false, // Formato de 24 horas
+  };
+
+  // Formatear la fecha y hora
+  const formattedDateTime = new Intl.DateTimeFormat("es-CL", options).format(now);
+
+  return formattedDateTime.replace(",", ""); // Eliminar la coma si está presente
+};
 export const ClientPromotionCard = () => {
   // ... mantener todos los estados existentes ...
   const { cid, pid } = useParams();
@@ -628,6 +647,7 @@ export const ClientPromotionCard = () => {
               >
                 Muestra este mensaje al negocio para validar tu canje
               </Typography>
+              <span className='font-bold text-xl'>Canje realizado el: {getFormattedDateTimeChile()}</span>
             </Box>
           </DialogContent>
           <DialogActions>

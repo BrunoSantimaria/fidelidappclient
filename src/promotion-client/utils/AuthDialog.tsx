@@ -153,7 +153,7 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
 
   return (
     <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className='bg-[#28292d] w-[95%]  mx-auto flex flex-col justify-center'>
+      <Card className='bg-[#28292d] w-full  mx-auto flex flex-col justify-center'>
         <CardContent className='p-6'>
           <form onSubmit={handleSubmit} className='space-y-4'>
             <h2 className='text-xl font-semibold text-white'>{isRegistering ? "Regístrate" : "Inicia sesión"}</h2>
