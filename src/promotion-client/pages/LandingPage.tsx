@@ -169,7 +169,23 @@ export function LandingPage() {
                 ¡Regístrate y empieza a sumar puntos! 🌟 Entérate de nuestras promociones y obtén grandes beneficios 🎉
               </p>
             </motion.div>
-
+            {!isLoggedInForAccount(account?._id) && account && (
+              <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <AuthDialog
+                  accountId={account._id}
+                  onAuthSuccess={(userId, token, clientId) => {
+                    console.log("Auth Success Details:", {
+                      accountId: account._id,
+                      userId,
+                      token,
+                      clientId,
+                    });
+                    login(account._id, userId, token, clientId);
+                    getAccInfo();
+                  }}
+                />
+              </motion.div>
+            )}
             {/* Botones de acción */}
 
             <div className='flex flex-col justify-center space-y-6'>
@@ -179,33 +195,17 @@ export function LandingPage() {
               >
                 Ver nuestra carta
               </Button>
-              <Button
-                onClick={() => window.open(account?.googleBusiness, "_blank")}
-                className={`${
-                  !account?.googleBusiness && "hidden"
-                } bg-yellow-500 hover:bg-yellow-600 text-black w-full m-auto font-bold p-6 transition-colors duration-300 flex items-center space-x-2`}
-              >
-                <Star className='w-6 h-6 fill-current' />
-                <span>Valóranos en Google</span>
-              </Button>
-              {/* Renderizar botones según estado de autenticación */}
-              {!isLoggedInForAccount(account?._id) && account && (
-                <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                  <AuthDialog
-                    accountId={account._id}
-                    onAuthSuccess={(userId, token, clientId) => {
-                      console.log("Auth Success Details:", {
-                        accountId: account._id,
-                        userId,
-                        token,
-                        clientId,
-                      });
-                      login(account._id, userId, token, clientId);
-                      getAccInfo();
-                    }}
-                  />
-                </motion.div>
+              {account?.googleBusiness && (
+                <Button
+                  onClick={() => window.open(account?.googleBusiness, "_blank")}
+                  className={` bg-yellow-500 hover:bg-yellow-600 text-black w-full m-auto font-bold p-6 transition-colors duration-300 flex items-center space-x-2`}
+                >
+                  <Star className='w-6 h-6 fill-current' />
+                  <span>Valóranos en Google</span>
+                </Button>
               )}
+
+              {/* Renderizar botones según estado de autenticación */}
 
               {isLoggedInForAccount(account?._id || "") && (
                 <>

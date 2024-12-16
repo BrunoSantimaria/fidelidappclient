@@ -44,6 +44,7 @@ export default function FideliCard() {
   const [promotions, setPromotions] = useState([]);
   const [hasPointPromotion, setHasPointPromotion] = useState("");
   // Check if a promotion is currently active
+
   const fetchFideliCardData = async () => {
     try {
       const resp = await api.get(`/api/landing/${slug}`);
@@ -81,7 +82,7 @@ export default function FideliCard() {
         console.log(promotion.promotion.systemType, promotion.promotion.status); // Verifica los valores
         return promotion.promotion.systemType.toLowerCase().trim() === "points" && promotion.promotion.status.toLowerCase().trim() === "active";
       });
-      console.log("Has Active Point Promotion:", activePointPromotion.promotion._id);
+
       setHasPointPromotion(activePointPromotion);
 
       setIsLoading(false);
@@ -359,6 +360,26 @@ export default function FideliCard() {
   };
 
   // Modify the confirmRedeem method to handle both reward and promotion redemptions
+  const getFormattedDateTimeChile = () => {
+    // Crear una nueva fecha
+    const now = new Date();
+
+    // Configurar la zona horaria de Chile
+    const options = {
+      timeZone: "America/Santiago",
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Formato de 24 horas
+    };
+
+    // Formatear la fecha y hora
+    const formattedDateTime = new Intl.DateTimeFormat("es-CL", options).format(now);
+
+    return formattedDateTime.replace(",", ""); // Eliminar la coma si está presente
+  };
 
   // Loading state
   if (isLoading) {
@@ -692,6 +713,9 @@ export default function FideliCard() {
               </div>
               <Alert severity='success' className='text-left'>
                 Muestra este mensaje para validar tu canje. Si no puedes mostrar en tú actividad reciente.
+              </Alert>
+              <Alert severity='info' sx={{ fontWeight: "bold" }}>
+                Canje realizado el: {getFormattedDateTimeChile()}
               </Alert>
             </DialogHeader>
             <DialogFooter>
