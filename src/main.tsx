@@ -10,6 +10,8 @@ import { Provider } from "react-redux";
 import { store } from "./store/store.ts";
 import { HelmetProvider } from "react-helmet-async";
 import ReactGA from "react-ga4";
+import { StrictMode } from "react";
+import { AuthProvider } from "./promotion-client/utils/AuthContext.tsx";
 
 ReactGA.initialize("G-Q91RG51PRW");
 
@@ -17,14 +19,16 @@ const rootElement = document.getElementById("root")!;
 createRoot(rootElement).render(
   <Provider store={store}>
     <BrowserRouter>
-      <HelmetProvider>
-        <GoogleOAuthProvider clientId='833746654519-bu68dd7uhn7bsgcvsjrrmnucl0nobta3.apps.googleusercontent.com'>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <AppRouter />
-          </ThemeProvider>
-        </GoogleOAuthProvider>
-      </HelmetProvider>
+      <AuthProvider>
+        <HelmetProvider>
+          <GoogleOAuthProvider clientId='833746654519-bu68dd7uhn7bsgcvsjrrmnucl0nobta3.apps.googleusercontent.com'>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <AppRouter />
+            </ThemeProvider>
+          </GoogleOAuthProvider>
+        </HelmetProvider>
+      </AuthProvider>
     </BrowserRouter>
   </Provider>
 );

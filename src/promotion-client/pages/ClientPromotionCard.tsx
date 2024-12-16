@@ -37,7 +37,7 @@ import { toast } from "react-toastify";
 import Lottie from "react-lottie";
 import celebrationAnimation from "../../assets/celebration.json";
 
-import { Scanner } from "@yudiel/react-qr-scanner";
+import { Scanner, useDevices } from "@yudiel/react-qr-scanner";
 import { Helmet } from "react-helmet-async";
 import api from "../../utils/api";
 import ClientPromotionsTable from "../components/ClientPromotionsTable";
@@ -106,6 +106,8 @@ export const ClientPromotionCard = () => {
   const [tabValue, setTabValue] = useState(0);
   const [rewardToConfirm, setRewardToConfirm] = useState(null);
   const [clientPromotions, setClientPromotions] = useState([]);
+  const devices = useDevices();
+  console.log("🚀 ~ ClientPromotionCard ~ devices:", devices);
 
   const handleOpenConfirmDialog = () => setOpenConfirmDialog(true);
   const handleCloseConfirmDialog = () => {
@@ -359,8 +361,9 @@ export const ClientPromotionCard = () => {
                 </Typography>
                 <div className='font-medium flex items-center space-x-1'>
                   <span
-                    className={`inline-block h-2 w-2 rounded-full ${promotion.status === "Active" ? "bg-green-500" : promotion.status === "Expired" ? "bg-red-500" : "bg-yellow-500"
-                      }`}
+                    className={`inline-block h-2 w-2 rounded-full ${
+                      promotion.status === "Active" ? "bg-green-500" : promotion.status === "Expired" ? "bg-red-500" : "bg-yellow-500"
+                    }`}
                   />
                   <span>{promotion.status}</span>
                 </div>

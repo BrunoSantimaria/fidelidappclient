@@ -1,8 +1,7 @@
-import { toast, ToastOptions } from "react-toastify";
-import { ReactElement } from 'react';
+import { toast as baseToast, ToastOptions } from "react-toastify";
 
 interface CustomToastOptions extends ToastOptions {
-  icon?: ReactElement;
+  icon?: React.ReactNode; // Propiedad opcional
 }
 
 const defaultOptions: CustomToastOptions = {
@@ -13,16 +12,14 @@ const defaultOptions: CustomToastOptions = {
   pauseOnHover: true,
   draggable: true,
   progress: undefined,
-  icon: undefined,
   theme: "light",
   style: {
     borderRadius: "12px",
     padding: "16px",
-
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     fontSize: "14px",
-    fontWeight: 500
-  }
+    fontWeight: 500,
+  },
 };
 
 const toastConfig: Record<string, CustomToastOptions> = {
@@ -32,9 +29,8 @@ const toastConfig: Record<string, CustomToastOptions> = {
       ...defaultOptions.style,
       background: "#f0fdf4",
       border: "1px solid #86efac",
-      color: "#166534"
+      color: "#166534",
     },
-    icon: <FiCheck className="w-5 h-5" />
   },
   error: {
     ...defaultOptions,
@@ -42,9 +38,8 @@ const toastConfig: Record<string, CustomToastOptions> = {
       ...defaultOptions.style,
       background: "#fef2f2",
       border: "1px solid #fecaca",
-      color: "#991b1b"
+      color: "#991b1b",
     },
-    icon: <FiAlertCircle className="w-5 h-5" />
   },
   info: {
     ...defaultOptions,
@@ -52,9 +47,8 @@ const toastConfig: Record<string, CustomToastOptions> = {
       ...defaultOptions.style,
       background: "#f0f9ff",
       border: "1px solid #bae6fd",
-      color: "#075985"
+      color: "#075985",
     },
-    icon: <FiInfo className="w-5 h-5" />
   },
   warning: {
     ...defaultOptions,
@@ -62,23 +56,23 @@ const toastConfig: Record<string, CustomToastOptions> = {
       ...defaultOptions.style,
       background: "#fffbeb",
       border: "1px solid #fde68a",
-      color: "#92400e"
+      color: "#92400e",
     },
-    icon: <FiAlertTriangle className="w-5 h-5" />
-  }
+  },
 };
 
-export const showToast = {
+// Exportar como un objeto llamado `toast`
+export const toast = {
   success: (message: string, options?: CustomToastOptions) => {
-    return toast.success(message, { ...toastConfig.success, ...options });
+    return baseToast.success(message, { ...toastConfig.success, ...options });
   },
   error: (message: string, options?: CustomToastOptions) => {
-    return toast.error(message, { ...toastConfig.error, ...options });
+    return baseToast.error(message, { ...toastConfig.error, ...options });
   },
   info: (message: string, options?: CustomToastOptions) => {
-    return toast.info(message, { ...toastConfig.info, ...options });
+    return baseToast.info(message, { ...toastConfig.info, ...options });
   },
   warning: (message: string, options?: CustomToastOptions) => {
-    return toast.warning(message, { ...toastConfig.warning, ...options });
-  }
+    return baseToast.warning(message, { ...toastConfig.warning, ...options });
+  },
 };
