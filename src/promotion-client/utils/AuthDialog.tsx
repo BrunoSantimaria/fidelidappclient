@@ -30,7 +30,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
   };
 
   const validatePhone = (phone: string) => {
-    return /^\d{9,}$/.test(phone);
+    return /^\d{6,}$/.test(phone);
   };
 
   const formatName = (name: string) =>
