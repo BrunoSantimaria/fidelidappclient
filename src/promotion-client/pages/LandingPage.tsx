@@ -20,10 +20,10 @@ import { useNavigateTo } from "@/hooks/useNavigateTo";
 
 import { sortPromotions } from "../utils/SortPromotions";
 import { toast as toastify } from "../../utils/toast";
-import { colorPalettes, generatePalette } from "../utils/colorPalettes";
-import { ArrowBack } from "@mui/icons-material";
+
+import { generatePalette } from "../utils/colorPalettes";
+
 import { ImageViewer } from "../components/ImageViewer";
-import { onLogOut } from "@/store/auth/authSlice";
 
 interface SocialMedia {
   instagram: string;
@@ -288,7 +288,10 @@ export function LandingPage() {
                   </Button>
 
                   <motion.button
-                    onClick={() => onLogOut(account?._id)}
+                    onClick={() => {
+                      logout(account?._id);
+                      handleNavigate(`/landing/${slug}`);
+                    }}
                     whileHover='hover'
                     initial='rest'
                     animate='rest'
