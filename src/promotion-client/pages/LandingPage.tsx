@@ -239,7 +239,7 @@ export function LandingPage() {
               </Button>
               {account?.landing?.googleBusiness && (
                 <Button
-                  onClick={() => window.open(account?.googleBusiness, "_blank")}
+                  onClick={() => window.open(account?.landing?.googleBusiness, "_blank")}
                   className={`
         bg-yellow-500 
         hover:bg-yellow-600 
