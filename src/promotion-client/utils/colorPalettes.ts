@@ -269,6 +269,56 @@ export const colorPalettes = {
     type: "Light",
     bestFor: "Wellness Centers, Yoga Studios, Meditation Retreats",
   },
+  "neon-nights": {
+    gradient: "bg-gradient-to-tr from-purple-800 to-pink-600",
+    background: "bg-[#1a002a]",
+    cardBackground: "bg-[#2a004a]",
+    textPrimary: "text-[#ff80ff]",
+    textSecondary: "text-[#ff4dff]",
+    buttonBackground: "bg-[#1a002a]",
+    buttonHover: "hover:bg-[#2a004a]",
+    type: "Dark",
+    bestFor: "Nightclubs, Dance Events, Electronic Music Venues",
+  },
+
+  // Miami Lights - Tropical and Energetic
+  "miami-lights": {
+    gradient: "bg-gradient-to-r from-pink-400 to-teal-500",
+    background: "bg-[#00334d]",
+    cardBackground: "bg-[#004d66]",
+    textPrimary: "text-[#ffffff]",
+    textSecondary: "text-[#ffa3a3]",
+    buttonBackground: "bg-[#00334d]",
+    buttonHover: "hover:bg-[#004d66]",
+    type: "Dark",
+    bestFor: "Beach Clubs, Latin Music Venues, Party Brands",
+  },
+
+  // Strobe Pulse - High Energy and Dynamic
+  "strobe-pulse": {
+    gradient: "bg-gradient-to-tr from-yellow-500 to-red-600",
+    background: "bg-[#330000]",
+    cardBackground: "bg-[#660000]",
+    textPrimary: "text-[#ffff80]",
+    textSecondary: "text-[#ff8080]",
+    buttonBackground: "bg-[#330000]",
+    buttonHover: "hover:bg-[#660000]",
+    type: "Dark",
+    bestFor: "Dance Clubs, EDM Venues, Festival Promotions",
+  },
+
+  // UltraViolet Groove - Sophisticated and Futuristic
+  "ultraviolet-groove": {
+    gradient: "bg-gradient-to-tr from-indigo-600 to-purple-800",
+    background: "bg-[#120032]",
+    cardBackground: "bg-[#240065]",
+    textPrimary: "text-[#b3b3ff]",
+    textSecondary: "text-[#9999ff]",
+    buttonBackground: "bg-[#120032]",
+    buttonHover: "hover:bg-[#240065]",
+    type: "Dark",
+    bestFor: "Upscale Nightclubs, VIP Lounges, Avant-Garde Parties",
+  },
 };
 
 export const generatePalette = (paletteName) => {
