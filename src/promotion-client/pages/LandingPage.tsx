@@ -195,7 +195,12 @@ export function LandingPage() {
         ) : (
           <>
             {/* Título de la página */}
-            <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className='text-center mt-12'>
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className={`text-center ${isLoggedInForAccount(account?._id || "") && "mt-12"} `}
+            >
               <h1 className={`text-5xl mb-2 font-bold ${palette.textPrimary}`}>{account?.name || "Restaurante"}</h1>
               <p className={`mt-2 text-xl font-bold w-full md:w-2/3 justify-center m-auto ${palette.textPrimary} font-poppins`}>
                 {account?.landing?.title || ""}
