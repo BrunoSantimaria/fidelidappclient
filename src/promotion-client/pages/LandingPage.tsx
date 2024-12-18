@@ -23,6 +23,7 @@ import { toast as toastify } from "../../utils/toast";
 import { colorPalettes, generatePalette } from "../utils/colorPalettes";
 import { ArrowBack } from "@mui/icons-material";
 import { ImageViewer } from "../components/ImageViewer";
+import { onLogOut } from "@/store/auth/authSlice";
 
 interface SocialMedia {
   instagram: string;
@@ -287,7 +288,7 @@ export function LandingPage() {
                   </Button>
 
                   <motion.button
-                    onClick={() => onClick(account?._id)}
+                    onClick={() => onLogOut(account?._id)}
                     whileHover='hover'
                     initial='rest'
                     animate='rest'
