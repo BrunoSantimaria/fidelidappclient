@@ -14,7 +14,7 @@ export const Customization = () => {
   const [facebook, setFacebook] = useState(user?.accounts?.socialMedia?.facebook || "");
   const [whatsapp, setWhatsapp] = useState(user?.accounts?.socialMedia?.whatsapp || "");
   const [website, setWebsite] = useState(user?.accounts?.socialMedia?.website || "");
-
+  const [onLoadChange, setOnLoadChange] = useState(false);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -25,6 +25,7 @@ export const Customization = () => {
 
   const handleSubmit = async () => {
     try {
+      setOnLoadChange(true);
       const settings = {
         logo,
         instagram,
@@ -38,6 +39,8 @@ export const Customization = () => {
     } catch (error) {
       console.error("Error al guardar los cambios:", error);
       alert("Hubo un error al guardar los cambios. Por favor, intenta de nuevo.");
+    } finally {
+      setOnLoadChange(false);
     }
   };
 
@@ -148,7 +151,7 @@ export const Customization = () => {
         <button className='px-4 py-2 text-gray-600 bg-white border border-main hover:bg-gray-100 rounded' onClick={handleCancel}>
           Cancelar
         </button>
-        <button className='px-4 py-2 bg-main text-white rounded hover:bg-main/80' onClick={handleSubmit} disabled={loading}>
+        <button disabled={onLoadChange} className='px-4 py-2 bg-main text-white rounded hover:bg-main/80' onClick={handleSubmit} disabled={loading}>
           Guardar Cambios
         </button>
       </div>

@@ -16,7 +16,7 @@ interface AuthProps {
   onAuthSuccess: () => void;
 }
 
-export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
+export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthProps) {
   const [isRegistering, setIsRegistering] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -155,10 +155,10 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
 
   return (
     <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className='bg-[#28292d] w-full  mx-auto flex flex-col justify-center'>
+      <Card className={`${selectedPalette.cardBackground} w-full mx-auto flex flex-col justify-center`}>
         <CardContent className='p-6'>
           <form onSubmit={handleSubmit} className='space-y-4'>
-            <h2 className='text-xl font-semibold text-white'>{isRegistering ? "Regístrate" : "Inicia sesión"}</h2>
+            <h2 className={`${selectedPalette.textPrimary} text-xl font-semibold`}>{isRegistering ? "Regístrate" : "Inicia sesión"}</h2>
             {isRegistering && (
               <Input
                 type='text'
@@ -166,7 +166,7 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className='bg-[#3a3b40] border-gray-600 text-white placeholder-gray-400'
+                className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
               />
             )}
             {errors.name && <p className='text-red-400 text-sm'>{errors.name}</p>}
@@ -177,7 +177,7 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className='bg-[#3a3b40] border-gray-600 text-white placeholder-gray-400'
+              className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
             />
             {errors.email && <p className='text-red-400 text-sm'>{errors.email}</p>}
             {isRegistering && (
@@ -187,14 +187,14 @@ export function AuthDialog({ accountId, onAuthSuccess }: AuthProps) {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required={isRegistering}
-                className='bg-[#3a3b40] border-gray-600 text-white placeholder-gray-400'
+                className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
               />
             )}
             {errors.phone && isRegistering && <p className='text-red-400 text-sm'>{errors.phone}</p>}
-            <Button type='submit' className='w-full bg-[#4a4b50] hover:bg-[#5a5b60] text-white font-bold'>
+            <Button type='submit' className={`${selectedPalette.buttonBackground} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}>
               {isRegistering ? "Regístrate" : "Iniciar sesión"}
             </Button>
-            <p className='text-sm text-gray-400 text-center mt-2'>
+            <p className={`${selectedPalette.textSecondary} text-sm text-center mt-2`}>
               {isRegistering ? "¿Ya estás registrado?" : "¿No tienes cuenta?"}{" "}
               <span onClick={() => setIsRegistering(!isRegistering)} className='text-white cursor-pointer hover:underline'>
                 {isRegistering ? "Iniciar sesión" : "Regístrate"}

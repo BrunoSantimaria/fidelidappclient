@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Facebook, Instagram, Globe, CreditCard, Star } from "lucide-react";
+import { Facebook, Instagram, Globe, CreditCard, Star, LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { Alert } from "@mui/material";
 import { useParams } from "react-router-dom";
+import { CiLogout } from "react-icons/ci";
 
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -19,6 +20,9 @@ import { useNavigateTo } from "@/hooks/useNavigateTo";
 
 import { sortPromotions } from "../utils/SortPromotions";
 import { toast as toastify } from "../../utils/toast";
+import { colorPalettes, generatePalette } from "../utils/colorPalettes";
+import { ArrowBack } from "@mui/icons-material";
+import { ImageViewer } from "../components/ImageViewer";
 
 interface SocialMedia {
   instagram: string;
@@ -64,9 +68,10 @@ export function LandingPage() {
     try {
       const response = await api.get(`/api/landing/${slug}`);
 
+      console.log("🚀 ~ getAccInfo ~ response:", response);
       setAccount(response.data);
       document.title = `${response.data.name} | FidelidApp`;
-      if (response.data.card) setNumPages(response.data.card.length);
+      if (response.data.landing.card.content) setNumPages(response.data.landing.card.content.length);
       setAccountNotFound(false);
     } catch (error) {
       console.error(error);
@@ -169,12 +174,15 @@ export function LandingPage() {
       </motion.div>
     );
   }
+  const palette = generatePalette(account?.landing?.colorPalette);
+  console.log("🚀 ~ LandingPage ~ palette:", palette);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className='min-h-screen bg-gradient-to-tr from-slate-400 to-slate-700 py-12 px-4 sm:px-6 lg:px-8 text-white'
+      className={`min-h-screen  ${palette.gradient} py-12 px-4 sm:px-6 lg:px-8 text-white`}
     >
       <div className='max-w-4xl md:max-w-5xl lg:max-w-6xl mx-auto space-y-8'>
         {/* Componente de carga */}
@@ -187,16 +195,18 @@ export function LandingPage() {
         ) : (
           <>
             {/* Título de la página */}
-            <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className='text-center'>
-              <h1 className='text-5xl font-bold text-white mb-2'>{account?.name || "Restaurante"}</h1>
-              <p className='mt-2 text-lg w-full md:w-2/3 justify-center m-auto text-gray-300'>
-                ¡Regístrate y empieza a sumar puntos! 🌟 Entérate de nuestras promociones y obtén grandes beneficios 🎉
+            <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className='text-center mt-12'>
+              <h1 className={`text-5xl mb-2 font-bold ${palette.textPrimary}`}>{account?.name || "Restaurante"}</h1>
+              <p className={`mt-2 text-xl font-bold w-full md:w-2/3 justify-center m-auto ${palette.textPrimary} font-poppins`}>
+                {account?.landing?.title || ""}
               </p>
+              <p className={`mt-2 text-md w-full md:w-2/3 justify-center m-auto ${palette.textSecondary}`}>{account?.landing?.subtitle || ""}</p>
             </motion.div>
             {!isLoggedInForAccount(account?._id) && account && (
               <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <AuthDialog
                   accountId={account._id}
+                  selectedPalette={palette}
                   onAuthSuccess={(userId, token, clientId) => {
                     login(account._id, userId, token, clientId);
                     getAccInfo();
@@ -204,22 +214,52 @@ export function LandingPage() {
                 />
               </motion.div>
             )}
-            {/* Botones de acción */}
 
             <div className='flex flex-col justify-center space-y-6'>
               <Button
-                onClick={() => setIsPdfDialogOpen(true)}
-                className={`${!account?.card && "hidden"} bg-[#3a3b40] p-6 hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300`}
+                onClick={() => {
+                  if (account?.landing?.card.type === "link") {
+                    // Redirige a la URL en una nueva pestaña
+                    window.open(account?.landing?.card.content[0], "_blank");
+                  } else {
+                    setIsPdfDialogOpen(true);
+                  }
+                }}
+                className={`
+    ${!account?.landing?.card.content && "hidden"}
+    ${palette.buttonBackground} 
+    ${palette.buttonHover}
+    text-white font-bold p-6 transition-colors duration-300
+    ring-0 
+        hover:ring-2
+        hover:ring-[${palette.textSecondary}]
+  `}
               >
-                Ver nuestra carta
+                {account?.landing?.card.title || "Ver nuestra carta"}
               </Button>
-              {account?.googleBusiness && (
+              {account?.landing?.googleBusiness && (
                 <Button
                   onClick={() => window.open(account?.googleBusiness, "_blank")}
-                  className={` bg-yellow-500 hover:bg-yellow-600 text-black w-full m-auto font-bold p-6 transition-colors duration-300 flex items-center space-x-2`}
+                  className={`
+        bg-yellow-500 
+        hover:bg-yellow-600 
+        text-black 
+        w-full 
+        m-auto 
+        font-bold 
+        p-6 
+        transition-colors 
+        duration-300 
+        flex 
+        items-center 
+        space-x-2
+        ring-0 
+        hover:ring-2
+        hover:ring-[${palette.textSecondary}]
+      `}
                 >
-                  <Star className='w-6 h-6 fill-current' />
-                  <span>Valóranos en Google</span>
+                  Valóranos en Google
+                  <Star />
                 </Button>
               )}
 
@@ -229,17 +269,87 @@ export function LandingPage() {
                     onClick={() => {
                       handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
                     }}
-                    className='bg-[#3a3b40] hover:bg-[#4a4b50] p-6 text-white font-bold transition-colors duration-300'
+                    className={`
+    ${palette.buttonBackground} 
+    ${palette.buttonHover}
+    p-6 text-white font-bold transition-colors duration-300
+    ring-0 
+        hover:ring-2
+        hover:ring-[${palette.textSecondary}]
+  `}
                   >
                     Mi FideliCard <CreditCard />
                   </Button>
 
-                  <Button
-                    onClick={() => logout(account?._id)}
-                    className='bg-[#3a3b40] p-6 hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300'
+                  <motion.button
+                    onClick={() => onClick(account?._id)}
+                    whileHover='hover'
+                    initial='rest'
+                    animate='rest'
+                    variants={{
+                      rest: { width: "auto", justifyContent: "center" },
+                      hover: {
+                        width: 180,
+                        justifyContent: "flex-start",
+                        transition: {
+                          duration: 0.3,
+                          type: "tween",
+                        },
+                      },
+                    }}
+                    className={`
+        ${palette.buttonBackground} 
+        ${palette.buttonHover}
+        p-2 text-white font-bold 
+        flex items-center 
+        overflow-hidden 
+        absolute top-0 
+      `}
                   >
-                    Cerrar Sesión
-                  </Button>
+                    <motion.div
+                      variants={{
+                        rest: {
+                          padding: "0.5rem",
+                          x: 0,
+                        },
+                        hover: {
+                          padding: "0.5rem",
+                          x: 0,
+                          transition: {
+                            duration: 0.3,
+                            type: "tween",
+                          },
+                        },
+                      }}
+                      className={`flex items-center ring-0 
+        hover:ring-2
+        hover:ring-[${palette.textSecondary}]`}
+                    >
+                      <CiLogout className='mr-2' />
+
+                      <motion.span
+                        variants={{
+                          rest: {
+                            opacity: 0,
+                            width: 0,
+                            display: "none",
+                          },
+                          hover: {
+                            opacity: 1,
+                            width: "auto",
+                            display: "block",
+                            transition: {
+                              duration: 0.3,
+                              delay: 0.2,
+                            },
+                          },
+                        }}
+                        className='whitespace-nowrap'
+                      >
+                        Cerrar sesión
+                      </motion.span>
+                    </motion.div>
+                  </motion.button>
                 </>
               )}
             </div>
@@ -249,35 +359,12 @@ export function LandingPage() {
                 <DialogHeader className='sr-only'>
                   <DialogTitle>Nuestra Carta</DialogTitle>
                 </DialogHeader>
-                <div className='w-full md:w-full md:h-[80vh] flex flex-col items-center justify-center'>
-                  {/* Image Viewer */}
-                  {account?.card && (
-                    <div className='flex justify-center items-center w-full h-full'>
-                      <img
-                        src={account.card[currentPage - 1]}
-                        alt={`Page ${currentPage}`}
-                        className='w-auto h-auto max-w-full md:w-screen md:h-screen max-h-full object-contain shadow-lg'
-                      />
-                    </div>
-                  )}
-
-                  <div className='flex justify-center space-x-4 bg-black/50 p-4 backdrop-blur-sm mt-4'>
-                    <Button onClick={goToPrevPage} disabled={currentPage === 1} className='bg-[#3a3b40] hover:bg-[#4a4b50] text-white px-4 py-2'>
-                      Anterior
-                    </Button>
-                    <span className='text-white flex items-center'>
-                      {currentPage} / {numPages}
-                    </span>
-                    <Button onClick={goToNextPage} disabled={currentPage === numPages} className='bg-[#3a3b40] hover:bg-[#4a4b50] text-white px-4 py-2'>
-                      Siguiente
-                    </Button>
-                  </div>
-                </div>
+                <ImageViewer account={account} currentPage={currentPage} numPages={numPages} goToPrevPage={goToPrevPage} goToNextPage={goToNextPage} />{" "}
               </DialogContent>
             </Dialog>
             {/* Promociones activas */}
             <div>
-              <h2 className={`${!sortedPromotions.length && "hidden"} text-2xl font-bold text-white mb-4 text-center`}>Nuestras Promociones</h2>
+              <h2 className={`${!sortedPromotions.length && "hidden"} text-2xl font-bold ${palette.textPrimary} mb-4 text-center`}>Nuestras Promociones</h2>{" "}
               <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
                 {sortedPromotions?.map((promo) => {
                   const isHot = isPromotionHot(promo);
@@ -317,11 +404,14 @@ export function LandingPage() {
                     <Dialog key={promo._id}>
                       <DialogTrigger asChild>
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                          <Card className='bg-[#3a3b40] shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative overflow-hidden h-full'>
+                          <Card
+                            className={`${palette.cardBackground} shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative overflow-hidden h-full`}
+                          >
+                            {" "}
                             <CardContent
-                              className={`${
-                                isHot ? "border-4 border-transparent bg-clip-border shadow-fire" : ""
-                              } p-6 bg-gradient-to-br from-[#4a4b50] to-[#3a4b40] text-white rounded-lg h-full flex flex-col justify-between`}
+                              className={`${isHot ? "border-4 border-transparent bg-clip-border shadow-fire" : ""} p-6 bg-gradient-to-br ${
+                                palette.gradient
+                              } text-white rounded-lg h-full flex flex-col justify-between`}
                             >
                               {isHot ||
                                 (promo.systemType === "points" && (
@@ -335,7 +425,7 @@ export function LandingPage() {
                           </Card>
                         </motion.div>
                       </DialogTrigger>
-                      <DialogContent className='bg-[#28292d] w-[95%] pt-20 text-white'>
+                      <DialogContent className={`${palette.background} w-[95%] pt-20 text-white`}>
                         <DialogHeader className='mt-16 flex flex-col m-auto justify-center'>
                           <DialogTitle className='text-white text-2xl'>{promo.title}</DialogTitle>
                           <DialogDescription className='text-gray-300'>{promo.description}</DialogDescription>
@@ -345,9 +435,11 @@ export function LandingPage() {
                           {promo.systemType === "points" && promo.rewards?.length > 0 && (
                             <div className='mt-4 '>
                               <h3 className='text-lg font-semibold text-white mb-4'>Recompensas</h3>
-                              <ul className='divide-y  bg-gradient-to-tr from-slate-400 to-slate-700 divide-gray-200 rounded-lg border border-gray-300 bg-white shadow-md'>
+                              <ul
+                                className={`divide-y bg-gradient-to-tr ${palette.gradient} divide-gray-200 rounded-lg border border-gray-300 bg-white shadow-md`}
+                              >
                                 {promo.rewards.map((reward) => (
-                                  <li key={reward._id} className='flex flex-col items-center justify-between p-4 hover:bg-gray-50 transition'>
+                                  <li key={reward._id} className='flex flex-col items-center justify-between p-4 transition'>
                                     <div>
                                       <p className='text-sm font-medium text-white'>{reward.description}</p>
                                     </div>
@@ -361,17 +453,17 @@ export function LandingPage() {
                           )}
                           {/* Conditional Alert for Non-Applicable Days */}
                           {!isHot && promo.systemType === "visits" && (
-                            <Alert severity='warning' className='text-sm text-white bg-[#4a4b50]'>
+                            <Alert severity='warning' className={`text-sm text-white ${palette.cardBackground}`}>
                               Esta promoción solo está disponible los días: {applicableDays}. Hoy ({daysOfWeek[today]}) no es un día válido para esta promoción.
                             </Alert>
                           )}
 
                           {/* Conditions Alert */}
-                          <Alert severity='info' className='text-sm text-gray-300 bg-[#3a3b40]'>
+                          <Alert severity='info' className={`text-sm text-gray-300 ${palette.cardBackground}`}>
                             {formatConditions(promo.conditions)}
                           </Alert>
                           {isLoggedInForAccount(account?._id || "") ? (
-                            <Alert severity='success' className='w-full text-sm text-white bg-[#4a4b50]'>
+                            <Alert severity='success' className={`w-full text-sm text-white ${palette.cardBackground}`}>
                               ¡Estás automáticamente registrado en todas nuestras promociones! <br></br>
                               <span
                                 className='cursor-pointer font-bold text-main'
@@ -383,7 +475,7 @@ export function LandingPage() {
                               </span>
                             </Alert>
                           ) : (
-                            <Alert severity='success' className='w-full text-sm text-white bg-[#4a4b50]'>
+                            <Alert severity='success' className={`w-full text-sm text-white ${palette.cardBackground}`}>
                               ¡
                               <DialogClose asChild>
                                 <span
@@ -409,17 +501,15 @@ export function LandingPage() {
             {/* Logo y redes sociales */}
             <div className='flex flex-col justify-center'>
               <div className='m-auto mb-6'>{account?.logo && <img src={account.logo} className='w-[14rem] h-auto' alt={`${account.name} Logo`} />}</div>
-              <div className='flex flex-row space-x-4 m-auto'>
+              <div className='flex flex-row space-x-6 m-auto'>
                 {getSocialLinks().map((link, index) => (
-                  <a
+                  <span
                     key={index}
-                    href={link.href}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-white hover:text-gray-300 transition-colors duration-300'
+                    onClick={() => window.open(link.href, "_blank", "noopener,noreferrer")}
+                    className={`text-white hover:${palette.textSecondary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
                   >
-                    <link.icon size={24} />
-                  </a>
+                    <link.icon size={28} />
+                  </span>
                 ))}
               </div>
             </div>

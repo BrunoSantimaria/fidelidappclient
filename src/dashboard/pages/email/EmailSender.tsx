@@ -58,7 +58,6 @@ import { CircleHelp } from "lucide-react";
 // Definir el componente ScheduleDialog fuera del componente principal
 const ScheduleDialog = ({ open, onClose, onConfirm }) => {
   const [selectedDate, setSelectedDate] = useState(null);
-
   // Crear las fechas mínima y máxima
   const minDate = dayjs();
   const maxDate = dayjs().add(1, "year");
@@ -114,6 +113,8 @@ const ScheduleDialog = ({ open, onClose, onConfirm }) => {
 
 export const EmailSender = () => {
   const [showHowToUse, setShowHowToUse] = useState(false);
+  const [onLoadChange, setOnLoadChange] = useState(false);
+
   const [contactSource, setContactSource] = useState("csv"); // Estado para la fuente de contactos (CSV o Clientes)
   const [csvFile, setCsvFile] = useState(null); // Archivo CSV seleccionado
   const [subject, setSubject] = useState(""); // Asunto del correo
@@ -160,6 +161,7 @@ export const EmailSender = () => {
 
   const checkEmailContent = async () => {
     try {
+      setOnLoadChange(true);
       if (!subject || subject.trim() === "") {
         toast.warning("Debes agregar un asunto al email");
         return false;
@@ -196,6 +198,8 @@ export const EmailSender = () => {
       console.error("Error al verificar contenido:", error);
       toast.error("Error al verificar el contenido del email");
       return false;
+    } finally {
+      setOnLoadChange(false);
     }
   };
 
@@ -327,7 +331,7 @@ export const EmailSender = () => {
         template: templateHtml,
         clients: recipients,
       };
-
+      setOnLoadChange(true);
       await api.post("/api/email/send", formData, {
         headers: {
           "Content-Type": "application/json",
@@ -352,7 +356,9 @@ export const EmailSender = () => {
       }, 100);
     } catch (error) {
       console.error("Error al iniciar la campaña:", error);
-      toast.error("Hubo un problema al iniciar la campaña de correos.");
+      toast.error(" Hubo un problema al iniciar la campaña de correos.");
+    } finally {
+      setOnLoadChange(false);
     }
   };
   useEffect(() => {
@@ -912,10 +918,10 @@ export const EmailSender = () => {
             </Button>
           </Box>
           <Box className='flex gap-2'>
-            <Button variant='outlined' startIcon={<CalendarTodayIcon />} onClick={handleScheduleClick}>
+            <Button disabled={onLoadChange} variant='outlined' startIcon={<CalendarTodayIcon />} onClick={handleScheduleClick}>
               Programar Envío
             </Button>
-            <Button variant='contained' color='primary' startIcon={<MailIcon />} onClick={handleSendEmails}>
+            <Button disabled={onLoadChange} variant='contained' color='primary' startIcon={<MailIcon />} onClick={handleSendEmails}>
               Enviar Email
             </Button>
           </Box>

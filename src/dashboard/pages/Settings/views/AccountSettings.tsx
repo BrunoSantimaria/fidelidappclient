@@ -14,7 +14,7 @@ export const AccountSettings = () => {
   const [phone, setPhone] = useState(user?.accounts.phone || "");
   const [error, setError] = useState("");
   const [isModified, setIsModified] = useState(false);
-
+  const [onLoadChange, setOnLoadChange] = useState(false);
   // Efecto para verificar cambios en los campos de entrada
   useEffect(() => {
     setIsModified(name !== user?.accounts.name || senderEmail !== user?.accounts.senderEmail || phone !== user?.accounts.phone);
@@ -40,6 +40,7 @@ export const AccountSettings = () => {
     if (phone !== user?.accounts.phone) settings.phone = phone;
 
     try {
+      setOnLoadChange(true);
       await api.put("/accounts/settings/account", { accountId: user?.accounts._id, settings });
       setError(""); // Limpiar errores después de una actualización exitosa
       toast.info("Ajustes actualizados correctamente.");
@@ -47,6 +48,8 @@ export const AccountSettings = () => {
     } catch (error) {
       console.error("Error guardando ajustes:", error);
       setError("Hubo un problema al guardar los ajustes.");
+    } finally {
+      setOnLoadChange(false);
     }
   };
 
@@ -124,7 +127,7 @@ export const AccountSettings = () => {
           >
             Cancelar
           </button>
-          <button className='px-4 py-2 bg-main text-white rounded hover:bg-main/80' onClick={handleSubmit} disabled={!isModified}>
+          <button className='px-4 py-2 bg-main text-white rounded hover:bg-main/80' onClick={handleSubmit} disabled={!isModified || onLoadChange}>
             Guardar cambios
           </button>
         </div>
