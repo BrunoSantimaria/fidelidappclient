@@ -498,8 +498,94 @@ export default function FideliCard() {
                         <DialogContent className='bg-white w-[95%] max-w-lg pt-14'>
                           <DialogHeader>
                             <DialogTitle className='text-xl'>{promo.promotion.title}</DialogTitle>
-                            <DialogDescription>{promo.promotion.description}</DialogDescription>
+                            {promo.promotion.systemType === "points" && promo.promotion.rewards && (
+                              <div className='mt-6 space-y-4'>
+                                <h3 className='text-xl font-semibold text-gray-800'>Premios disponibles</h3>
+                                {promo.promotion.rewards.map((reward) => {
+                                  const isRewardAchievable = reward.points === 0 ? true : userDetails.totalPoints >= reward.points;
+
+                                  // Verificar si la recompensa de 0 puntos ha sido canjeada
+                                  const isRewardRedeemed = activities.some(
+                                    (activity) =>
+                                      activity.type === "reward_redeemed" &&
+                                      activity.description === reward.description &&
+                                      activity.promotionId === promo.promotion._id
+                                  );
+                                  const isRewarded = activities?.map(({ amount, type }) => {
+                                    return amount === 0 && type === "reward_reedem";
+                                  });
+                                  console.log("🚀 ~ isRewarded ~ isRewarded:", isRewarded);
+
+                                  const progress = reward.points !== 0 ? (userDetails.totalPoints / reward.points) * 100 : 100;
+
+                                  return (
+                                    <div key={reward._id} className='bg-gray-50 p-4 rounded-lg shadow-sm'>
+                                      <div className='flex justify-between items-start mb-2'>
+                                        <div>
+                                          <h4 className='font-semibold text-lg text-gray-800'>{reward.title}</h4>
+                                          <p className='text-sm text-gray-600'>{reward.description}</p>
+                                        </div>
+                                      </div>
+                                      <div className='mt-3'>
+                                        {reward.points === 0 ? (
+                                          <Alert severity='success'>¡Recompensa gratis por registro!</Alert>
+                                        ) : (
+                                          <>
+                                            <div className='flex justify-between text-sm text-gray-600 mb-1'>
+                                              <span>{userDetails.totalPoints} pts</span>
+                                              <span className='text-main font-bold'>{reward.points} pts</span>
+                                            </div>
+                                            <div className='w-full bg-gray-200 rounded-full h-2.5'>
+                                              <div
+                                                className={`h-2.5 rounded-full ${isRewardAchievable ? "bg-green-500" : "bg-blue-500"}`}
+                                                style={{ width: `${Math.min(progress, 100)}%` }}
+                                              ></div>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+
+                                      {/* Mostrar mensaje si la recompensa de 0 puntos ya ha sido canjeada */}
+                                      {reward.points === 0 && isRewardRedeemed ? (
+                                        <p className='mt-2 text-sm text-gray-500'>Promoción única ya canjeada</p>
+                                      ) : (
+                                        <Button
+                                          onClick={() => {
+                                            console.log("Reward clicked:", reward);
+                                            console.log("Promotion:", promo.promotion);
+                                            console.log("Is Reward Achievable:", isRewardAchievable);
+                                            setSelectedReward(reward);
+                                            handleRedeemReward(promo.promotion, reward);
+                                          }}
+                                          disabled={!isRewardAchievable || (reward.points === 0 && isRewarded.length)}
+                                          className={`mt-3 w-full ${
+                                            isRewardAchievable && !(reward.points === 0 && isRewardRedeemed)
+                                              ? "bg-green-500 hover:bg-green-600 text-white"
+                                              : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                                          }`}
+                                        >
+                                          {reward.points === 0 && isRewarded.length
+                                            ? "Promoción única ya canjeada"
+                                            : isRewardAchievable
+                                            ? "Canjear"
+                                            : `Te faltan ${reward.points - userDetails.totalPoints} pts`}
+                                        </Button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                            {/* Conditional Alert for Non-Applicable Days */}
+                            {!isHot && promo.promotion.systemType === "visits" && (
+                              <Alert severity='warning' className='mt-4 h-fit'>
+                                Esta promoción solo está disponible los días: {formattedDays}. Hoy ({daysOfWeek[today]}) no es un día válido para esta
+                                promoción.
+                              </Alert>
+                            )}
+
                             <img className='rounded-md py-4' src={promo.promotion.imageUrl} />
+                            <DialogDescription>{promo.promotion.description}</DialogDescription>
                             <Alert severity='info' className='text-left'>
                               {promo.promotion?.conditions}
                             </Alert>
@@ -507,90 +593,7 @@ export default function FideliCard() {
                           </DialogHeader>
 
                           {/* Point-based rewards for point promotions */}
-                          {promo.promotion.systemType === "points" && promo.promotion.rewards && (
-                            <div className='mt-6 space-y-4'>
-                              <h3 className='text-xl font-semibold text-gray-800'>Premios disponibles</h3>
-                              {promo.promotion.rewards.map((reward) => {
-                                const isRewardAchievable = reward.points === 0 ? true : userDetails.totalPoints >= reward.points;
 
-                                // Verificar si la recompensa de 0 puntos ha sido canjeada
-                                const isRewardRedeemed = activities.some(
-                                  (activity) =>
-                                    activity.type === "reward_redeemed" &&
-                                    activity.description === reward.description &&
-                                    activity.promotionId === promo.promotion._id
-                                );
-                                const isRewarded = activities?.map(({ amount, type }) => {
-                                  return amount === 0 && type === "reward_reedem";
-                                });
-                                console.log("🚀 ~ isRewarded ~ isRewarded:", isRewarded);
-
-                                const progress = reward.points !== 0 ? (userDetails.totalPoints / reward.points) * 100 : 100;
-
-                                return (
-                                  <div key={reward._id} className='bg-gray-50 p-4 rounded-lg shadow-sm'>
-                                    <div className='flex justify-between items-start mb-2'>
-                                      <div>
-                                        <h4 className='font-semibold text-lg text-gray-800'>{reward.title}</h4>
-                                        <p className='text-sm text-gray-600'>{reward.description}</p>
-                                      </div>
-                                    </div>
-                                    <div className='mt-3'>
-                                      {reward.points === 0 ? (
-                                        <Alert severity='success'>¡Recompensa gratis por registro!</Alert>
-                                      ) : (
-                                        <>
-                                          <div className='flex justify-between text-sm text-gray-600 mb-1'>
-                                            <span>{userDetails.totalPoints} pts</span>
-                                            <span className='text-main font-bold'>{reward.points} pts</span>
-                                          </div>
-                                          <div className='w-full bg-gray-200 rounded-full h-2.5'>
-                                            <div
-                                              className={`h-2.5 rounded-full ${isRewardAchievable ? "bg-green-500" : "bg-blue-500"}`}
-                                              style={{ width: `${Math.min(progress, 100)}%` }}
-                                            ></div>
-                                          </div>
-                                        </>
-                                      )}
-                                    </div>
-
-                                    {/* Mostrar mensaje si la recompensa de 0 puntos ya ha sido canjeada */}
-                                    {reward.points === 0 && isRewardRedeemed ? (
-                                      <p className='mt-2 text-sm text-gray-500'>Promoción única ya canjeada</p>
-                                    ) : (
-                                      <Button
-                                        onClick={() => {
-                                          console.log("Reward clicked:", reward);
-                                          console.log("Promotion:", promo.promotion);
-                                          console.log("Is Reward Achievable:", isRewardAchievable);
-                                          setSelectedReward(reward);
-                                          handleRedeemReward(promo.promotion, reward);
-                                        }}
-                                        disabled={!isRewardAchievable || (reward.points === 0 && isRewarded.length)}
-                                        className={`mt-3 w-full ${
-                                          isRewardAchievable && !(reward.points === 0 && isRewardRedeemed)
-                                            ? "bg-green-500 hover:bg-green-600 text-white"
-                                            : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                                        }`}
-                                      >
-                                        {reward.points === 0 && isRewarded.length
-                                          ? "Promoción única ya canjeada"
-                                          : isRewardAchievable
-                                          ? "Canjear"
-                                          : `Te faltan ${reward.points - userDetails.totalPoints} pts`}
-                                      </Button>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                          {/* Conditional Alert for Non-Applicable Days */}
-                          {!isHot && promo.promotion.systemType === "visits" && (
-                            <Alert severity='warning' className='mt-4 h-fit'>
-                              Esta promoción solo está disponible los días: {formattedDays}. Hoy ({daysOfWeek[today]}) no es un día válido para esta promoción.
-                            </Alert>
-                          )}
                           <DialogFooter>
                             {isHot && promo.systemType === "visits" && (
                               <Button
