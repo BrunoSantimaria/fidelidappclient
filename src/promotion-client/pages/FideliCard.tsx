@@ -650,7 +650,7 @@ export default function FideliCard() {
 
               <div>
                 <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-                  <DialogContent className='max-w-xs max-h-[40%] md:max-h-[30%] overflow-y-hidden p-4 rounded-lg shadow-md border border-gray-200 bg-white'>
+                  <DialogContent className='max-w-xs max-h-[40%] md:max-h-[30%] overflow-y-scroll p-4 rounded-lg shadow-md border border-gray-200 bg-white'>
                     <DialogHeader className='pt-16'>
                       <DialogTitle className='text-lg font-semibold'>Confirmar Canje</DialogTitle>
                       <DialogDescription className='text-sm text-gray-600'>
@@ -702,7 +702,7 @@ export default function FideliCard() {
 
         {/* Confirmation Dialog */}
         <Dialog open={showRedemptionDialog} onOpenChange={setShowRedemptionDialog}>
-          <DialogContent className='h-fit'>
+          <DialogContent className='h-fit overflow-y-scroll'>
             <DialogHeader>
               <DialogTitle className='pt-8'>Promoción Canjeada</DialogTitle>
               <DialogDescription>
