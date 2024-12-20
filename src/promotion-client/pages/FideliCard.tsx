@@ -712,7 +712,7 @@ export default function FideliCard() {
               </DialogDescription>
               <div className='mt-4 bg-blue-50 p-4 rounded-lg'>
                 <p className='text-sm text-gray-700'>{selectedPromotion?.promotion?.description}</p>
-                <p className='mt-2 text-sm text-main font-semibold'>Condiciones: {selectedPromotion?.promotion?.conditions}</p>
+           
               </div>
               <Alert severity='success' className='text-left'>
                 Muestra este mensaje para validar tu canje. Si no puedes mostrar en tú actividad reciente.
