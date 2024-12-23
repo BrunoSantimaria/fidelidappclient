@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Facebook, Instagram, Globe, CreditCard, Star, LogOutIcon, Search, ChevronRight, ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -78,80 +78,170 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
     min: "",
     max: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const contentRef = useRef(null);
+  const categoryScrollRef = useRef(null);
 
-  const scrollRef = useRef(null);
+  // Add debounced values
+  const debouncedSearch = useDebounce(searchTerm, 300);
+  const debouncedPriceFilter = useDebounce(priceFilter, 300);
+  function useDebounce(value, delay) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+
+    return debouncedValue;
+  }
+  const allItems = useMemo(
+    () =>
+      account?.landing?.menu?.categories.flatMap((category) =>
+        (category.items || []).map((item) => ({
+          ...item,
+          categoryName: category.name,
+          name: item.name || "",
+          description: item.description || "",
+        }))
+      ) || [],
+    [account?.landing?.menu?.categories]
+  );
+  const filteredItems = useMemo(() => {
+    if (!debouncedSearch && !debouncedPriceFilter.min && !debouncedPriceFilter.max) return [];
+
+    setIsLoading(true);
+    const results = allItems.filter((item) => {
+      const searchLower = (debouncedSearch || "").toLowerCase();
+      const itemName = (item.name || "").toLowerCase();
+      const itemDescription = (item.description || "").toLowerCase();
+
+      const matchesSearch = !debouncedSearch || itemName.includes(searchLower) || itemDescription.includes(searchLower);
+
+      const itemPrice = Number(item.price) || 0;
+      const minPrice = Number(debouncedPriceFilter.min) || 0;
+      const maxPrice = Number(debouncedPriceFilter.max) || Infinity;
+
+      const matchesPrice = (!debouncedPriceFilter.min || itemPrice >= minPrice) && (!debouncedPriceFilter.max || itemPrice <= maxPrice);
+
+      return matchesSearch && matchesPrice;
+    });
+    setIsLoading(false);
+    return results;
+  }, [allItems, debouncedSearch, debouncedPriceFilter]);
+  // Memoize current category items
+  const categoryItems = useMemo(
+    () => account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.items || [],
+    [account?.landing?.menu?.categories, selectedCategory]
+  );
+
+  const itemsToShow = debouncedSearch || debouncedPriceFilter.min || debouncedPriceFilter.max ? filteredItems : categoryItems;
+
+  // Handle category change and scroll reset
+  const handleCategoryChange = (categoryName) => {
+    setSelectedCategory(categoryName);
+    setSearchTerm("");
+    setPriceFilter({ min: "", max: "" });
+    setShowSearch(false);
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  };
+
+  // Custom debounce hook
 
   if (!isOpen) return null;
 
-  const filteredItems = account?.landing?.menu?.categories
-    .flatMap((category) => category.items)
-    .filter((item) => {
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesPrice = (!priceFilter.min || item.price >= Number(priceFilter.min)) && (!priceFilter.max || item.price <= Number(priceFilter.max));
-      return matchesSearch && matchesPrice;
-    });
-
-  const itemsToShow =
-    searchTerm || priceFilter.min || priceFilter.max ? filteredItems : account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.items || [];
-
   return (
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`fixed inset-0 z-50 ${palette.background}`}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={`fixed inset-0 h-screen overflow-hidden z-50 ${palette.background}`}
+      >
         <div className='h-full flex flex-col'>
           {/* Header */}
           <div className='sticky top-0 z-10 bg-inherit'>
             <div className='flex items-center justify-between p-4'>
               <h1 className={`text-2xl font-bold ${palette.textPrimary}`}>Nuestro Menú</h1>
-              <button onClick={onClose} className={`p-2 rounded-full hover:${palette.buttonHover}`}>
-                <X className={`w-6 h-6 ${palette.textPrimary}`} />
-              </button>
+              <div className='flex items-center gap-2'>
+                <button
+                  onClick={() => setShowSearch(!showSearch)}
+                  className={`p-2 rounded-full hover:${palette.buttonHover} ${showSearch ? palette.cardBackground : ""}`}
+                >
+                  <Search className={`w-6 h-6 ${palette.textPrimary}`} />
+                </button>
+                <button onClick={onClose} className={`p-2 rounded-full hover:${palette.buttonHover}`}>
+                  <X className={`w-6 h-6 ${palette.textPrimary}`} />
+                </button>
+              </div>
             </div>
 
             {/* Search and Filters */}
-            <div className='px-4 pb-4 space-y-4'>
-              <div className='relative'>
-                <input
-                  type='text'
-                  placeholder='Buscar productos'
-                  className={`w-full p-3 pl-10 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Search className='absolute left-3 top-3.5 text-gray-400' />
-              </div>
+            <AnimatePresence>
+              {showSearch && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className='overflow-hidden'
+                >
+                  <div className='px-4 pb-4 space-y-4'>
+                    <div className='relative'>
+                      <input
+                        type='text'
+                        placeholder='Buscar productos'
+                        className={`w-full p-3 pl-10 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <Search className='absolute left-3 top-3.5 text-gray-400' />
+                      {searchTerm && (
+                        <button onClick={() => setSearchTerm("")} className='absolute right-3 top-3.5'>
+                          <X className='w-5 h-5 text-gray-400' />
+                        </button>
+                      )}
+                    </div>
 
-              <div className='flex gap-2'>
-                <input
-                  type='number'
-                  placeholder='Precio min'
-                  className={`w-1/2 p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
-                  value={priceFilter.min}
-                  onChange={(e) => setPriceFilter((prev) => ({ ...prev, min: e.target.value }))}
-                />
-                <input
-                  type='number'
-                  placeholder='Precio max'
-                  className={`w-1/2 p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
-                  value={priceFilter.max}
-                  onChange={(e) => setPriceFilter((prev) => ({ ...prev, max: e.target.value }))}
-                />
-              </div>
-            </div>
+                    <div className='flex gap-2'>
+                      <input
+                        type='number'
+                        placeholder='Precio min'
+                        className={`w-1/2 p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                        value={priceFilter.min}
+                        onChange={(e) => setPriceFilter((prev) => ({ ...prev, min: e.target.value }))}
+                      />
+                      <input
+                        type='number'
+                        placeholder='Precio max'
+                        className={`w-1/2 p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                        value={priceFilter.max}
+                        onChange={(e) => setPriceFilter((prev) => ({ ...prev, max: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Categories */}
             <div className='px-4'>
-              <div ref={scrollRef} className='flex gap-3 overflow-x-auto pb-4 scrollbar-hide' style={{ scrollSnapType: "x mandatory" }}>
+              <div ref={categoryScrollRef} className='flex gap-3 overflow-x-auto pb-4 scrollbar-hide' style={{ scrollSnapType: "x mandatory" }}>
                 {account?.landing?.menu?.categories.map((category, index) => (
                   <motion.button
                     key={category._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    onClick={() => {
-                      setSelectedCategory(category.name);
-                      setSearchTerm("");
-                      setPriceFilter({ min: "", max: "" });
-                    }}
+                    onClick={() => handleCategoryChange(category.name)}
                     className={`
                       flex-shrink-0 
                       min-w-[100px]
@@ -175,50 +265,70 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
           </div>
 
           {/* Content */}
-          <div className='flex-1 overflow-y-auto'>
+          <div ref={contentRef} className='flex-1 overflow-y-auto'>
             <div className='container mx-auto px-4 py-6'>
-              <motion.h2
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`text-xl font-semibold mb-6 ${palette.textPrimary}`}
-              >
-                {searchTerm || priceFilter.min || priceFilter.max ? "Resultados de búsqueda" : selectedCategory}
-              </motion.h2>
-
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8'>
-                {itemsToShow.map((item, index) => (
-                  <motion.div
-                    key={item._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden`}
+              <div className='mb-6'>
+                <motion.h2
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`text-xl font-semibold ${palette.textPrimary}`}
+                >
+                  {debouncedSearch || debouncedPriceFilter.min || debouncedPriceFilter.max ? "Resultados de búsqueda" : selectedCategory}
+                </motion.h2>
+                {!debouncedSearch && !debouncedPriceFilter.min && !debouncedPriceFilter.max && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className={`mt-2 ${palette.textSecondary}`}
                   >
-                    {item.image && (
-                      <div className='relative h-48'>
-                        <img src={item.image} alt={item.name} className='w-full h-full object-cover' />
-                      </div>
-                    )}
-                    <div className='p-4'>
-                      <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{item.name}</h3>
-                      <p className={`text-sm mb-4 ${palette.textSecondary}`}>{item.description}</p>
-                      {account?.landing?.menu?.settings?.showPrices && (
-                        <p className={`text-lg font-bold ${palette.textPrimary}`}>
-                          {account?.landing?.menu?.settings?.currency}
-                          {item.price.toLocaleString()}
-                        </p>
-                      )}
-                      {!item.available && <span className='bg-red-500 text-white px-2 py-1 rounded mt-2 inline-block'>No disponible</span>}
-                    </div>
-                  </motion.div>
-                ))}
+                    {account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.description}
+                  </motion.p>
+                )}
               </div>
 
-              {itemsToShow.length === 0 && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-center ${palette.textSecondary} py-8`}>
-                  No se encontraron productos que coincidan con tu búsqueda
-                </motion.p>
+              {isLoading ? (
+                <div className='flex justify-center items-center py-12'>
+                  <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900'></div>
+                </div>
+              ) : (
+                <>
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8'>
+                    {itemsToShow.map((item, index) => (
+                      <motion.div
+                        key={item._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                        className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden`}
+                      >
+                        {item.image && (
+                          <div className='relative h-48'>
+                            <img src={item.image} alt={item.name} className='w-full h-full object-cover' />
+                          </div>
+                        )}
+                        <div className='p-4'>
+                          <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{item.name}</h3>
+                          <p className={`text-sm mb-4 ${palette.textSecondary}`}>{item.description}</p>
+                          {account?.landing?.menu?.settings?.showPrices && (
+                            <p className={`text-lg font-bold ${palette.textPrimary}`}>
+                              {account?.landing?.menu?.settings?.currency}
+                              {item.price.toLocaleString()}
+                            </p>
+                          )}
+                          {!item.available && <span className='bg-red-500 text-white px-2 py-1 rounded mt-2 inline-block'>No disponible</span>}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {itemsToShow.length === 0 && (
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-center ${palette.textSecondary} py-8`}>
+                      No se encontraron productos que coincidan con tu búsqueda
+                    </motion.p>
+                  )}
+                </>
               )}
             </div>
           </div>
