@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Facebook, Instagram, Globe, CreditCard, Star, LogOutIcon, Search, ChevronRight, ChevronLeft } from "lucide-react";
+import { Facebook, Instagram, Globe, CreditCard, Star, LogOutIcon, Search, ChevronRight, ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from "@/components/ui/dialog";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Alert } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
@@ -69,6 +69,7 @@ interface MenuCategory {
 }
 
 // Componente para mostrar el menú
+
 const MenuDialog = ({ account, isOpen, onClose }) => {
   const palette = generatePalette(account?.landing?.colorPalette);
   const [selectedCategory, setSelectedCategory] = useState(() => account?.landing?.menu?.categories[0]?.name || null);
@@ -80,17 +81,8 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
 
   const scrollRef = useRef(null);
 
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === "left" ? -200 : 200;
-      scrollRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
+  if (!isOpen) return null;
 
-  // Filtrar items...
   const filteredItems = account?.landing?.menu?.categories
     .flatMap((category) => category.items)
     .filter((item) => {
@@ -103,27 +95,24 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
     searchTerm || priceFilter.min || priceFilter.max ? filteredItems : account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.items || [];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`sm:max-w-[90%] sm:h-[90vh] flex flex-col ${palette.background}`}>
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <DialogHeader>
-            <DialogTitle className={`text-2xl text-center ${palette.textPrimary}`}>Nuestro Menú</DialogTitle>
-          </DialogHeader>
-        </motion.div>
+    <AnimatePresence>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`fixed inset-0 z-50 ${palette.background}`}>
+        <div className='h-full flex flex-col'>
+          {/* Header */}
+          <div className='sticky top-0 z-10 bg-inherit'>
+            <div className='flex items-center justify-between p-4'>
+              <h1 className={`text-2xl font-bold ${palette.textPrimary}`}>Nuestro Menú</h1>
+              <button onClick={onClose} className={`p-2 rounded-full hover:${palette.buttonHover}`}>
+                <X className={`w-6 h-6 ${palette.textPrimary}`} />
+              </button>
+            </div>
 
-        <div className='flex-grow overflow-y-auto'>
-          <div className='max-w-7xl mx-auto px-4 py-8'>
-            {/* Filtros con animación */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'
-            >
-              <div className='relative col-span-1 md:col-span-2'>
+            {/* Search and Filters */}
+            <div className='px-4 pb-4 space-y-4'>
+              <div className='relative'>
                 <input
                   type='text'
-                  placeholder='Buscar productos por nombre o descripción'
+                  placeholder='Buscar productos'
                   className={`w-full p-3 pl-10 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -135,37 +124,23 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
                 <input
                   type='number'
                   placeholder='Precio min'
-                  className={`w-full p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                  className={`w-1/2 p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
                   value={priceFilter.min}
                   onChange={(e) => setPriceFilter((prev) => ({ ...prev, min: e.target.value }))}
                 />
                 <input
                   type='number'
                   placeholder='Precio max'
-                  className={`w-full p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                  className={`w-1/2 p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
                   value={priceFilter.max}
                   onChange={(e) => setPriceFilter((prev) => ({ ...prev, max: e.target.value }))}
                 />
               </div>
-            </motion.div>
+            </div>
 
-            {/* Categorías con scroll */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }} className='relative px-8 md:px-0'>
-              <button
-                onClick={() => scroll("left")}
-                className='md:hidden absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 rounded-full p-2 hover:bg-black/50 transition-colors'
-              >
-                <ChevronLeft className='text-white w-6 h-6' />
-              </button>
-
-              <button
-                onClick={() => scroll("right")}
-                className='md:hidden absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 rounded-full p-2 hover:bg-black/50 transition-colors'
-              >
-                <ChevronRight className='text-white w-6 h-6' />
-              </button>
-
-              <div ref={scrollRef} className='flex md:grid md:grid-cols-8 gap-4 mb-12 overflow-x-auto pb-4 scrollbar-hide mx-2'>
+            {/* Categories */}
+            <div className='px-4'>
+              <div ref={scrollRef} className='flex gap-3 overflow-x-auto pb-4 scrollbar-hide' style={{ scrollSnapType: "x mandatory" }}>
                 {account?.landing?.menu?.categories.map((category, index) => (
                   <motion.button
                     key={category._id}
@@ -179,73 +154,77 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
                     }}
                     className={`
                       flex-shrink-0 
-                      w-24
-                     
-                      md:w-auto 
+                      min-w-[100px]
                       flex 
                       flex-col 
                       items-center 
                       p-4 
                       rounded-lg 
                       transition-all
+                      scroll-snap-align-start
                       ${selectedCategory === category.name ? palette.cardBackground : `${palette.background} hover:${palette.buttonHover}`} 
                       ${palette.textPrimary}
                     `}
                   >
-                    <div className='text-3xl mb-2'>{category.icon}</div>
-                    <span className='text-xs text-center font-medium whitespace-pre-wrap'>{category.name}</span>
+                    <div className='text-2xl mb-2'>{category.icon}</div>
+                    <span className='text-xs text-center font-medium'>{category.name}</span>
                   </motion.button>
                 ))}
               </div>
-            </motion.div>
-
-            {/* Título con animación */}
-            <motion.h2
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0.3 }}
-              className={`text-xl font-semibold mb-6 ${palette.textPrimary}`}
-            >
-              {searchTerm || priceFilter.min || priceFilter.max ? "Resultados de búsqueda" : selectedCategory}
-            </motion.h2>
-
-            {/* Grid de items con animaciones */}
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {itemsToShow.map((item, index) => (
-                <motion.div
-                  key={item._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                  className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden`}
-                >
-                  {item.image && <img src={item.image} alt={item.name} className='w-full h-48 object-cover' />}
-                  <div className='p-4'>
-                    <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{item.name}</h3>
-                    <p className={`text-sm mb-4 ${palette.textSecondary}`}>{item.description}</p>
-                    {account?.landing?.menu?.settings?.showPrices && (
-                      <p className={`text-lg font-bold ${palette.textPrimary}`}>
-                        {account?.landing?.menu?.settings?.currency}
-                        {item.price.toLocaleString()}
-                      </p>
-                    )}
-                    {!item.available && <span className='bg-red-500 text-white px-2 py-1 rounded mt-2 inline-block'>No disponible</span>}
-                  </div>
-                </motion.div>
-              ))}
             </div>
+          </div>
 
-            {/* Mensaje sin resultados con animación */}
-            {itemsToShow.length === 0 && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className={`text-center ${palette.textSecondary}`}>
-                No se encontraron productos que coincidan con tu búsqueda
-              </motion.p>
-            )}
+          {/* Content */}
+          <div className='flex-1 overflow-y-auto'>
+            <div className='container mx-auto px-4 py-6'>
+              <motion.h2
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`text-xl font-semibold mb-6 ${palette.textPrimary}`}
+              >
+                {searchTerm || priceFilter.min || priceFilter.max ? "Resultados de búsqueda" : selectedCategory}
+              </motion.h2>
+
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8'>
+                {itemsToShow.map((item, index) => (
+                  <motion.div
+                    key={item._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden`}
+                  >
+                    {item.image && (
+                      <div className='relative h-48'>
+                        <img src={item.image} alt={item.name} className='w-full h-full object-cover' />
+                      </div>
+                    )}
+                    <div className='p-4'>
+                      <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{item.name}</h3>
+                      <p className={`text-sm mb-4 ${palette.textSecondary}`}>{item.description}</p>
+                      {account?.landing?.menu?.settings?.showPrices && (
+                        <p className={`text-lg font-bold ${palette.textPrimary}`}>
+                          {account?.landing?.menu?.settings?.currency}
+                          {item.price.toLocaleString()}
+                        </p>
+                      )}
+                      {!item.available && <span className='bg-red-500 text-white px-2 py-1 rounded mt-2 inline-block'>No disponible</span>}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {itemsToShow.length === 0 && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-center ${palette.textSecondary} py-8`}>
+                  No se encontraron productos que coincidan con tu búsqueda
+                </motion.p>
+              )}
+            </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 export function LandingPage() {
