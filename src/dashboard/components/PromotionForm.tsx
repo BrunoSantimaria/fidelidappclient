@@ -54,7 +54,7 @@ export const PromotionForm = () => {
       const formData = new FormData();
       formData.append("title", values.title);
       formData.append("description", values.description);
-      formData.append("visitsRequired", values.visitsRequired);
+
       formData.append("promotionDuration", values.promotionDuration);
       formData.append("promotionType", values.promotionType);
       formData.append("promotionRecurrent", values.promotionRecurrent);
@@ -72,7 +72,6 @@ export const PromotionForm = () => {
         setLoading(false);
         navigate("/dashboard");
       } catch (error) {
-        console.log(error);
         toast.error("Error al crear la promoción");
       } finally {
         setLoading(false);

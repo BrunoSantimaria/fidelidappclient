@@ -78,7 +78,6 @@ const ContactForm = () => {
 
       handleNavigate("/thankyou");
     } catch (error) {
-      console.log(error);
       toast.error("Hubo un error al enviar el formulario.");
     } finally {
       setTimeout(() => {

@@ -13,8 +13,6 @@ const statusMap = {
 
 export const ClientList = ({ clients, promotion }) => {
   const { handleNavigate } = useNavigateTo();
-  console.log("Clientes:", clients); // Log para ver los datos de los clientes
-  console.log("Promoción:", promotion); // Log para ver los datos de la promoción
 
   // Estado para paginación
   const [page, setPage] = useState(0);
@@ -34,10 +32,6 @@ export const ClientList = ({ clients, promotion }) => {
   // Verificamos el tipo de promoción al principio
   const isPointsBased = promotion.systemType === "points";
   const isVisitsBased = promotion.systemType === "visits";
-
-  // Agregar logs para verificar los tipos
-  console.log("isPointsBased:", isPointsBased); // Log para verificar si es un sistema de puntos
-  console.log("isVisitsBased:", isVisitsBased); // Log para verificar si es un sistema de visitas
 
   if (!clients.length)
     return (

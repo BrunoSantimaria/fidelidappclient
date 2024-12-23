@@ -42,8 +42,6 @@ interface DecodedToken {
 
 const token = localStorage.getItem("token");
 
-console.log(token); // Imprime el valor del token si existe
-
 let initialUser = null;
 
 if (token) {

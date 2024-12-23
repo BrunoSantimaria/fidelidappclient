@@ -31,18 +31,15 @@ export const PromotionClient = () => {
   };
 
   useEffect(() => {
-
     const clientIdDataString = localStorage.getItem("clientId");
-    console.log("clientIdDataString", clientIdDataString);
 
     if (clientIdDataString) {
       try {
         const clientIdData = JSON.parse(clientIdDataString); // Parse the stored string
         const clientId = clientIdData.clientId;
-        console.log(`/promotions/${clientId}/${id}`);
+
         handleNavigate(`/promotions/${clientId}/${id}`); // Redirect if the local storage key exists
         return; // Exit the effect to avoid unnecessary API calls
-
       } catch (error) {
         console.error("Error parsing clientId from local storage:", error);
       }
@@ -63,7 +60,6 @@ export const PromotionClient = () => {
 
     fetchPromotion();
   }, [id]);
-  console.log(promotion);
 
   const handleEmailChange = (event) => {
     setClientEmail(event.target.value);
@@ -106,7 +102,6 @@ export const PromotionClient = () => {
       saveClientId(clientId);
       toast.success("Has sido agregado a la promoción exitosamente. Serás redirigido a tu Fidelicard.");
       handleNavigate(`/promotions/${clientId}/${id}`);
-
     } catch (error) {
       if (error.response?.data?.error === "Client already has this promotion") {
         // Cliente ya existe; obtener el clientId del error

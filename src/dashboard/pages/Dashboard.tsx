@@ -15,8 +15,6 @@ moment.locale("es");
 const useDashboardData = () => {
   const [error, setError] = useState(null);
   const { metrics, plan, promotions, getPromotionsAndMetrics, clients, loadingPromotions, loadingClients, loadingAgendas } = useDashboard();
-  console.log("🚀 ~ useDashboardData ~ metrics:", metrics);
-  console.log("🚀 ~ useDashboardData ~ clients:", clients);
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,7 +66,7 @@ export const Dashboard = () => {
   const indexOfLastClient = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
   const currentClients = sortedClients.slice(indexOfFirstClient, indexOfLastClient);
-  console.log("🚀 ~ Dashboard ~ sortedClients:", sortedClients);
+
   const totalPages = Math.ceil(sortedClients.length / clientsPerPage);
 
   const handlePageChange = (event, value) => {

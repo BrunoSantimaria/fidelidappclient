@@ -107,7 +107,7 @@ export const TablePromotions = ({ onDelete }) => {
       onDelete();
     }
   };
-  console.log(metrics?.activePromotions, plan?.promotionLimit);
+
   return (
     <Card sx={{ borderTop: 4, borderColor: "#5b7898" }}>
       <Box sx={{ p: 3 }}>

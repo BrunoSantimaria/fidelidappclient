@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Facebook, Instagram, Globe, CreditCard, Star, LogOutIcon } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Facebook, Instagram, Globe, CreditCard, Star, LogOutIcon, Search, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from "@/components/ui/dialog";
@@ -51,7 +51,203 @@ interface Account {
   promotions: Promotion[];
   card?: string[];
 }
+interface MenuItem {
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  available: boolean;
+  _id: string;
+}
 
+interface MenuCategory {
+  name: string;
+  icon: string;
+  description: string;
+  items: MenuItem[];
+  _id: string;
+}
+
+// Componente para mostrar el menú
+const MenuDialog = ({ account, isOpen, onClose }) => {
+  const palette = generatePalette(account?.landing?.colorPalette);
+  const [selectedCategory, setSelectedCategory] = useState(() => account?.landing?.menu?.categories[0]?.name || null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [priceFilter, setPriceFilter] = useState({
+    min: "",
+    max: "",
+  });
+
+  const scrollRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === "left" ? -200 : 200;
+      scrollRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Filtrar items...
+  const filteredItems = account?.landing?.menu?.categories
+    .flatMap((category) => category.items)
+    .filter((item) => {
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesPrice = (!priceFilter.min || item.price >= Number(priceFilter.min)) && (!priceFilter.max || item.price <= Number(priceFilter.max));
+      return matchesSearch && matchesPrice;
+    });
+
+  const itemsToShow =
+    searchTerm || priceFilter.min || priceFilter.max ? filteredItems : account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.items || [];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className={`sm:max-w-[90%] sm:h-[90vh] flex flex-col ${palette.background}`}>
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <DialogHeader>
+            <DialogTitle className={`text-2xl text-center ${palette.textPrimary}`}>Nuestro Menú</DialogTitle>
+          </DialogHeader>
+        </motion.div>
+
+        <div className='flex-grow overflow-y-auto'>
+          <div className='max-w-7xl mx-auto px-4 py-8'>
+            {/* Filtros con animación */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'
+            >
+              <div className='relative col-span-1 md:col-span-2'>
+                <input
+                  type='text'
+                  placeholder='Buscar productos por nombre o descripción'
+                  className={`w-full p-3 pl-10 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Search className='absolute left-3 top-3.5 text-gray-400' />
+              </div>
+
+              <div className='flex gap-2'>
+                <input
+                  type='number'
+                  placeholder='Precio min'
+                  className={`w-full p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                  value={priceFilter.min}
+                  onChange={(e) => setPriceFilter((prev) => ({ ...prev, min: e.target.value }))}
+                />
+                <input
+                  type='number'
+                  placeholder='Precio max'
+                  className={`w-full p-3 rounded-lg border border-gray-600 ${palette.background} ${palette.textPrimary}`}
+                  value={priceFilter.max}
+                  onChange={(e) => setPriceFilter((prev) => ({ ...prev, max: e.target.value }))}
+                />
+              </div>
+            </motion.div>
+
+            {/* Categorías con scroll */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }} className='relative px-8 md:px-0'>
+              <button
+                onClick={() => scroll("left")}
+                className='md:hidden absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 rounded-full p-2 hover:bg-black/50 transition-colors'
+              >
+                <ChevronLeft className='text-white w-6 h-6' />
+              </button>
+
+              <button
+                onClick={() => scroll("right")}
+                className='md:hidden absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 rounded-full p-2 hover:bg-black/50 transition-colors'
+              >
+                <ChevronRight className='text-white w-6 h-6' />
+              </button>
+
+              <div ref={scrollRef} className='flex md:grid md:grid-cols-8 gap-4 mb-12 overflow-x-auto pb-4 scrollbar-hide mx-2'>
+                {account?.landing?.menu?.categories.map((category, index) => (
+                  <motion.button
+                    key={category._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    onClick={() => {
+                      setSelectedCategory(category.name);
+                      setSearchTerm("");
+                      setPriceFilter({ min: "", max: "" });
+                    }}
+                    className={`
+                      flex-shrink-0 
+                      w-24
+                     
+                      md:w-auto 
+                      flex 
+                      flex-col 
+                      items-center 
+                      p-4 
+                      rounded-lg 
+                      transition-all
+                      ${selectedCategory === category.name ? palette.cardBackground : `${palette.background} hover:${palette.buttonHover}`} 
+                      ${palette.textPrimary}
+                    `}
+                  >
+                    <div className='text-3xl mb-2'>{category.icon}</div>
+                    <span className='text-xs text-center font-medium whitespace-pre-wrap'>{category.name}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Título con animación */}
+            <motion.h2
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+              className={`text-xl font-semibold mb-6 ${palette.textPrimary}`}
+            >
+              {searchTerm || priceFilter.min || priceFilter.max ? "Resultados de búsqueda" : selectedCategory}
+            </motion.h2>
+
+            {/* Grid de items con animaciones */}
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {itemsToShow.map((item, index) => (
+                <motion.div
+                  key={item._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden`}
+                >
+                  {item.image && <img src={item.image} alt={item.name} className='w-full h-48 object-cover' />}
+                  <div className='p-4'>
+                    <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{item.name}</h3>
+                    <p className={`text-sm mb-4 ${palette.textSecondary}`}>{item.description}</p>
+                    {account?.landing?.menu?.settings?.showPrices && (
+                      <p className={`text-lg font-bold ${palette.textPrimary}`}>
+                        {account?.landing?.menu?.settings?.currency}
+                        {item.price.toLocaleString()}
+                      </p>
+                    )}
+                    {!item.available && <span className='bg-red-500 text-white px-2 py-1 rounded mt-2 inline-block'>No disponible</span>}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Mensaje sin resultados con animación */}
+            {itemsToShow.length === 0 && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className={`text-center ${palette.textSecondary}`}>
+                No se encontraron productos que coincidan con tu búsqueda
+              </motion.p>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 export function LandingPage() {
   const { slug } = useParams();
 
@@ -61,6 +257,7 @@ export function LandingPage() {
   const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [accountNotFound, setAccountNotFound] = useState(false);
+  const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
 
   // Cargar la información de la cuenta
   const getAccInfo = async () => {
@@ -69,7 +266,6 @@ export function LandingPage() {
     try {
       const response = await api.get(`/api/landing/${slug}`);
 
-      console.log("🚀 ~ getAccInfo ~ response:", response);
       setAccount(response.data);
       document.title = `${response.data.name} | FidelidApp`;
       if (response.data.landing.card.content) setNumPages(response.data.landing.card.content.length);
@@ -176,7 +372,6 @@ export function LandingPage() {
     );
   }
   const palette = generatePalette(account?.landing?.colorPalette);
-  console.log("🚀 ~ LandingPage ~ palette:", palette);
 
   return (
     <motion.div
@@ -225,10 +420,11 @@ export function LandingPage() {
               <Button
                 onClick={() => {
                   if (account?.landing?.card.type === "link") {
-                    // Redirige a la URL en una nueva pestaña
                     window.open(account?.landing?.card.content[0], "_blank");
-                  } else {
+                  } else if (account?.landing?.card.type === "view_on_site") {
                     setIsPdfDialogOpen(true);
+                  } else if (account?.landing?.card.type === "menu") {
+                    setIsMenuDialogOpen(true);
                   }
                 }}
                 className={`
@@ -237,12 +433,15 @@ export function LandingPage() {
     ${palette.buttonHover}
     text-white font-bold p-6 transition-colors duration-300
     ring-0 
-        hover:ring-2
-        hover:ring-[${palette.textSecondary}]
+    hover:ring-2
+    hover:ring-[${palette.textSecondary}]
   `}
               >
                 {account?.landing?.card.title || "Ver nuestra carta"}
               </Button>
+
+              {/* Agrega el MenuDialog */}
+              <MenuDialog account={account} isOpen={isMenuDialogOpen} onClose={() => setIsMenuDialogOpen(false)} />
               {account?.landing?.googleBusiness && (
                 <Button
                   onClick={() => window.open(account?.landing?.googleBusiness, "_blank")}

@@ -6,8 +6,6 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DirectionsWalkRoundedIcon from "@mui/icons-material/DirectionsWalkRounded";
 import SavingsRoundedIcon from "@mui/icons-material/SavingsRounded";
 export const PromotionMetrics = ({ metrics }) => {
-  console.log(metrics);
-
   const isPointsBased = metrics?.systemType === "points"; // Verifica si es sistema de puntos
 
   return (

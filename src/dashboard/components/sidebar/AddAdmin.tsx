@@ -35,7 +35,7 @@ export const AddAdmin = ({ open, handleClose }: Props) => {
             } catch (error) {
               toast.error("Hubo un problema al agregar el administrador.");
             }
-            console.log(email);
+
             handleClose();
           },
         }}

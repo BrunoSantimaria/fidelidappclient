@@ -19,7 +19,6 @@ export const Stepper = () => {
     conditions: "",
   });
   const [promotionRequirements, setPromotionRequirements] = useState({
-    visitsRequired: "",
     promotionDuration: "",
     rewards: [], // Usamos rewards para las recompensas
     isRecurrent: false,
@@ -36,20 +35,18 @@ export const Stepper = () => {
   const validateStep = () => {
     switch (currentStep) {
       case 1:
-        return true; // Primer paso no requiere validación
+        return true;
       case 2:
-        return selectedSystem !== ""; // Validar que se haya seleccionado un sistema
+        return selectedSystem !== "";
       case 3:
         return isFieldNotEmpty(promotionDetails.title) && isFieldNotEmpty(promotionDetails.description) && promotionDetails.image !== null;
       case 4:
         if (selectedSystem === "visits") {
-          // Validación de visitas necesarias y duración
-          return isFieldNotEmpty(promotionRequirements.visitsRequired);
+          return promotionRequirements.startDate && promotionRequirements.endDate && promotionRequirements.daysOfWeek.length > 0;
         } else if (selectedSystem === "points") {
-          // Validación de que haya al menos una recompensa
           return promotionRequirements.rewards.length > 0;
         }
-        return false; // No válido si no es ni "visits" ni "points"
+        return false;
       default:
         return false;
     }
@@ -58,7 +55,6 @@ export const Stepper = () => {
   // Restablecer los requisitos de la promoción cuando el sistema cambie
   useEffect(() => {
     setPromotionRequirements({
-      visitsRequired: "",
       promotionDuration: "",
       rewards: [],
       isRecurrent: false,
@@ -111,16 +107,15 @@ export const Stepper = () => {
     formData.append("promotionDetails[title]", promotionDetails.title);
     formData.append("promotionDetails[description]", promotionDetails.description);
     formData.append("promotionDetails[conditions]", promotionDetails.conditions);
-    formData.append("promotionRequirements[visitsRequired]", promotionRequirements.visitsRequired);
+
     formData.append("promotionRequirements[promotionDuration]", promotionRequirements.promotionDuration);
     formData.append("promotionRequirements[isRecurrent]", promotionRequirements.isRecurrent);
-    
 
     // Si el selectedSystem es visits entonces sumar start y end date
     if (selectedSystem === "visits") {
       formData.append("promotionRequirements[startDate]", promotionRequirements.startDate);
       formData.append("promotionRequirements[endDate]", promotionRequirements.endDate);
-      formData.append("promotionRequirements[daysOfWeek]", promotionRequirements.daysOfWeek); 
+      formData.append("promotionRequirements[daysOfWeek]", promotionRequirements.daysOfWeek);
     }
 
     // Asegurarse de que `promotionRequirements.rewards` sea un array de objetos
@@ -145,17 +140,22 @@ export const Stepper = () => {
     }
 
     // Verificación de campos completos
-    if (
-      !promotionDetails.title ||
-      !promotionDetails.description ||
-      !promotionDetails.conditions ||
-      !promotionDetails.image ||
-      (selectedSystem === "visits" && !promotionRequirements.visitsRequired)
-    ) {
+    if (!promotionDetails.title || !promotionDetails.description || !promotionDetails.conditions || !promotionDetails.image) {
       console.log("Datos incompletos:", promotionDetails, promotionRequirements);
-
-      toast.info("Por favor, completa todos los campos.");
+      toast.info("Por favor, completa todos los campos básicos.");
       return;
+    }
+
+    // Validación específica para promociones tipo visits
+    if (selectedSystem === "visits") {
+      if (!promotionRequirements.startDate || !promotionRequirements.endDate) {
+        toast.info("Por favor, selecciona las fechas de inicio y fin de la promoción.");
+        return;
+      }
+      if (promotionRequirements.daysOfWeek.length === 0) {
+        toast.info("Por favor, selecciona los días en que estará disponible la promoción.");
+        return;
+      }
     }
     for (const [key, value] of formData.entries()) {
       console.log(`${key}: ${value}`);
@@ -166,10 +166,11 @@ export const Stepper = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("Promoción creada con éxito:", response.data);
+
       toast.success("Promoción creada con éxito.");
       handleNavigate(`/dashboard/promotion/${response.data._id}`);
     } catch (error) {
+      toast.error("Error al crear la promoción.");
       console.error("Error al crear la promoción:", error);
     }
   };

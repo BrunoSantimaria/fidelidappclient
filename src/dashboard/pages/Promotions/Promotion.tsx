@@ -36,7 +36,6 @@ import CloseIcon from "@mui/icons-material/Close";
 
 export const Promotion = () => {
   const { activePromotion, getPromotionById, cleanPromotion } = useDashboard();
-  console.log(activePromotion);
 
   const { id } = useParams();
   const [clientEmail, setClientEmail] = useState("");
@@ -74,14 +73,13 @@ export const Promotion = () => {
   const previewPromotionEmails = async (promotionId) => {
     try {
       const response = await api.post("api/email/previewPromotionEmails", { promotionId });
-      console.log(response.data); // Log the response data to see the result
+
       toast.success(`Preview successful! Total emails to send: ${response.data.totalEmailsToSend}`);
     } catch (error) {
       console.error(error);
       toast.error("Error while previewing emails");
     }
   };
-
 
   // Cargar la promoción al montar el componente
   useEffect(() => {
@@ -172,19 +170,21 @@ export const Promotion = () => {
 
   function renderDaysOfWeek(daysArray) {
     const daysMap = {
-      1: 'Lunes',
-      2: 'Martes',
-      3: 'Miércoles',
-      4: 'Jueves',
-      5: 'Viernes',
-      6: 'Sábado',
-      7: 'Domingo',
+      1: "Lunes",
+      2: "Martes",
+      3: "Miércoles",
+      4: "Jueves",
+      5: "Viernes",
+      6: "Sábado",
+      7: "Domingo",
     };
 
     // Map numbers to day names and join with commas
-    return daysArray.map(day => daysMap[day] || '').filter(Boolean).join(', ');
+    return daysArray
+      .map((day) => daysMap[day] || "")
+      .filter(Boolean)
+      .join(", ");
   }
-
 
   // Mostrar el backdrop mientras se carga
   if (loading) {
@@ -280,8 +280,6 @@ export const Promotion = () => {
                       )}
                     </div>
                   )}
-
-
                 </div>
               </div>
 
@@ -297,7 +295,6 @@ export const Promotion = () => {
                 Enviar Promoción por Email a mis Clientes
               </Button> */}
             </div>
-
           </CardContent>
 
           <PromotionMetrics metrics={activePromotion} />

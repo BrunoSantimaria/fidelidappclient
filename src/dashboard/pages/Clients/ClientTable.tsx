@@ -66,7 +66,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
 
       refreshAccount();
       setDisplayedClients(resp.data);
-      console.log(resp.data);
     } catch (error) {
       toast.error("Hubo un problema al eliminar. Intenta nuevamente.");
     }
@@ -99,7 +98,6 @@ const ClientTable: React.FC<ClientTableProps> = () => {
 
       try {
         const response = await api.post("/api/clients/addClient", newClient);
-        console.log("🚀 ~ addClient ~ newClient:", newClient);
 
         toast.info(`Cliente ${formattedName} agregado.`);
 

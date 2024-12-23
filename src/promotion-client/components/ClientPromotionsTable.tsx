@@ -3,33 +3,36 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Butto
 import { CalendarToday as CalendarIcon } from "@mui/icons-material";
 
 // Utility function to format dates
-const formatDate = (date) => new Date(date).toLocaleDateString("es-CL", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString("es-CL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
 // Table Component
-const ClientPromotionsTable = ({ clientPromotions, onRedirect }) => {
+const ClientPromotionsTable = ({ clientPromotions }) => {
   return (
     <TableContainer>
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell align="center">Título</TableCell>
+            <TableCell align='center'>Título</TableCell>
             {/* <TableCell align="center">Estado</TableCell> */}
-            <TableCell align="center">Visitas / Puntos</TableCell>
-            <TableCell align="center">Requerido</TableCell>
-            <TableCell align="center">Tipo</TableCell>
-            <TableCell align="center">Fin de Vigencia</TableCell>
+            <TableCell align='center'>Visitas / Puntos</TableCell>
+            <TableCell align='center'>Requerido</TableCell>
+            <TableCell align='center'>Tipo</TableCell>
+            <TableCell align='center'>Fin de Vigencia</TableCell>
             {/* <TableCell align="center">Acciones</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
           {clientPromotions.map((promo) => (
             <TableRow key={promo.id}>
-              <TableCell align="left">
-                <Typography variant="body2" fontWeight="bold">{promo.title}</Typography>
+              <TableCell align='left'>
+                <Typography variant='body2' fontWeight='bold'>
+                  {promo.title}
+                </Typography>
               </TableCell>
               {/* <TableCell align="center">
                 <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
@@ -41,15 +44,13 @@ const ClientPromotionsTable = ({ clientPromotions, onRedirect }) => {
                   <Typography variant="body2">{promo.status}</Typography>
                 </Box>
               </TableCell> */}
-              <TableCell align="center">
-                {promo.systemType === "points" ? promo.pointsEarned : promo.actualVisits}
-              </TableCell>
-              <TableCell align="center">{promo.visitsRequired || "N/A"}</TableCell>
-              <TableCell align="center">{promo.systemType}</TableCell>
-              <TableCell align="center">
-                <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                  <CalendarIcon fontSize="small" />
-                  <Typography variant="body2">{formatDate(promo.endDate)}</Typography>
+              <TableCell align='center'>{promo.systemType === "points" ? promo.pointsEarned : promo.actualVisits}</TableCell>
+              <TableCell align='center'>{promo.visitsRequired || "N/A"}</TableCell>
+              <TableCell align='center'>{promo.systemType}</TableCell>
+              <TableCell align='center'>
+                <Box display='flex' alignItems='center' justifyContent='center' gap={1}>
+                  <CalendarIcon fontSize='small' />
+                  <Typography variant='body2'>{formatDate(promo.endDate)}</Typography>
                 </Box>
               </TableCell>
               {/* <TableCell align="center">

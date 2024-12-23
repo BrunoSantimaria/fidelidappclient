@@ -29,7 +29,7 @@ export const CreateAgenda = () => {
         availableDays,
         availableHours,
       });
-      console.log("Agenda creada correctamente:", response.data);
+
       toast.success("Agenda creada correctamente");
       navigate("/dashboard/");
     } catch (error) {

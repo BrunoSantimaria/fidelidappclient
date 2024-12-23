@@ -19,10 +19,12 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { sortPromotions } from "../utils/SortPromotions";
 import { Badge } from "@/components/ui/badge";
 import { toast as toastify } from "react-toastify";
+import moment from "moment";
 
 export default function FideliCard() {
   const { slug, clientId } = useParams();
   const { authData, getClientId, logout } = useAuth();
+  console.log("🚀 ~ FideliCard ~ authData:", authData);
   const { handleNavigate } = useNavigateTo();
   const { toast } = useToast();
 
@@ -49,6 +51,7 @@ export default function FideliCard() {
     try {
       const resp = await api.get(`/api/landing/${slug}`);
 
+      console.log("🚀 ~ fetchFideliCardData ~ resp:", resp);
       const accountId = resp.data._id;
 
       if (!accountId) {
@@ -76,8 +79,7 @@ export default function FideliCard() {
       });
       setActivities(userActivities);
       setPromotions(availablePromotions);
-      console.log("🚀 ~ fetchFideliCardData ~ availablePromotions:", availablePromotions);
-      console.log("🚀 ~ fetchFideliCardData ~ availablePromotions:", availablePromotions);
+
       const activePointPromotion = availablePromotions.find((promotion) => {
         console.log(promotion.promotion.systemType, promotion.promotion.status); // Verifica los valores
         return promotion.promotion.systemType.toLowerCase().trim() === "points" && promotion.promotion.status.toLowerCase().trim() === "active";
@@ -323,12 +325,24 @@ export default function FideliCard() {
     const isHot = promotion?.status?.toLowerCase() === "active" && promotion.daysOfWeek.includes(adjustedToday);
 
     // Verificar si ya se canjeó una promoción del tipo "visits" hoy
-    const hasRedeemedToday = promotions.some(
-      (promo) =>
-        promo.systemType === "visits" &&
-        promo.lastRedeemDate &&
-        new Date(promo.lastRedeemDate).toISOString().split("T")[0] === new Date().toISOString().split("T")[0]
-    );
+    const hasRedeemedToday = promotions.some((promo) => {
+      if (!promo.lastRedeemDate || promo.systemType !== "visits") return false;
+
+      const options = {
+        timeZone: "America/Santiago",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      };
+
+      const lastRedeemDate = new Date(promo.lastRedeemDate).toLocaleString("es-CL", options);
+      const todayChile = new Date().toLocaleString("es-CL", options);
+
+      return lastRedeemDate === todayChile;
+    });
 
     // Validar disponibilidad de la promoción
     if (!isHot) {
@@ -450,8 +464,6 @@ export default function FideliCard() {
                         return day === today ? `${dayName}` : dayName;
                       });
 
-                    console.log("Applicable Days (raw):", applicableDays);
-
                     // Formatear `applicableDays` a días normalizados
                     const normalizedApplicableDays = applicableDays.map(normalizeText);
 
@@ -461,20 +473,15 @@ export default function FideliCard() {
                         ? applicableDays.slice(0, -1).join(", ") + (applicableDays.length > 1 ? " y " : "") + applicableDays[applicableDays.length - 1] + "."
                         : "";
 
-                    console.log("Formatted Days:", formattedDays);
-
                     // Extraer y normalizar los días de `formattedDays`
                     const formattedDaysList = formattedDays
                       .replace(/ y /g, ",") // Cambia " y " por ","
                       .split(",") // Divide en días individuales
                       .map(normalizeText); // Normaliza cada día
 
-                    console.log("Formatted Days (list):", formattedDaysList);
-
                     // Verificar si algún día de `formattedDaysList` está en `normalizedApplicableDays`
                     const hasMatchingDay = formattedDaysList.some((day) => normalizedApplicableDays.includes(day));
 
-                    console.log("¿Hay coincidencia de días?", hasMatchingDay);
                     return (
                       <Dialog key={promo._id}>
                         <DialogTrigger asChild>
@@ -514,7 +521,6 @@ export default function FideliCard() {
                                   const isRewarded = activities?.map(({ amount, type }) => {
                                     return amount === 0 && type === "reward_reedem";
                                   });
-                                  console.log("🚀 ~ isRewarded ~ isRewarded:", isRewarded);
 
                                   const progress = reward.points !== 0 ? (userDetails.totalPoints / reward.points) * 100 : 100;
 
@@ -603,9 +609,6 @@ export default function FideliCard() {
                                 className={`flex w-full ${
                                   // Verificar si CUALQUIER promoción de visitas ya fue canjeada hoy
                                   promotions.some((p) => {
-                                    console.log(
-                                      `Promoción: ${p.systemType}, Fecha de canje: ${p.lastRedeemDate}, Fecha actual: ${new Date().toISOString().split("T")[0]}`
-                                    );
                                     return (
                                       p.systemType === "visits" &&
                                       p.lastRedeemDate &&
@@ -616,9 +619,6 @@ export default function FideliCard() {
                                     : "bg-main text-white hover:bg-main/90 duration-500"
                                 }`}
                                 disabled={promotions.some((p) => {
-                                  console.log(
-                                    `Promoción: ${p.systemType}, Fecha de canje: ${p.lastRedeemDate}, Fecha actual: ${new Date().toISOString().split("T")[0]}`
-                                  );
                                   return (
                                     p.systemType === "visits" &&
                                     p.lastRedeemDate &&
@@ -627,9 +627,6 @@ export default function FideliCard() {
                                 })}
                               >
                                 {promotions.some((p) => {
-                                  console.log(
-                                    `Promoción: ${p.systemType}, Fecha de canje: ${p.lastRedeemDate}, Fecha actual: ${new Date().toISOString().split("T")[0]}`
-                                  );
                                   return (
                                     p.systemType === "visits" &&
                                     p.lastRedeemDate &&
@@ -702,7 +699,7 @@ export default function FideliCard() {
 
         {/* Confirmation Dialog */}
         <Dialog open={showRedemptionDialog} onOpenChange={setShowRedemptionDialog}>
-          <DialogContent className='h-fit overflow-y-scroll'>
+          <DialogContent className='h-fit'>
             <DialogHeader>
               <DialogTitle className='pt-8'>Promoción Canjeada</DialogTitle>
               <DialogDescription>
@@ -712,7 +709,6 @@ export default function FideliCard() {
               </DialogDescription>
               <div className='mt-4 bg-blue-50 p-4 rounded-lg'>
                 <p className='text-sm text-gray-700'>{selectedPromotion?.promotion?.description}</p>
-           
               </div>
               <Alert severity='success' className='text-left'>
                 Muestra este mensaje para validar tu canje. Si no puedes mostrar en tú actividad reciente.

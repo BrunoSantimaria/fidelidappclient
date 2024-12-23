@@ -73,7 +73,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
       });
 
       const clientId = response.data?.clientId ?? "";
-      console.log("🚀 ~ handleRegister ~ clientId:", clientId);
+
       const token = response.data?.token ?? "";
 
       login(accountId, clientId, token, clientId);
@@ -91,7 +91,6 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
 
       onAuthSuccess();
     } catch (error: any) {
-      console.log(error);
       if (error.response.data.error === "El cliente ya está registrado en esta cuenta") return toastify.info("Ya te encuentras asociado a la cuenta.");
       toastify.error(error);
     }
@@ -122,11 +121,6 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
       const clientId = response.data?.clientId ?? "";
       const token = response.data?.token ?? "";
 
-      console.log(response.data);
-      console.log("🚀 ~ handleLogin ~ clientId:", clientId);
-      console.log("🚀 ~ handleLogin ~ token:", token);
-      console.log("🚀 ~ handleLogin ~ accountId:", accountId); // Verifica el valor del accountId
-
       // Ahora utilizas el accountId dinámico obtenido
       login(accountId, accountId, token, clientId); // Llamas a login con el accountId correcto
 
@@ -144,7 +138,6 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    console.log("isRegistering:", isRegistering);
 
     if (isRegistering) {
       handleRegister();

@@ -63,7 +63,6 @@ const ExistingAppointments = ({ agendaId }) => {
       const fetchedAppointments = await fetchExistingAppointments(agendaId);
       if (fetchedAppointments.length > 0) {
         await setIsAdmin(true);
-        console.log(isAdmin);
       }
       setAppointments(fetchedAppointments);
       setLoading(false);

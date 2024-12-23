@@ -318,11 +318,6 @@ export const ClientPromotionCard = () => {
     }
   };
 
-  const handleRedirect = (id) => {
-    console.log(`Redirecting to promotion with ID: ${id}`);
-    // Implement navigation logic here
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -561,7 +556,7 @@ export const ClientPromotionCard = () => {
               </div>
             </div>
 
-            <ClientPromotionsTable clientPromotions={clientPromotions} onRedirect={handleRedirect} />
+            <ClientPromotionsTable clientPromotions={clientPromotions} />
           </CardContent>
           {(promotion.status === "Completed" || promotion.status === "Redeemed") && promotionDetails.promotionRecurrent === "True" && (
             <Box sx={{ my: 3, display: "flex", justifyContent: "center" }}>

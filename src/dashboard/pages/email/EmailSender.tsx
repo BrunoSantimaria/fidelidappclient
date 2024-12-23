@@ -471,7 +471,7 @@ export const EmailSender = () => {
       toast.error("Error al guardar la plantilla");
     }
   };
-  console.log("esto es accounts ", accounts);
+
   // Función para cargar las plantillas
   const loadTemplates = async () => {
     try {
@@ -539,12 +539,10 @@ export const EmailSender = () => {
       height: "100%",
     },
     onReady: () => {
-      console.log("Editor listo");
       // Restaurar el diseño guardado si existe y estamos en la pestaña de diseño
       if (currentTab === "design" && emailDesign) {
         setTimeout(() => {
           if (emailEditorRef.current?.editor) {
-            console.log("Cargando diseño guardado:", emailDesign);
             emailEditorRef.current.editor.loadDesign(emailDesign);
           }
         }, 1000);
@@ -560,7 +558,6 @@ export const EmailSender = () => {
         if (emailEditorRef.current?.editor) {
           await new Promise((resolve) => {
             emailEditorRef.current.editor.saveDesign((design) => {
-              console.log("Guardando diseño:", design);
               setEmailDesign(design);
               resolve(design);
             });
@@ -570,7 +567,6 @@ export const EmailSender = () => {
         // Esperar a que el editor esté listo antes de cargar el diseño
         setTimeout(() => {
           if (emailEditorRef.current?.editor) {
-            console.log("Restaurando diseño:", emailDesign);
             emailEditorRef.current.editor.loadDesign(emailDesign);
           }
         }, 1000);
@@ -585,7 +581,6 @@ export const EmailSender = () => {
   useEffect(() => {
     if (currentTab === "design" && emailDesign && emailEditorRef.current?.editor) {
       const timer = setTimeout(() => {
-        console.log("Intentando restaurar diseño:", emailDesign);
         emailEditorRef.current.editor.loadDesign(emailDesign);
       }, 1000);
 
@@ -760,7 +755,6 @@ export const EmailSender = () => {
                       emailEditorRef.current.editor.addEventListener("design:updated", () => {
                         emailEditorRef.current.editor.exportHtml((data) => {
                           // Aquí puedes manejar las actualizaciones del diseño
-                          console.log("Diseño actualizado");
                         });
                       });
                     }

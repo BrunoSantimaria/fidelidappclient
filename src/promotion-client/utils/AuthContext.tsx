@@ -33,7 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    console.log("Full AuthData Update:", authData);
     localStorage.setItem("globalAuthData", JSON.stringify(authData));
   }, [authData]);
 
@@ -43,13 +42,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Login attempted with empty accountId");
       return;
     }
-
-    console.log("Login Attempt Details:", {
-      accountId,
-      userId,
-      token,
-      clientId,
-    });
 
     setAuthData((prevData) => {
       const updatedData = {
@@ -62,9 +54,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           registered: true,
         },
       };
-
-      console.log("Updated AuthData for AccountId:", accountId);
-      console.log("Updated Entry:", updatedData[accountId]);
 
       return updatedData;
     });

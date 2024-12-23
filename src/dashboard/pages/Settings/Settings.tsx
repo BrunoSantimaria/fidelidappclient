@@ -6,6 +6,7 @@ import { Subscript } from "@mui/icons-material";
 import { Subscription } from "./views/Subscription";
 import { AccountSettings } from "./views/AccountSettings";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
+import { LandingSettings } from "./views/LandingSettings";
 
 export const Settings = () => {
   const [selectedSection, setSelectedSection] = useState("Personalización");
@@ -16,6 +17,7 @@ export const Settings = () => {
     { id: "1", label: "Personalización" },
     { id: "2", label: "Ajustes de cuenta" },
     { id: "3", label: "Suscripción" },
+    { id: "4", label: "Landing Page" }, // New section
   ];
 
   const renderSection = () => {
@@ -28,6 +30,8 @@ export const Settings = () => {
         return <Subscription />;
       case "Factura":
         return <Billing />;
+      case "Landing Page":
+        return <LandingSettings />;
       default:
         return null;
     }
