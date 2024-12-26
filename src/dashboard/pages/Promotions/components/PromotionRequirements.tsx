@@ -51,12 +51,12 @@ export const PromotionRequirements = ({
     const { name, value } = e.target;
     setNewReward((prev) => ({
       ...prev,
-      [name]: value.trim(),
+      [name]: value,
     }));
   };
 
   const addReward = () => {
-    if (newReward.points.trim() && newReward.description.trim()) {
+    if (newReward.points.trim() && newReward.description) {
       setRewards((prev) => [...prev, newReward]);
       setNewReward({ points: "", description: "" });
     }

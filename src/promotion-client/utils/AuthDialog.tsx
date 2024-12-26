@@ -10,13 +10,15 @@ import { useAuth } from "./AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { motion } from "framer-motion";
 import { toast as toastify } from "../../utils/toast";
+import { useNavigate } from "react-router-dom";
+import { useNavigateTo } from "@/hooks/useNavigateTo";
 
 interface AuthProps {
   accountId: string;
   onAuthSuccess: () => void;
 }
 
-export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthProps) {
+export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: AuthProps) {
   const [isRegistering, setIsRegistering] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,6 +26,8 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { toast } = useToast();
   const { login, registerAccount } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const {handleNavigate} = useNavigateTo();
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -41,6 +45,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
 
   // Función para manejar el registro
   const handleRegister = async () => {
+    setIsLoading(true);
     const formattedName = formatName(name);
     const formattedEmail = email.trim().toLowerCase();
     const formattedPhone = phone.trim();
@@ -73,7 +78,6 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
       });
 
       const clientId = response.data?.clientId ?? "";
-
       const token = response.data?.token ?? "";
 
       login(accountId, clientId, token, clientId);
@@ -87,17 +91,23 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
       const updatedPromotions = [...new Set([...existingPromotions, ...(response.data?.addedPromotions ?? [])])];
       localStorage.setItem("addedPromotions", JSON.stringify(updatedPromotions));
 
-      toastify.success(`Registro Exitoso.`);
-
+      toastify.success("¡Registro exitoso! Bienvenido/a.");
+      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
       onAuthSuccess();
     } catch (error: any) {
-      if (error.response.data.error === "El cliente ya está registrado en esta cuenta") return toastify.info("Ya te encuentras asociado a la cuenta.");
-      toastify.error(error);
+      if (error.response?.data?.error === "El cliente ya está registrado en esta cuenta") {
+        toastify.info("Ya te encuentras asociado a la cuenta.");
+      } else {
+        toastify.error("Error al registrar: " + (error.response?.data?.error || "Error desconocido"));
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Función para manejar el inicio de sesión
   const handleLogin = async () => {
+    setIsLoading(true);
     const formattedEmail = email.trim().toLowerCase();
 
     const newErrors: { [key: string]: string } = {};
@@ -117,21 +127,17 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
         accountId: accountId,
       });
 
-      // Obtener clientId, token y accountId de la respuesta de la API
       const clientId = response.data?.clientId ?? "";
       const token = response.data?.token ?? "";
 
-      // Ahora utilizas el accountId dinámico obtenido
-      login(accountId, accountId, token, clientId); // Llamas a login con el accountId correcto
-
-      // Llamar al callback de éxito de autenticación
+      login(accountId, accountId, token, clientId);
+      toastify.success("¡Inicio de sesión exitoso!");
+      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
       onAuthSuccess();
     } catch (error: any) {
-      toast({
-        title: "Inicio de Sesión Fallido",
-        description: error.response?.data?.error || "Ocurrió un error durante el inicio de sesión",
-        variant: "destructive",
-      });
+      toastify.error("Error al iniciar sesión: " + (error.response?.data?.error || "Error desconocido"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -155,10 +161,12 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
             {isRegistering && (
               <Input
                 type='text'
+                name='name'
                 placeholder='Tu nombre completo'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                autoComplete="name"
                 className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
               />
             )}
@@ -176,16 +184,29 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette }: AuthPr
             {isRegistering && (
               <Input
                 type='tel'
+                name='phone'
                 placeholder='Tu número de teléfono'
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required={isRegistering}
+                autoComplete="tel"
                 className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
               />
             )}
             {errors.phone && isRegistering && <p className='text-red-400 text-sm'>{errors.phone}</p>}
-            <Button type='submit' className={`${selectedPalette.buttonBackground} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}>
-              {isRegistering ? "Regístrate" : "Iniciar sesión"}
+            <Button 
+              type='submit' 
+              className={`${selectedPalette.buttonBackground} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-t-2 border-white rounded-full animate-spin mr-2"></div>
+                  {isRegistering ? "Registrando..." : "Iniciando sesión..."}
+                </div>
+              ) : (
+                isRegistering ? "Regístrate" : "Iniciar sesión"
+              )}
             </Button>
             <p className={`${selectedPalette.textSecondary} text-sm text-center mt-2`}>
               {isRegistering ? "¿Ya estás registrado?" : "¿No tienes cuenta?"}{" "}

@@ -501,6 +501,7 @@ export function LandingPage() {
                     login(account._id, userId, token, clientId);
                     getAccInfo();
                   }}
+                  slug={slug}
                 />
               </motion.div>
             )}
