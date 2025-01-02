@@ -27,7 +27,7 @@ const RuleForm: React.FC<RuleFormProps> = ({ rule, onClose, onSave }) => {
       <DialogTitle>{rule ? 'Edit Rule' : 'Create Rule'}</DialogTitle>
       <DialogContent>
         <TextField label="Name" name="name" fullWidth value={form.name} onChange={handleChange} sx={{ mb: 2 }} />
-        
+
         {/* Condition select with placeholder */}
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel id="condition-label">Condition</InputLabel>
@@ -41,15 +41,23 @@ const RuleForm: React.FC<RuleFormProps> = ({ rule, onClose, onSave }) => {
             <MenuItem value="" disabled>
               Choose a condition
             </MenuItem>
-            <MenuItem value="clientInactivity">clientInactivity</MenuItem>
-            <MenuItem value="promotionExpiration">promotionExpiration</MenuItem>
             <MenuItem value="clientRegistration">clientRegistration</MenuItem>
+            <MenuItem value="registrationDate">registrationDate</MenuItem>
           </Select>
         </FormControl>
 
         <TextField label="Condition Value" name="conditionValue" fullWidth value={form.conditionValue} onChange={handleChange} sx={{ mb: 2 }} />
         <TextField label="Asunto" name="subject" fullWidth value={form.subject} onChange={handleChange} sx={{ mb: 2 }} />
-        <TextField label="Mensaje" name="message" fullWidth value={form.message} onChange={handleChange} sx={{ mb: 2 }} />
+        <TextField
+          label="Mensaje"
+          name="message"
+          fullWidth
+          value={form.message}
+          onChange={handleChange}
+          multiline
+          rows={4} // Adjust this to the desired number of visible rows
+          sx={{ mb: 2 }}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
