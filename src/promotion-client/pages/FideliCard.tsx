@@ -436,7 +436,7 @@ export default function FideliCard() {
                     </div>
                     <Alert severity='info' className='my-6'>
                       Escanéa y suma 1 punto en cada visita.
-                      <p className='font-light italic text-[12px]'>*Con la compra mínima de $10.000CLP</p>
+                      <p className='font-light italic text-[12px]'>*Con la compra mínima de $20.000CLP</p>
                     </Alert>
                   </>
                 ) : (
