@@ -273,7 +273,7 @@ export const colorPalettes = {
     gradient: "bg-gradient-to-tr from-purple-800 to-pink-600",
     background: "bg-[#1a002a]",
     cardBackground: "bg-[#2a004a]",
-    textPrimary: "text-[#ff80ff]",
+    textPrimary: "text-[#ffffff]",
     textSecondary: "text-[#ff4dff]",
     buttonBackground: "bg-[#1a002a]",
     buttonHover: "hover:bg-[#2a004a]",

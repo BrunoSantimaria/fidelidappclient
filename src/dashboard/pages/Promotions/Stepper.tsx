@@ -109,13 +109,14 @@ export const Stepper = () => {
     formData.append("promotionDetails[conditions]", promotionDetails.conditions);
 
     formData.append("promotionRequirements[promotionDuration]", promotionRequirements.promotionDuration);
-    formData.append("promotionRequirements[isRecurrent]", promotionRequirements.isRecurrent);
+    formData.append("promotionRequirements[isRecurrent]", promotionRequirements.isRecurrent ? "True" : "False");
 
     // Si el selectedSystem es visits entonces sumar start y end date
     if (selectedSystem === "visits") {
       formData.append("promotionRequirements[startDate]", promotionRequirements.startDate);
       formData.append("promotionRequirements[endDate]", promotionRequirements.endDate);
       formData.append("promotionRequirements[daysOfWeek]", promotionRequirements.daysOfWeek);
+      formData.append("promotionRequirements[isRecurrent]", promotionRequirements.isRecurrent ? "True" : "False");
     }
 
     // Asegurarse de que `promotionRequirements.rewards` sea un array de objetos

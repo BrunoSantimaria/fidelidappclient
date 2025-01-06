@@ -27,10 +27,17 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
   const { toast } = useToast();
   const { login, registerAccount } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const {handleNavigate} = useNavigateTo();
+  const { handleNavigate } = useNavigateTo();
 
   const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    // Lista extensa de dominios de nivel superior comunes
+    const validTLDs =
+      /\.(com|net|org|edu|gov|mil|io|dev|info|biz|xyz|app|online|site|web|cloud|me|tv|co|ai|com\.ar|com\.mx|com\.br|com\.co|com\.cl|com\.pe|com\.uy|com\.ec|com\.ve|ar|mx|br|co|cl|pe|uy|ec|ve|uk|es|fr|it|de|nl|pt|ru|jp|cn|kr|in|au|nz)$/i;
+
+    // Validación completa del email
+    const emailRegex = new RegExp(`^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+${validTLDs.source}`);
+
+    return emailRegex.test(email);
   };
 
   const validatePhone = (phone: string) => {
@@ -66,6 +73,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      setIsLoading(false);
       return;
     }
 
@@ -92,7 +100,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
       localStorage.setItem("addedPromotions", JSON.stringify(updatedPromotions));
 
       toastify.success("¡Registro exitoso! Bienvenido/a.");
-      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
+      //handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
       onAuthSuccess();
     } catch (error: any) {
       if (error.response?.data?.error === "El cliente ya está registrado en esta cuenta") {
@@ -132,7 +140,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
 
       login(accountId, accountId, token, clientId);
       toastify.success("¡Inicio de sesión exitoso!");
-      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
+      //handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
       onAuthSuccess();
     } catch (error: any) {
       toastify.error("Error al iniciar sesión: " + (error.response?.data?.error || "Error desconocido"));
@@ -166,7 +174,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                autoComplete="name"
+                autoComplete='name'
                 className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
               />
             )}
@@ -189,23 +197,25 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required={isRegistering}
-                autoComplete="tel"
+                autoComplete='tel'
                 className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
               />
             )}
             {errors.phone && isRegistering && <p className='text-red-400 text-sm'>{errors.phone}</p>}
-            <Button 
-              type='submit' 
+            <Button
+              type='submit'
               className={`${selectedPalette.buttonBackground} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}
               disabled={isLoading}
             >
               {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-t-2 border-white rounded-full animate-spin mr-2"></div>
+                <div className='flex items-center justify-center'>
+                  <div className='w-5 h-5 border-2 border-t-2 border-white rounded-full animate-spin mr-2'></div>
                   {isRegistering ? "Registrando..." : "Iniciando sesión..."}
                 </div>
+              ) : isRegistering ? (
+                "Regístrate"
               ) : (
-                isRegistering ? "Regístrate" : "Iniciar sesión"
+                "Iniciar sesión"
               )}
             </Button>
             <p className={`${selectedPalette.textSecondary} text-sm text-center mt-2`}>

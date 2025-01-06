@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CreditCard, ArrowLeft } from "lucide-react";
+import { CreditCard, ArrowLeft, Notebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -45,6 +45,7 @@ export default function FideliCard() {
   const [activities, setActivities] = useState([]);
   const [promotions, setPromotions] = useState([]);
   const [hasPointPromotion, setHasPointPromotion] = useState("");
+  const [minPointValue, setMinPointValue] = useState(15000);
   // Check if a promotion is currently active
 
   const fetchFideliCardData = async () => {
@@ -53,7 +54,8 @@ export default function FideliCard() {
 
       console.log("🚀 ~ fetchFideliCardData ~ resp:", resp);
       const accountId = resp.data._id;
-
+      setMinPointValue(resp.data.landing.minPointValue);
+      console.log("🚀 ~ fetchFideliCardData ~ minPointValue:", minPointValue);
       if (!accountId) {
         throw new Error("No logged-in account found");
       }
@@ -436,7 +438,7 @@ export default function FideliCard() {
                     </div>
                     <Alert severity='info' className='my-6'>
                       Escanéa y suma 1 punto en cada visita.
-                      <p className='font-light italic text-[12px]'>*Con la compra mínima de $10.000CLP</p>
+                      <p className='font-light italic text-[12px]'>*Con la compra mínima de ${minPointValue}CLP</p>
                     </Alert>
                   </>
                 ) : (
@@ -756,6 +758,9 @@ export default function FideliCard() {
         </div>
       )}
       <p className='text-white text-center mt-2'>© {new Date().getFullYear()} FidelidApp. Todos los derechos reservados.</p>
+      <Button onClick={() => handleNavigate(`/landing/${slug}`)} className='bg-main text-white hover:bg-main/90 duration-500 w-full mt-4'>
+        Ver Menú <Notebook />
+      </Button>
     </div>
   );
 }
