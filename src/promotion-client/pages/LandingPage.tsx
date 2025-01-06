@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Facebook, Instagram, Globe, CreditCard, Star, Search, X, QrCode, Notebook, Gift, Power, Bolt } from "lucide-react";
+import { Facebook, Instagram, Globe, CreditCard, Star, Search, X, QrCode, Notebook, Gift, Power, Bolt, LockKeyholeOpen, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
@@ -864,6 +864,7 @@ export function LandingPage() {
                   onAuthSuccess={(userId, token, clientId) => {
                     login(account._id, userId, token, clientId);
                     getAccInfo();
+                    window.location.reload();
                   }}
                   slug={slug}
                 />
@@ -1063,9 +1064,9 @@ export function LandingPage() {
                 ))}
               </div>
 
-              <p className='flex items-center m-auto italic mt-4'>
-                Powered by&nbsp;<span className='font-bold'>FidelidApp</span>
-                <Bolt className='ml-2' />
+              <p className='flex items-center m-auto italic mt-6'>
+                Powered by&nbsp;<span className='font-bold'>FidelidApp.cl</span>
+                <ShieldCheck className='ml-2' />
               </p>
             </div>
           </>
