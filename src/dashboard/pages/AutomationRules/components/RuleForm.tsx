@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
+import { MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { Rule } from '../AutomationRules';
 
 interface RuleFormProps {
@@ -13,8 +14,8 @@ const RuleForm: React.FC<RuleFormProps> = ({ rule, onClose, onSave }) => {
     rule || { name: '', condition: '', conditionValue: '', subject: '', message: '', isActive: true }
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown }>) => {
+    setForm({ ...form, [e.target.name as string]: e.target.value });
   };
 
   const handleSubmit = () => {
@@ -26,10 +27,37 @@ const RuleForm: React.FC<RuleFormProps> = ({ rule, onClose, onSave }) => {
       <DialogTitle>{rule ? 'Edit Rule' : 'Create Rule'}</DialogTitle>
       <DialogContent>
         <TextField label="Name" name="name" fullWidth value={form.name} onChange={handleChange} sx={{ mb: 2 }} />
-        <TextField label="Condition" name="condition" fullWidth value={form.condition} onChange={handleChange} sx={{ mb: 2 }} />
+
+        {/* Condition select with placeholder */}
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel id="condition-label">Condition</InputLabel>
+          <Select
+            labelId="condition-label"
+            name="condition"
+            value={form.condition}
+            onChange={handleChange}
+            label="Condition"
+          >
+            <MenuItem value="" disabled>
+              Choose a condition
+            </MenuItem>
+            <MenuItem value="clientRegistration">clientRegistration</MenuItem>
+            <MenuItem value="registrationDate">registrationDate</MenuItem>
+          </Select>
+        </FormControl>
+
         <TextField label="Condition Value" name="conditionValue" fullWidth value={form.conditionValue} onChange={handleChange} sx={{ mb: 2 }} />
         <TextField label="Asunto" name="subject" fullWidth value={form.subject} onChange={handleChange} sx={{ mb: 2 }} />
-        <TextField label="Mensaje" name="message" fullWidth value={form.message} onChange={handleChange} sx={{ mb: 2 }} />
+        <TextField
+          label="Mensaje"
+          name="message"
+          fullWidth
+          value={form.message}
+          onChange={handleChange}
+          multiline
+          rows={4} // Adjust this to the desired number of visible rows
+          sx={{ mb: 2 }}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
