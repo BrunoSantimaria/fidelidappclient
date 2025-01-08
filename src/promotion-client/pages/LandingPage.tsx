@@ -1061,7 +1061,7 @@ export function LandingPage() {
                     onClick={() => window.open(link.href, "_blank", "noopener,noreferrer")}
                     className={`text-white hover:${palette.textSecondary}   ${palette?.textPrimary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
                   >
-                    <link.icon size={28} />
+                    <link.icon color={palette.textPrimary} size={28} />
                   </span>
                 ))}
               </div>
