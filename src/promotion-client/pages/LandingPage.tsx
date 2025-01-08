@@ -595,6 +595,11 @@ export function LandingPage() {
   // Generar los enlaces de redes sociales
   const getSocialLinks = () => {
     if (!account?.socialMedia) return [];
+
+    // Extraer el color del textPrimary
+    const colorMatch = palette.textPrimary.match(/\[(.*?)\]/);
+    const iconColor = colorMatch ? colorMatch[1] : "#FFFFFF"; // Color por defecto si no se encuentra
+
     return [
       { icon: Facebook, href: account.socialMedia.facebook },
       { icon: Instagram, href: account.socialMedia.instagram },
@@ -603,7 +608,7 @@ export function LandingPage() {
         href: account.socialMedia.whatsapp ? `https://wa.me/${account.socialMedia.whatsapp}` : null,
       },
       { icon: Globe, href: account.socialMedia.website },
-    ].filter((link) => link.href); // Filtrar los enlaces que no tienen `href`
+    ].filter((link) => link.href);
   };
   const formatDescription = (description) => {
     // Reemplazar los saltos de línea '\n' con el componente <br />
@@ -1059,9 +1064,9 @@ export function LandingPage() {
                   <span
                     key={index}
                     onClick={() => window.open(link.href, "_blank", "noopener,noreferrer")}
-                    className={`text-white hover:${palette.textSecondary}   ${palette?.textPrimary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
+                    className={`hover:${palette.textSecondary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
                   >
-                    <link.icon color={palette.textPrimary} size={28} />
+                    <link.icon color={palette.textPrimary.match(/\[(.*?)\]/)?.[1] || "#FFFFFF"} size={28} />
                   </span>
                 ))}
               </div>
