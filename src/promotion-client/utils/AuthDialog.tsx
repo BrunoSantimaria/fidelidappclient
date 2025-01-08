@@ -204,7 +204,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
             {errors.phone && isRegistering && <p className='text-red-400 text-sm'>{errors.phone}</p>}
             <Button
               type='submit'
-              className={`${selectedPalette.buttonBackground} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}
+              className={`${selectedPalette.buttonBackground} ${selectedPalette.textPrimary} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}
               disabled={isLoading}
             >
               {isLoading ? (
