@@ -440,6 +440,9 @@ const PromotionsDialog = ({
                                       }}
                                       disabled={isLoggedIn ? redeemingPromotion || totalPoints < reward.points : false}
                                       className={`w-full ${palette.buttonBackground} ${!redeemingPromotion ? palette.buttonHover : ""}`}
+                                      style={{
+                                        color: palette?.textPrimary.split("[")[1].split("]")[0],
+                                      }}
                                     >
                                       {redeemingPromotion
                                         ? "Canjeando..."
