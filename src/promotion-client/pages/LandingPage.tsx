@@ -895,6 +895,9 @@ export function LandingPage() {
         hover:ring-[${palette.textSecondary}]
         ${!canRedeemPoints && "opacity-50 cursor-not-allowed"}
   `}
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
                   >
                     {canRedeemPoints ? "Sumar puntos" : "Ya sumaste puntos hoy"} <QrCode />
                   </Button>
@@ -911,6 +914,9 @@ export function LandingPage() {
                   hover:ring-2
                   hover:ring-[${palette?.textSecondary}]
                 `}
+                style={{
+                  color: palette?.textPrimary.split("[")[1].split("]")[0],
+                }}
               >
                 Promociones <Gift />
               </Button>
@@ -949,6 +955,9 @@ export function LandingPage() {
     hover:ring-[${palette?.textSecondary}]
         hover:ring-[${palette?.textSecondary}]
       `}
+                  style={{
+                    color: palette?.textPrimary.split("[")[1].split("]")[0],
+                  }}
                 >
                   Valóranos en Google
                   <Star />

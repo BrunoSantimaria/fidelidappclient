@@ -206,6 +206,9 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
               type='submit'
               className={`${selectedPalette.buttonBackground} ${selectedPalette.textPrimary} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}
               disabled={isLoading}
+              style={{
+                color: palette?.textPrimary.split("[")[1].split("]")[0],
+              }}
             >
               {isLoading ? (
                 <div className='flex items-center justify-center'>
