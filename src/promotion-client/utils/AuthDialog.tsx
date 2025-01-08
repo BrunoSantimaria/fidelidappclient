@@ -209,7 +209,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
             >
               {isLoading ? (
                 <div className='flex items-center justify-center'>
-                  <div className='w-5 h-5 border-2 border-t-2 border-white rounded-full animate-spin mr-2'></div>
+                  <div className={`w-5 h-5 border-2 border-t-2 border-white rounded-full animate-spin mr-2 ${selectedPalette.textPrimary}`}></div>
                   {isRegistering ? "Registrando..." : "Iniciando sesión..."}
                 </div>
               ) : isRegistering ? (
@@ -220,7 +220,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
             </Button>
             <p className={`${selectedPalette.textSecondary} text-sm text-center mt-2`}>
               {isRegistering ? "¿Ya estás registrado?" : "¿No tienes cuenta?"}{" "}
-              <span onClick={() => setIsRegistering(!isRegistering)} className='text-white cursor-pointer hover:underline'>
+              <span onClick={() => setIsRegistering(!isRegistering)} className={`${selectedPalette.textPrimary} cursor-pointer hover:underline`}>
                 {isRegistering ? "Iniciar sesión" : "Regístrate"}
               </span>
             </p>

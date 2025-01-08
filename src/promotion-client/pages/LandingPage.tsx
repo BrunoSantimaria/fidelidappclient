@@ -883,6 +883,7 @@ export function LandingPage() {
                       ${!hasPointPromotion ? "hidden" : ""}
     ${palette.buttonBackground} 
     ${palette.buttonHover}
+      ${palette?.textPrimary}
     p-6 text-white font-bold transition-colors duration-300
     ring-0 
         hover:ring-2
@@ -899,6 +900,7 @@ export function LandingPage() {
                 className={`
                   ${palette?.buttonBackground} 
                   ${palette?.buttonHover}
+                  ${palette?.textPrimary}
                   p-6 text-white font-bold transition-colors duration-300
                   ring-0 
                   hover:ring-2
@@ -1057,14 +1059,14 @@ export function LandingPage() {
                   <span
                     key={index}
                     onClick={() => window.open(link.href, "_blank", "noopener,noreferrer")}
-                    className={`text-white hover:${palette.textSecondary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
+                    className={`text-white hover:${palette.textSecondary}   ${palette?.textPrimary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
                   >
                     <link.icon size={28} />
                   </span>
                 ))}
               </div>
 
-              <p className='flex items-center m-auto italic mt-6'>
+              <p className={`flex items-center m-auto italic mt-6 ${palette?.textPrimary}`}>
                 Powered by&nbsp;<span className='font-bold'>FidelidApp.cl</span>
                 <ShieldCheck className='ml-2' />
               </p>
