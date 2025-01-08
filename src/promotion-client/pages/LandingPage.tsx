@@ -939,6 +939,9 @@ export function LandingPage() {
     hover:ring-2
     hover:ring-[${palette.textSecondary}]
   `}
+                style={{
+                  color: palette?.textPrimary.split("[")[1].split("]")[0],
+                }}
               >
                 {account?.landing?.card.title || "Ver nuestra carta"} <Notebook />
               </Button>
