@@ -207,7 +207,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
               className={`${selectedPalette.buttonBackground} ${selectedPalette.textPrimary} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}
               disabled={isLoading}
               style={{
-                color: palette?.textPrimary.split("[")[1].split("]")[0],
+                color: selectedPalette?.textPrimary.split("[")[1].split("]")[0],
               }}
             >
               {isLoading ? (
