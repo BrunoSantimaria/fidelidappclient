@@ -178,7 +178,28 @@ export const colorPalettes = {
     type: "Light",
     bestFor: "Mediterranean Restaurants, Greek Cuisine, Seafood",
   },
-
+  "cyber-ocean": {
+    gradient: "bg-gradient-to-b from-[#059def] to-[#034d75]",
+    background: "bg-[#012a40]",
+    cardBackground: "bg-[#023b57]",
+    textPrimary: "text-[#ffffff]",
+    textSecondary: "text-[#a8d1e6]",
+    buttonBackground: "bg-[#059def]",
+    buttonHover: "hover:bg-[#034d75]",
+    type: "Dark",
+    bestFor: "Tech Startups, SaaS Platforms, Modern Web Apps",
+  },
+  "sky-blossom": {
+    gradient: "bg-gradient-to-b from-[#059def] to-[#ff85b3]",
+    background: "bg-[#fef6fb]",
+    cardBackground: "bg-[#ffeaf1]",
+    textPrimary: "text-[#ff85b3]",
+    textSecondary: "text-[#333333]",
+    buttonBackground: "bg-[#059def]",
+    buttonHover: "hover:bg-[#ff85b3]",
+    type: "Light",
+    bestFor: "Cosmetics Stores, Beauty Blogs, Skincare Brands",
+  },
   // Vintage Vinyl Record Store
   "vinyl-groove": {
     gradient: "bg-gradient-to-tr from-gray-700 to-black",
