@@ -998,6 +998,9 @@ export function LandingPage() {
                     overflow-hidden 
                     rounded-md
                   `}
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
                   >
                     <motion.div
                       variants={{
@@ -1055,6 +1058,9 @@ export function LandingPage() {
                     hover:ring-2
                     hover:ring-[${palette.textSecondary}]
                   `}
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
                   >
                     FideliCard <CreditCard />
                   </Button>
