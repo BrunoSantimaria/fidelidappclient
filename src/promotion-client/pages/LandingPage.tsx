@@ -22,6 +22,9 @@ import { toast } from "react-toastify";
 import moment from "moment";
 import { Accordion, AccordionSummary, AccordionDetails, Typography, LinearProgress, Alert } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { ClientChatbotInteraction } from "@/landing/components/ClientChatbot";
+import { ChatBubble } from "@mui/icons-material";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 interface SocialMedia {
   instagram: string;
@@ -444,8 +447,8 @@ const PromotionsDialog = ({
                                       {redeemingPromotion
                                         ? "Canjeando..."
                                         : totalPoints < reward.points
-                                        ? `Te faltan ${reward.points - totalPoints} punto(s)`
-                                        : `Canjear por ${reward.points} punto(s)`}
+                                          ? `Te faltan ${reward.points - totalPoints} punto(s)`
+                                          : `Canjear por ${reward.points} punto(s)`}
                                     </Button>
                                   </div>
                                 ))}
@@ -462,16 +465,15 @@ const PromotionsDialog = ({
                               }
                             }}
                             disabled={isLoggedIn ? isRedeemedToday || redeemingPromotion : false}
-                            className={`w-full mt-4 ${palette.buttonBackground} ${!isRedeemedToday && !redeemingPromotion ? palette.buttonHover : ""} ${
-                              isRedeemedToday ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full mt-4 ${palette.buttonBackground} ${!isRedeemedToday && !redeemingPromotion ? palette.buttonHover : ""} ${isRedeemedToday ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
                           >
                             {isLoggedIn
                               ? isRedeemedToday
                                 ? "Ya canjeaste hoy"
                                 : redeemingPromotion
-                                ? "Canjeando..."
-                                : "Canjear promoción"
+                                  ? "Canjeando..."
+                                  : "Canjear promoción"
                               : "Regístrate o inicia sesión para canjear"}
                           </Button>
                         )}
@@ -486,6 +488,44 @@ const PromotionsDialog = ({
       </motion.div>
     </AnimatePresence>
   );
+};
+
+const ChatbotDialog = ({ account, isOpen, onClose }) => {
+  const palette = generatePalette(account?.landing?.colorPalette);
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={`fixed inset-0 h-screen overflow-hidden z-50 ${palette.background}`}
+      >
+        <div className='h-full flex flex-col'>
+          {/* Header */}
+          <div className='sticky top-0 z-10 bg-inherit'>
+            <div className='flex items-center justify-between p-4'>
+              <h1 className={`text-2xl font-bold ${palette.textPrimary}`}>Chatbot</h1>
+              <button onClick={onClose} className={`p-2 rounded-full hover:${palette.buttonHover}`}>
+                <X className={`w-6 h-6 ${palette.textPrimary}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className='flex-1 overflow-y-auto'>
+            <div className='container mx-auto px-4 py-6'>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8'>
+                <ClientChatbot></ClientChatbot>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+
 };
 
 export function LandingPage() {
@@ -510,6 +550,8 @@ export function LandingPage() {
   const [showRedemptionDialog, setShowRedemptionDialog] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedReward, setSelectedReward] = useState(null);
+  const [isChatbotDialogOpen, setIsChatbotDialogOpen] = useState(false);
+  const [chatbotMessage, setChatbotMessages] = useState([]);
 
   // Cargar la información de la cuenta
   const getAccInfo = async () => {
@@ -648,6 +690,7 @@ export function LandingPage() {
     return <LandingNotFound />;
   }
   const palette = generatePalette(account?.landing?.colorPalette);
+
   const getClientData = async () => {
     try {
       const response = await api.get(`/api/landing/${slug}/fidelicard`, {
@@ -813,6 +856,13 @@ export function LandingPage() {
       setRedeemingPromotion(false);
       setShowConfirmDialog(false);
     }
+  };
+
+
+  // Para el chatbot
+
+  const handleChatbotButton = () => {
+    setIsChatbotDialogOpen(!isChatbotDialogOpen);
   };
 
   useEffect(() => {
@@ -1071,6 +1121,84 @@ export function LandingPage() {
             </div>
           </>
         )}
+
+        <button onClick={async () => { console.log(getClientData()) }} className={`text-white ${palette.buttonHover}`}>Obtener datos clientes</button>
+
+        {/* Frame del chatbot */}
+        <AnimatePresence>
+          {isChatbotDialogOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0, y: 200, x: 200 }}
+              animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+              exit={{ opacity: 0, scale: 0, y: 200, x: 200 }}
+              transition={{ duration: 0.1, ease: "easeInOut" }}
+              className="fixed bottom-24 right-28 w-96 h-96 bg-white shadow-lg rounded-lg z-50"
+            >
+              {/* Header del chatbot */}
+              <div className={`flex items-center justify-between p-4 ${palette.background} rounded-t-lg`}>
+                <h3 className="text-lg font-bold">Chatbot</h3>
+              </div>
+
+              {/* Contenido del chatbot */}
+              <div className={`flex-1 overflow-y-auto ${palette.cardBackground} ${palette.textPrimary} p-4 h-[calc(100%-64px)]`}>
+                {/* Aquí puedes agregar lógica para el chat */}
+                <div>
+                  {/* Imagina que tienes una función que diga generateResponse, ahora quiero que este campo se autoinserte por cada respuesta */}
+                  {chatbotMessage.map((message, index) => (
+                    <div key={index} className="mb-2">
+                      <p className="text-sm">{message}</p>
+                    </div>
+
+                  ))}
+                  <div className={`px-4 ${palette.textPrimary}`}>
+                    {/* Mensaje del cliente */}
+                    <div className="mb-4">
+                      <p className="font-bold">Cliente:</p>
+                      <p className="pl-4">Hola, ¿puedes ayudarme con algo?</p>
+                    </div>
+                  </div>
+                  <div className={`px-4 ${palette.textPrimary}`}>
+                    {/* Respuesta del chatbot */}
+                    <div className="mb-4">
+                      <p className="font-bold">Chatbot:</p>
+                      <p className="pl-4">¡Claro! ¿En qué necesitas ayuda?</p>
+                    </div>
+                  </div>
+
+
+                </div>
+              </div>
+
+              <div className={`flex ${palette.background} p-4 rounded-b-lg`}>
+                {/* padding del texto de input */}
+
+                <input type="text" className="flex-1 p-2 border border-gray-300" />
+                <button className={`p-2 ${palette.buttonBackground} ${palette.buttonHover} text-white rounded-lg`}>Enviar</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+
+
+
+        {/* Agregar el botón que abre el chatbot */}
+
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, transform: "scale(0)" }}
+            animate={{ opacity: 1, transform: "scale(1)" }}
+            transition={{ duration: 0.5 }}
+            className='fixed bottom-4 right-4 z-50'
+          >
+            <button
+              onClick={handleChatbotButton}
+              className={`p-6 rounded-full ${palette.buttonBackground} ${palette.buttonHover}`}
+            >
+              <ChatBubble></ChatBubble>
+            </button>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Agregar el componente del Scanner */}
@@ -1098,6 +1226,8 @@ export function LandingPage() {
           </div>
         </div>
       )}
+
+      {/* Dialogo de promociones */}
 
       <PromotionsDialog
         account={account}
