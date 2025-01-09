@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import moment from "moment";
 import { Accordion, AccordionSummary, AccordionDetails, Typography, LinearProgress, Alert } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface SocialMedia {
   instagram: string;
@@ -491,6 +492,130 @@ const PromotionsDialog = ({
   );
 };
 
+// Añadir el componente StarRating
+const StarRating = ({ totalStars = 5, onRating }) => {
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+
+  return (
+    <div className='flex'>
+      {[...Array(totalStars)].map((_, index) => {
+        const ratingValue = index + 1;
+        return (
+          <Star
+            key={index}
+            className={`cursor-pointer transition-all duration-200 hover:scale-110 ${
+              ratingValue <= (hover || rating) ? "text-[#ff4dff] fill-[#ff4dff]" : "text-purple-300"
+            }`}
+            size={28}
+            onClick={() => {
+              setRating(ratingValue);
+              onRating(ratingValue);
+            }}
+            onMouseEnter={() => setHover(ratingValue)}
+            onMouseLeave={() => setHover(rating)}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+// Añadir el componente WaiterRatingDialog
+const WaiterRatingDialog = ({ isOpen, onClose, account, palette, onSubmit }) => {
+  const [selectedWaiter, setSelectedWaiter] = useState("");
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async () => {
+    if (selectedWaiter && rating > 0) {
+      console.log(comment);
+      await onSubmit(selectedWaiter, rating, comment);
+      setSubmitted(true);
+      setTimeout(() => {
+        onClose();
+        setSubmitted(false);
+        setSelectedWaiter("");
+        setRating(0);
+        setComment("");
+      }, 2000);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className={`sm:max-w-[425px] ${palette.background} h-fit`}>
+        <DialogHeader className='mt-12'>
+          <DialogTitle className={`text-2xl font-bold ${palette.textPrimary}`}>Califica la atención</DialogTitle>
+        </DialogHeader>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {!submitted ? (
+            <div className='flex flex-col text-center py-4 space-y-6'>
+              <div className='items-center gap-4 mb-2 space-y-4'>
+                <label htmlFor='waiter' className={`pb-12 mb-12 ${palette.textPrimary}`}>
+                  ¿Quién te atendió?
+                </label>
+
+                <Select onValueChange={setSelectedWaiter} value={selectedWaiter}>
+                  <SelectTrigger className={`col-span-3 ${palette.background} ${palette.textPrimary}`}>
+                    <SelectValue placeholder='Selecciona un mesero' />
+                  </SelectTrigger>
+                  <SelectContent className={`${palette.background} ${palette.textPrimary}`}>
+                    {account?.landing?.waiters?.map((waiter) => (
+                      <SelectItem key={waiter._id} value={waiter._id} className={`hover:${palette.buttonHover}`}>
+                        {waiter.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className='flex flex-col items-center gap-4'>
+                <label className={`text-right ${palette.textPrimary}`}>Califica el servicio:</label>
+                <div className='col-span-3'>
+                  <StarRating onRating={setRating} />
+                </div>
+              </div>
+              <div className='flex flex-col items-center gap-2'>
+                <label className={`text-right ${palette.textPrimary}`}>Comentario (opcional):</label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className={`w-full p-2 rounded-md border ${palette.background} ${palette.textPrimary}`}
+                  placeholder='Escribe tu comentario aquí...'
+                  rows={3}
+                />
+              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={!selectedWaiter || rating === 0}
+                className={`
+                  ${palette.buttonBackground}
+                  ${palette.buttonHover}
+                  ${(!selectedWaiter || rating === 0) && "opacity-50 cursor-not-allowed"}
+                `}
+              >
+                Enviar Evaluación
+              </Button>
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className='flex items-center justify-center py-8'
+            >
+              <p className={`${palette.textPrimary} font-semibold text-xl`}>¡Gracias por tu evaluación!</p>
+            </motion.div>
+          )}
+        </motion.div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export function LandingPage() {
   const { slug } = useParams();
   const [totalPoints, setTotalPoints] = useState(0);
@@ -513,6 +638,7 @@ export function LandingPage() {
   const [showRedemptionDialog, setShowRedemptionDialog] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedReward, setSelectedReward] = useState(null);
+  const [showWaiterRating, setShowWaiterRating] = useState(false);
 
   // Cargar la información de la cuenta
   const getAccInfo = async () => {
@@ -521,6 +647,7 @@ export function LandingPage() {
     try {
       const response = await api.get(`/api/landing/${slug}`);
       setAccount(response.data);
+      console.log("response.data", response.data);
       if (!response.data) {
         handleNavigate("/");
 
@@ -710,6 +837,11 @@ export function LandingPage() {
 
       toast.success("Visita registrada con éxito ⭐");
       await getAccInfo(); // Refrescar datos
+
+      // Si hay meseros en la landing, mostrar el diálogo de valoración
+      if (account?.landing?.waiters?.length > 0) {
+        setShowWaiterRating(true);
+      }
     } catch (error) {
       console.error("Error in handleScan:", error);
       toast.error(error.response?.data?.error || "Error al registrar puntos");
@@ -833,6 +965,24 @@ export function LandingPage() {
       return () => clearTimeout(timer);
     }
   }, [showRedemptionDialog]);
+
+  // Añadir la función para manejar la valoración
+  const handleWaiterRating = async (waiterId, rating, comment) => {
+    try {
+      await api.post(`/api/waiters/accounts/${account._id}/waiters/${waiterId}/ratings`, {
+        rating,
+        comment,
+        clientId: clientId,
+      });
+      await api.post(`/api/waiters/accounts/${account._id}/waiters/${waiterId}/points`, {
+        points: 1,
+      });
+      toast.success("¡Gracias por tu valoración!");
+    } catch (error) {
+      toast.error("Error al enviar la valoración");
+      console.error(error);
+    }
+  };
 
   return (
     <motion.div
@@ -1228,6 +1378,16 @@ export function LandingPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {account?.landing?.waiters?.length > 0 && (
+        <WaiterRatingDialog
+          isOpen={showWaiterRating}
+          onClose={() => setShowWaiterRating(false)}
+          account={account}
+          palette={palette}
+          onSubmit={handleWaiterRating}
+        />
+      )}
     </motion.div>
   );
 }
