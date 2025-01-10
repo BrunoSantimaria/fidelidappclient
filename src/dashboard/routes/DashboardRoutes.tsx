@@ -27,6 +27,9 @@ import { toast } from "react-toastify";
 import { AutomationRulesPage } from "../pages/AutomationRules/AutomationRules";
 import EmailCampaigns, { EmailCampaign } from "../pages/email/EmailCampaign";
 
+import {SmsCampaignManager} from "../pages/sms/SmsCampaignManager"
+
+
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
 });
@@ -108,6 +111,14 @@ export const DashboardRoutes = () => {
           element={
             <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
               <EmailCampaign />
+            </motion.div>
+          }
+        />
+        <Route
+          path='/sms-sender'
+          element={
+            <motion.div initial='hidden' animate='visible' exit='hidden' variants={pageTransition}>
+              <SmsCampaignManager />
             </motion.div>
           }
         />
