@@ -20,6 +20,8 @@ import { Divider } from "@mui/material";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
 
 import { useNavigate } from "react-router-dom";
+import { PersonStandingIcon } from "lucide-react";
+import { Person } from "@mui/icons-material";
 
 const containerVariants = {
   close: {
@@ -167,6 +169,11 @@ export const Navigation = () => {
           </div>*/}
 
           <Divider className='bg-gray-300/80' />
+          <div>
+            <NavigationLink name='Meseros' link='/dashboard/waiters'>
+              <Person className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+            </NavigationLink>
+          </div>
           <div>
             <NavigationLink name='Ajustes' link='/dashboard/settings'>
               <SettingsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />

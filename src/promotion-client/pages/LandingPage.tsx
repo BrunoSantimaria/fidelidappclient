@@ -1,15 +1,11 @@
 "use client";
-
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Facebook, Instagram, Globe, CreditCard, Star, LogOutIcon, Search, ChevronRight, ChevronLeft, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Facebook, Instagram, Globe, CreditCard, Star, Search, X, QrCode, Notebook, Gift, Power, Bolt, LockKeyholeOpen, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { Alert } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
-
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import api from "@/utils/api";
@@ -17,13 +13,16 @@ import { FaWhatsapp } from "react-icons/fa";
 import { AuthDialog } from "../utils/AuthDialog";
 import { useAuth } from "../utils/AuthContext";
 import { useNavigateTo } from "@/hooks/useNavigateTo";
-
 import { sortPromotions } from "../utils/SortPromotions";
-import { toast as toastify } from "../../utils/toast";
-
 import { generatePalette } from "../utils/colorPalettes";
-
 import { ImageViewer } from "../components/ImageViewer";
+import { LandingNotFound } from "../components/LandingPage/LandingNotFound";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { toast } from "react-toastify";
+import moment from "moment";
+import { Accordion, AccordionSummary, AccordionDetails, Typography, LinearProgress, Alert } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface SocialMedia {
   instagram: string;
@@ -337,9 +336,289 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
     </AnimatePresence>
   );
 };
+
+const PromotionsDialog = ({
+  account,
+  isOpen,
+  onClose,
+  promotions,
+  handleRedeemPromotion,
+  wasRedeemedToday,
+  isPromotionHot,
+  redeemingPromotion,
+  isLoggedIn,
+  totalPoints,
+}) => {
+  const palette = generatePalette(account?.landing?.colorPalette);
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={`fixed inset-0 h-screen overflow-hidden z-50 ${palette.background}`}
+      >
+        <div className='h-full flex flex-col'>
+          {/* Header */}
+          <div className='sticky top-0 z-10 bg-inherit'>
+            <div className='flex items-center justify-between p-4'>
+              <h1 className={`text-2xl font-bold ${palette.textPrimary}`}>Promociones</h1>
+              <button onClick={onClose} className={`p-2 rounded-full hover:${palette.buttonHover}`}>
+                <X className={`w-6 h-6 ${palette.textPrimary}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className='flex-1 overflow-y-auto'>
+            <div className='container mx-auto px-4 py-6'>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8'>
+                {promotions.map((promotion) => {
+                  const isRedeemedToday = wasRedeemedToday(promotion, promotions);
+                  console.log("isRedeemedToday", isRedeemedToday);
+                  const isPointsPromotion = promotion.systemType === "points";
+
+                  return (
+                    <motion.div
+                      key={promotion._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden`}
+                    >
+                      <div className='p-4'>
+                        <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{promotion.title}</h3>
+                        <p className={`text-sm mb-4 ${palette.textSecondary}`}>{promotion.description}</p>
+
+                        {promotion.imageUrl && <img src={promotion.imageUrl} alt={promotion.title} className='w-full h-48 object-cover' />}
+
+                        {isPointsPromotion ? (
+                          <>
+                            <Typography className={`text-sm ${palette.textPrimary} mb-2 py-4 `}>
+                              Puntos acumulados: <span className='text-bold'>{totalPoints} </span>
+                            </Typography>
+                            <Accordion
+                              sx={{
+                                backgroundColor: palette.background.match(/\[(.+?)\]/)[1],
+                                "& .MuiAccordionSummary-root": {
+                                  color: palette.textPrimary.match(/\[(.+?)\]/)[1],
+                                },
+                                "& .MuiAccordionDetails-root": {
+                                  color: palette.textSecondary.match(/\[(.+?)\]/)[1],
+                                },
+                                "& .MuiTypography-root": {
+                                  color: "inherit",
+                                },
+                                "& .MuiLinearProgress-root": {
+                                  backgroundColor: palette.textSecondary.match(/\[(.+?)\]/)[1] + "40",
+                                  "& .MuiLinearProgress-bar": {
+                                    backgroundColor: palette.textSecondary.match(/\[(.+?)\]/)[1],
+                                  },
+                                },
+                              }}
+                            >
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon className={`${palette.textPrimary}`} />}
+                                aria-controls='panel1a-content'
+                                id='panel1a-header'
+                              >
+                                <Typography className={`text-sm `}>Recompensas Disponibles</Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                {promotion.rewards.map((reward) => (
+                                  <div key={reward._id} className='mb-2'>
+                                    <Typography className={`text-sm ${palette.textSecondary}`}>{reward.description}</Typography>
+                                    <LinearProgress variant='determinate' value={(totalPoints / reward.points) * 100} className='mb-2' />
+                                    <Button
+                                      onClick={() => {
+                                        if (isLoggedIn) {
+                                          handleRedeemPromotion(promotion, reward);
+                                        } else {
+                                          toast.info("Por favor, regístrate o inicia sesión para canjear esta promoción.");
+                                        }
+                                      }}
+                                      disabled={isLoggedIn ? redeemingPromotion || totalPoints < reward.points : false}
+                                      className={`w-full ${palette.buttonBackground} ${!redeemingPromotion ? palette.buttonHover : ""}`}
+                                      style={{
+                                        color: palette?.textPrimary.split("[")[1].split("]")[0],
+                                      }}
+                                    >
+                                      {redeemingPromotion
+                                        ? "Canjeando..."
+                                        : totalPoints < reward.points
+                                        ? `Te faltan ${reward.points - totalPoints} punto(s)`
+                                        : `Canjear por ${reward.points} punto(s)`}
+                                    </Button>
+                                  </div>
+                                ))}
+                              </AccordionDetails>
+                            </Accordion>
+                          </>
+                        ) : (
+                          <Button
+                            onClick={() => {
+                              if (isLoggedIn) {
+                                handleRedeemPromotion(promotion);
+                              } else {
+                                toast.info("Por favor, regístrate o inicia sesión para canjear esta promoción.");
+                              }
+                            }}
+                            disabled={isLoggedIn ? isRedeemedToday || redeemingPromotion : false}
+                            className={`w-full mt-4 ${palette.buttonBackground} ${!isRedeemedToday && !redeemingPromotion ? palette.buttonHover : ""} ${
+                              isRedeemedToday ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          >
+                            {isLoggedIn
+                              ? isRedeemedToday
+                                ? "Ya canjeaste hoy"
+                                : redeemingPromotion
+                                ? "Canjeando..."
+                                : "Canjear promoción"
+                              : "Regístrate o inicia sesión para canjear"}
+                          </Button>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+// Añadir el componente StarRating
+const StarRating = ({ totalStars = 5, onRating }) => {
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+
+  return (
+    <div className='flex'>
+      {[...Array(totalStars)].map((_, index) => {
+        const ratingValue = index + 1;
+        return (
+          <Star
+            key={index}
+            className={`cursor-pointer transition-all duration-200 hover:scale-110 ${
+              ratingValue <= (hover || rating) ? "text-[#ff4dff] fill-[#ff4dff]" : "text-purple-300"
+            }`}
+            size={28}
+            onClick={() => {
+              setRating(ratingValue);
+              onRating(ratingValue);
+            }}
+            onMouseEnter={() => setHover(ratingValue)}
+            onMouseLeave={() => setHover(rating)}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+// Añadir el componente WaiterRatingDialog
+const WaiterRatingDialog = ({ isOpen, onClose, account, palette, onSubmit }) => {
+  const [selectedWaiter, setSelectedWaiter] = useState("");
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async () => {
+    if (selectedWaiter && rating > 0) {
+      console.log(comment);
+      await onSubmit(selectedWaiter, rating, comment);
+      setSubmitted(true);
+      setTimeout(() => {
+        onClose();
+        setSubmitted(false);
+        setSelectedWaiter("");
+        setRating(0);
+        setComment("");
+      }, 2000);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className={`sm:max-w-[425px] ${palette.background} h-fit`}>
+        <DialogHeader className='mt-12'>
+          <DialogTitle className={`text-2xl font-bold ${palette.textPrimary}`}>Califica la atención</DialogTitle>
+        </DialogHeader>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {!submitted ? (
+            <div className='flex flex-col text-center py-4 space-y-6'>
+              <div className='items-center gap-4 mb-2 space-y-4'>
+                <label htmlFor='waiter' className={`pb-12 mb-12 ${palette.textPrimary}`}>
+                  ¿Quién te atendió?
+                </label>
+
+                <Select onValueChange={setSelectedWaiter} value={selectedWaiter}>
+                  <SelectTrigger className={`col-span-3 ${palette.background} ${palette.textPrimary}`}>
+                    <SelectValue placeholder='Selecciona un mesero' />
+                  </SelectTrigger>
+                  <SelectContent className={`${palette.background} ${palette.textPrimary}`}>
+                    {account?.landing?.waiters?.map((waiter) => (
+                      <SelectItem key={waiter._id} value={waiter._id} className={`hover:${palette.buttonHover}`}>
+                        {waiter.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className='flex flex-col items-center gap-4'>
+                <label className={`text-right ${palette.textPrimary}`}>Califica el servicio:</label>
+                <div className='col-span-3'>
+                  <StarRating onRating={setRating} />
+                </div>
+              </div>
+              <div className='flex flex-col items-center gap-2'>
+                <label className={`text-right ${palette.textPrimary}`}>Comentario (opcional):</label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className={`w-full p-2 rounded-md border ${palette.background} ${palette.textPrimary}`}
+                  placeholder='Escribe tu comentario aquí...'
+                  rows={3}
+                />
+              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={!selectedWaiter || rating === 0}
+                className={`
+                  ${palette.buttonBackground}
+                  ${palette.buttonHover}
+                  ${(!selectedWaiter || rating === 0) && "opacity-50 cursor-not-allowed"}
+                `}
+              >
+                Enviar Evaluación
+              </Button>
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className='flex items-center justify-center py-8'
+            >
+              <p className={`${palette.textPrimary} font-semibold text-xl`}>¡Gracias por tu evaluación!</p>
+            </motion.div>
+          )}
+        </motion.div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export function LandingPage() {
   const { slug } = useParams();
-
+  const [totalPoints, setTotalPoints] = useState(0);
   const { login, logout, isLoggedInForAccount, getClientId } = useAuth();
   const [account, setAccount] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
@@ -347,6 +626,19 @@ export function LandingPage() {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [accountNotFound, setAccountNotFound] = useState(false);
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [hasPointPromotion, setHasPointPromotion] = useState(null);
+  const [userActivities, setUserActivities] = useState([]);
+  const [canRedeemPoints, setCanRedeemPoints] = useState(true);
+  const [redeemingPromotion, setRedeemingPromotion] = useState(false);
+  const [isPromotionsDialogOpen, setIsPromotionsDialogOpen] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
+  const [showRedemptionDialog, setShowRedemptionDialog] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [selectedReward, setSelectedReward] = useState(null);
+  const [showWaiterRating, setShowWaiterRating] = useState(false);
 
   // Cargar la información de la cuenta
   const getAccInfo = async () => {
@@ -354,14 +646,61 @@ export function LandingPage() {
     setLoading(true);
     try {
       const response = await api.get(`/api/landing/${slug}`);
-
       setAccount(response.data);
-      document.title = `${response.data.name} | FidelidApp`;
-      if (response.data.landing.card.content) setNumPages(response.data.landing.card.content.length);
-      setAccountNotFound(false);
+      console.log("response.data", response.data);
+      if (!response.data) {
+        handleNavigate("/");
+
+        return;
+      }
+      // Si hay un cliente logueado, obtener sus actividades
+      if (isLoggedInForAccount(response.data._id)) {
+        const clientId = getClientId(response.data._id);
+
+        try {
+          console.log("Fetching user data with:", {
+            email: clientId,
+            accountId: response.data._id,
+          });
+
+          const userResponse = await api.get(`/api/landing/${slug}/fidelicard`, {
+            params: {
+              email: clientId,
+              accountId: response.data._id,
+            },
+          });
+
+          console.log("User Response:", userResponse.data);
+          setTotalPoints(userResponse.data.totalPoints);
+          // Buscar la promoción de puntos en addedPromotions
+          const pointPromotion = userResponse.data.addedPromotions.find((promo) => promo.systemType === "points" && promo.status === "Active");
+
+          if (pointPromotion) {
+            console.log("Found point promotion:", pointPromotion);
+            setHasPointPromotion({
+              _id: pointPromotion._id,
+              ...pointPromotion.promotion,
+            });
+          }
+
+          setUserActivities(userResponse.data.activities);
+
+          // Verificar si ya canjeó puntos hoy usando moment
+          const today = moment().startOf("day");
+          const hasRedeemedToday = userResponse.data.activities.some((activity) => {
+            const activityDate = moment(activity.date).startOf("day");
+            return activityDate.isSame(today) && activity.type === "points";
+          });
+
+          setCanRedeemPoints(!hasRedeemedToday);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          console.error("Error details:", error.response?.data);
+        }
+      }
     } catch (error) {
-      console.error(error);
-      setAccountNotFound(true);
+      handleNavigate("/");
+      console.error(error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -386,6 +725,11 @@ export function LandingPage() {
   // Generar los enlaces de redes sociales
   const getSocialLinks = () => {
     if (!account?.socialMedia) return [];
+
+    // Extraer el color del textPrimary
+    const colorMatch = palette.textPrimary.match(/\[(.*?)\]/);
+    const iconColor = colorMatch ? colorMatch[1] : "#FFFFFF"; // Color por defecto si no se encuentra
+
     return [
       { icon: Facebook, href: account.socialMedia.facebook },
       { icon: Instagram, href: account.socialMedia.instagram },
@@ -394,7 +738,7 @@ export function LandingPage() {
         href: account.socialMedia.whatsapp ? `https://wa.me/${account.socialMedia.whatsapp}` : null,
       },
       { icon: Globe, href: account.socialMedia.website },
-    ].filter((link) => link.href); // Filtrar los enlaces que no tienen `href`
+    ].filter((link) => link.href);
   };
   const formatDescription = (description) => {
     // Reemplazar los saltos de línea '\n' con el componente <br />
@@ -432,35 +776,213 @@ export function LandingPage() {
     }
   };
   const clientId = getClientId(account?._id);
+  {
+    /* Si la cuenta no existe retorna landing not found. */
+  }
   if (accountNotFound) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className='min-h-screen bg-gradient-to-tr from-slate-400 to-slate-700 py-12 px-4 sm:px-6 lg:px-8 text-white flex flex-col justify-center items-center'
-      >
-        <div className='max-w-md w-full space-y-8 text-center'>
-          <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <h1 className='text-5xl font-bold text-white mb-2'>Oops!</h1>
-            <p className='mt-2 text-xl text-gray-300'>Cuenta no encontrada</p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-            <p className='mt-4 text-lg text-gray-300'>Lo sentimos, pero no pudimos encontrar la cuenta que estás buscando.</p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.6 }}>
-            <Button
-              onClick={() => (window.location.href = "/")}
-              className='mt-8 bg-[#3a3b40] p-6 hover:bg-[#4a4b50] text-white font-bold transition-colors duration-300 w-full'
-            >
-              Volver a la página principal
-            </Button>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
+    return <LandingNotFound />;
   }
   const palette = generatePalette(account?.landing?.colorPalette);
+  const getClientData = async () => {
+    try {
+      const response = await api.get(`/api/landing/${slug}/fidelicard`, {
+        params: { email: clientId, accountId: account?._id },
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Agregar función para manejar el escaneo
+  const handleScan = async (result) => {
+    setProcessing(true);
+
+    if (!result) {
+      toast.error("No se pudo leer el código QR. Intenta nuevamente.");
+      setProcessing(false);
+      setShowScanner(false);
+      return;
+    }
+
+    if (!canRedeemPoints) {
+      toast.error("Ya has sumado puntos hoy. Vuelve mañana!");
+      setProcessing(false);
+      setShowScanner(false);
+      return;
+    }
+
+    if (!hasPointPromotion) {
+      toast.error("No hay una promoción de puntos activa.");
+      setProcessing(false);
+      setShowScanner(false);
+      return;
+    }
+
+    const accountQr = result[0].rawValue;
+
+    try {
+      const clientId = getClientId(account?._id);
+      console.log("Scanning with:", {
+        clientEmail: clientId,
+        promotionId: hasPointPromotion._id,
+        accountQr,
+      });
+
+      const response = await api.post("/api/landing/redeem-points", {
+        clientId: clientId,
+        promotionId: hasPointPromotion._id,
+        accountQr,
+      });
+
+      toast.success("Visita registrada con éxito ⭐");
+      await getAccInfo(); // Refrescar datos
+
+      // Si hay meseros en la landing, mostrar el diálogo de valoración
+      if (account?.landing?.waiters?.length > 0) {
+        setShowWaiterRating(true);
+      }
+    } catch (error) {
+      console.error("Error in handleScan:", error);
+      toast.error(error.response?.data?.error || "Error al registrar puntos");
+    } finally {
+      setProcessing(false);
+      setShowScanner(false);
+    }
+  };
+
+  const handleRedeemPromotion = async (promotion) => {
+    if (redeemingPromotion) return;
+
+    try {
+      setRedeemingPromotion(true);
+      const clientId = getClientId(account?._id);
+
+      const response = await api.post(`/api/landing/${slug}/redeem-promotion`, {
+        clientId,
+        promotionId: promotion._id,
+      });
+
+      toast.success("¡Promoción canjeada con éxito! 🎉", {
+        position: "bottom-center",
+        autoClose: 3000,
+      });
+
+      await getAccInfo();
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Error al canjear la promoción", {
+        position: "bottom-center",
+        autoClose: 3000,
+      });
+    } finally {
+      setRedeemingPromotion(false);
+    }
+  };
+
+  // Función para verificar si una promoción ya fue canjeada hoy
+  const wasRedeemedToday = (promotion, allPromotions) => {
+    if (!userActivities || !promotion || !allPromotions) return false;
+
+    // Si es una promoción de puntos, siempre permitir el canje
+    if (promotion.systemType === "points") {
+      return false;
+    }
+
+    // Para promociones de visitas, verificar si ya se canjeó alguna hoy
+    const currentPromotion = allPromotions.find((p) => p._id === promotion._id);
+    if (currentPromotion?.systemType === "visits") {
+      const today = moment().startOf("day");
+      return userActivities.some((activity) => activity.type === "visit" && moment(activity.date).startOf("day").isSame(today));
+    }
+
+    return false;
+  };
+
+  const handleRedeemVisitPromotion = (promotion, reward = null) => {
+    if (wasRedeemedToday(promotion, account?.promotions || [])) {
+      toast.error("Ya has canjeado una promoción de visita hoy. Vuelve mañana!", {
+        position: "bottom-center",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    setSelectedPromotion(promotion);
+    setSelectedReward(reward); // Guardar el reward seleccionado
+    setShowConfirmDialog(true);
+  };
+
+  const confirmRedeem = async () => {
+    if (!selectedPromotion) return;
+    console.log("selectedPromotion", selectedPromotion);
+    try {
+      setRedeemingPromotion(true);
+      const clientId = getClientId(account?._id);
+
+      // Determinar el endpoint según el systemType
+      if (selectedPromotion.systemType === "points") {
+        await api.post(`/api/landing/redeem-promotion-reward`, {
+          email: clientId,
+          accountId: account?._id,
+          promotionId: selectedPromotion._id,
+          rewardId: selectedReward._id,
+          points: selectedReward.points,
+        });
+      } else {
+        await api.post(`/api/landing/redeem-hot-promotion`, {
+          email: clientId,
+          accountId: account?._id,
+          promotionId: selectedPromotion._id,
+        });
+      }
+
+      toast.success("¡Promoción canjeada con éxito! 🎉", {
+        position: "bottom-center",
+        autoClose: 3000,
+      });
+
+      await getAccInfo();
+      setShowRedemptionDialog(true);
+    } catch (error) {
+      console.log("error", error);
+      toast.error(error.response?.data?.error || "Error al canjear la promoción", {
+        position: "bottom-center",
+        autoClose: 3000,
+      });
+    } finally {
+      setRedeemingPromotion(false);
+      setShowConfirmDialog(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showRedemptionDialog) {
+      setIsButtonDisabled(true);
+      const timer = setTimeout(() => {
+        setIsButtonDisabled(false);
+      }, 5000); // Deshabilitar el botón por 5 segundos
+
+      return () => clearTimeout(timer);
+    }
+  }, [showRedemptionDialog]);
+
+  // Añadir la función para manejar la valoración
+  const handleWaiterRating = async (waiterId, rating, comment) => {
+    try {
+      await api.post(`/api/waiters/accounts/${account._id}/waiters/${waiterId}/ratings`, {
+        rating,
+        comment,
+        clientId: clientId,
+      });
+      await api.post(`/api/waiters/accounts/${account._id}/waiters/${waiterId}/points`, {
+        points: 1,
+      });
+      toast.success("¡Gracias por tu valoración!");
+    } catch (error) {
+      toast.error("Error al enviar la valoración");
+      console.error(error);
+    }
+  };
 
   return (
     <motion.div
@@ -490,7 +1012,7 @@ export function LandingPage() {
               <p className={`mt-2 text-xl font-bold w-full md:w-2/3 justify-center m-auto ${palette.textPrimary} font-poppins`}>
                 {account?.landing?.title || ""}
               </p>
-              <p className={`mt-2 text-md w-full md:w-2/3 justify-center m-auto ${palette.textSecondary}`}>{account?.landing?.subtitle || ""}</p>
+              {/*  <p className={`mt-2 text-md w-full md:w-2/3 justify-center m-auto ${palette.textSecondary}`}>{account?.landing?.subtitle || ""}</p> */}
             </motion.div>
             {!isLoggedInForAccount(account?._id) && account && (
               <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -500,6 +1022,7 @@ export function LandingPage() {
                   onAuthSuccess={(userId, token, clientId) => {
                     login(account._id, userId, token, clientId);
                     getAccInfo();
+                    window.location.reload();
                   }}
                   slug={slug}
                 />
@@ -507,6 +1030,49 @@ export function LandingPage() {
             )}
 
             <div className='flex flex-col justify-center space-y-6'>
+              <MenuDialog account={account} isOpen={isMenuDialogOpen} onClose={() => setIsMenuDialogOpen(false)} />
+
+              {isLoggedInForAccount(account?._id || "") && (
+                <>
+                  <Button
+                    onClick={() => setShowScanner(true)}
+                    disabled={!canRedeemPoints}
+                    className={`
+                      ${!hasPointPromotion ? "hidden" : ""}
+    ${palette.buttonBackground} 
+    ${palette.buttonHover}
+      ${palette?.textPrimary}
+    p-6 text-white font-bold transition-colors duration-300
+    ring-0 
+        hover:ring-2
+        hover:ring-[${palette.textSecondary}]
+        ${!canRedeemPoints && "opacity-50 cursor-not-allowed"}
+  `}
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
+                  >
+                    {canRedeemPoints ? "Sumar puntos" : "Ya sumaste puntos hoy"} <QrCode />
+                  </Button>
+                </>
+              )}
+              <Button
+                onClick={() => setIsPromotionsDialogOpen(true)}
+                className={`
+                  ${palette?.buttonBackground} 
+                  ${palette?.buttonHover}
+                  ${palette?.textPrimary}
+                  p-6 text-white font-bold transition-colors duration-300
+                  ring-0 
+                  hover:ring-2
+                  hover:ring-[${palette?.textSecondary}]
+                `}
+                style={{
+                  color: palette?.textPrimary.split("[")[1].split("]")[0],
+                }}
+              >
+                Promociones <Gift />
+              </Button>
               <Button
                 onClick={() => {
                   if (account?.landing?.card.type === "link") {
@@ -519,76 +1085,55 @@ export function LandingPage() {
                 }}
                 className={`
     ${!account?.landing?.card.content && "hidden"}
-    ${palette.buttonBackground} 
-    ${palette.buttonHover}
+    ${palette?.buttonBackground} 
+    ${palette?.buttonHover}
     text-white font-bold p-6 transition-colors duration-300
     ring-0 
     hover:ring-2
     hover:ring-[${palette.textSecondary}]
   `}
+                style={{
+                  color: palette?.textPrimary.split("[")[1].split("]")[0],
+                }}
               >
-                {account?.landing?.card.title || "Ver nuestra carta"}
+                {account?.landing?.card.title || "Ver nuestra carta"} <Notebook />
               </Button>
-
-              {/* Agrega el MenuDialog */}
-              <MenuDialog account={account} isOpen={isMenuDialogOpen} onClose={() => setIsMenuDialogOpen(false)} />
               {account?.landing?.googleBusiness && (
                 <Button
                   onClick={() => window.open(account?.landing?.googleBusiness, "_blank")}
                   className={`
-        bg-yellow-500 
-        hover:bg-yellow-600 
-        text-black 
-        w-full 
-        m-auto 
-        font-bold 
-        p-6 
-        transition-colors 
-        duration-300 
-        flex 
-        items-center 
-        space-x-2
-        ring-0 
-        hover:ring-2
-        hover:ring-[${palette.textSecondary}]
+     
+    ${palette.buttonBackground} 
+    ${palette?.buttonHover}
+    text-white font-bold p-6 transition-colors duration-300
+    ring-0 
+    hover:ring-2
+    hover:ring-[${palette?.textSecondary}]
+        hover:ring-[${palette?.textSecondary}]
       `}
+                  style={{
+                    color: palette?.textPrimary.split("[")[1].split("]")[0],
+                  }}
                 >
                   Valóranos en Google
                   <Star />
                 </Button>
               )}
-
               {isLoggedInForAccount(account?._id || "") && (
-                <>
-                  <Button
-                    onClick={() => {
-                      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
-                    }}
-                    className={`
-    ${palette.buttonBackground} 
-    ${palette.buttonHover}
-    p-6 text-white font-bold transition-colors duration-300
-    ring-0 
-        hover:ring-2
-        hover:ring-[${palette.textSecondary}]
-  `}
-                  >
-                    Mi FideliCard <CreditCard />
-                  </Button>
-
+                <div className='flex justify-between w-full absolute top-0 right-0 px-6'>
                   <motion.button
                     onClick={() => {
                       logout(account?._id);
+                      setTotalPoints;
                       handleNavigate(`/landing/${slug}`);
                     }}
                     whileHover='hover'
                     initial='rest'
                     animate='rest'
                     variants={{
-                      rest: { width: "auto", justifyContent: "center" },
+                      rest: { width: "auto" },
                       hover: {
                         width: 180,
-                        justifyContent: "flex-start",
                         transition: {
                           duration: 0.3,
                           type: "tween",
@@ -596,13 +1141,16 @@ export function LandingPage() {
                       },
                     }}
                     className={`
-        ${palette.buttonBackground} 
-        ${palette.buttonHover}
-        p-2 text-white font-bold 
-        flex items-center 
-        overflow-hidden 
-        absolute top-0 
-      `}
+                    ${palette.buttonBackground} 
+                    ${palette.buttonHover}
+                    p-2 text-white font-bold 
+                    flex items-center 
+                    overflow-hidden 
+                    rounded-md
+                  `}
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
                   >
                     <motion.div
                       variants={{
@@ -620,11 +1168,10 @@ export function LandingPage() {
                         },
                       }}
                       className={`flex items-center ring-0 
-        hover:ring-2
-        hover:ring-[${palette.textSecondary}]`}
+                      hover:ring-2
+                      hover:ring-[${palette.textSecondary}]`}
                     >
                       <CiLogout className='mr-2' />
-
                       <motion.span
                         variants={{
                           rest: {
@@ -648,7 +1195,26 @@ export function LandingPage() {
                       </motion.span>
                     </motion.div>
                   </motion.button>
-                </>
+
+                  <Button
+                    onClick={() => {
+                      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
+                    }}
+                    className={`
+                    ${palette.buttonBackground} 
+                    ${palette.buttonHover}
+                    p-6 text-white font-bold transition-colors duration-300
+                    ring-0 
+                    hover:ring-2
+                    hover:ring-[${palette.textSecondary}]
+                  `}
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
+                  >
+                    FideliCard <CreditCard />
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -660,160 +1226,168 @@ export function LandingPage() {
                 <ImageViewer account={account} currentPage={currentPage} numPages={numPages} goToPrevPage={goToPrevPage} goToNextPage={goToNextPage} />{" "}
               </DialogContent>
             </Dialog>
-            {/* Promociones activas */}
-            <div>
-              <h2 className={`${!sortedPromotions.length && "hidden"} text-2xl font-bold ${palette.textPrimary} mb-4 text-center`}>Nuestras Promociones</h2>{" "}
-              <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-                {sortedPromotions?.map((promo) => {
-                  const isHot = isPromotionHot(promo);
-
-                  const daysOfWeek = [null, "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-
-                  // Día actual (ajustado al rango 1-7)
-                  const today = new Date().getDay();
-                  const normalizeText = (text) => text.toLowerCase().trim().replace(/\.$/, "");
-
-                  const applicableDays = [...new Set(promo.daysOfWeek)] // Elimina duplicados
-                    .filter((day) => day >= 1 && day <= 7) // Filtra valores fuera de rango
-                    .sort((a, b) => a - b) // Ordena los días
-                    .map((day) => {
-                      const dayName = daysOfWeek[day];
-                      return day === today ? `${dayName}` : dayName;
-                    });
-
-                  // Formatear `applicableDays` a días normalizados
-                  const normalizedApplicableDays = applicableDays.map(normalizeText);
-
-                  // Formatear `formattedDays`
-                  const formattedDays =
-                    applicableDays.length > 0
-                      ? applicableDays.slice(0, -1).join(", ") + (applicableDays.length > 1 ? " y " : "") + applicableDays[applicableDays.length - 1] + "."
-                      : "";
-
-                  // Extraer y normalizar los días de `formattedDays`
-                  const formattedDaysList = formattedDays
-                    .replace(/ y /g, ",") // Cambia " y " por ","
-                    .split(",") // Divide en días individuales
-                    .map(normalizeText); // Normaliza cada día
-
-                  // Verificar si algún día de `formattedDaysList` está en `normalizedApplicableDays`
-                  const hasMatchingDay = formattedDaysList.some((day) => normalizedApplicableDays.includes(day));
-                  return (
-                    <Dialog key={promo._id}>
-                      <DialogTrigger asChild>
-                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                          <Card
-                            className={`${palette.cardBackground} shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative overflow-hidden h-full`}
-                          >
-                            {" "}
-                            <CardContent
-                              className={`${isHot ? "border-4 border-transparent bg-clip-border shadow-fire" : ""} p-6 bg-gradient-to-br ${
-                                palette.gradient
-                              } text-white rounded-lg h-full flex flex-col justify-between`}
-                            >
-                              {isHot ||
-                                (promo.systemType === "points" && (
-                                  <span className='absolute top-0 right-0 py-1 px-3 text-sm bg-red-600 text-white rounded-full font-bold'>Hot</span>
-                                ))}
-                              <h2 className='text-xl font-semibold'>{promo.title}</h2>
-                              <p className='mt-2 text-gray-300'>{formatDescription(promo.description)}</p>
-
-                              <p className={`${promo.systemType === "points" && "hidden"} mt-2 text-sm text-gray-400`}>Válido: {formattedDays}</p>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      </DialogTrigger>
-                      <DialogContent className={`${palette.background} w-[95%] pt-20 text-white`}>
-                        <DialogHeader className='mt-16 flex flex-col m-auto justify-center'>
-                          <DialogTitle className='text-white text-2xl'>{promo.title}</DialogTitle>
-                          <DialogDescription className='text-gray-300'>{promo.description}</DialogDescription>
-                        </DialogHeader>
-                        <div className='mt-4 space-y-4 flex flex-col justify-center'>
-                          <img src={promo.imageUrl} alt={promo.title} className='w-full md:m-auto md:w-[30vw] rounded-lg' />
-                          {promo.systemType === "points" && promo.rewards?.length > 0 && (
-                            <div className='mt-4 '>
-                              <h3 className='text-lg font-semibold text-white mb-4'>Recompensas</h3>
-                              <ul
-                                className={`divide-y bg-gradient-to-tr ${palette.gradient} divide-gray-200 rounded-lg border border-gray-300 bg-white shadow-md`}
-                              >
-                                {promo.rewards.map((reward) => (
-                                  <li key={reward._id} className='flex flex-col items-center justify-between p-4 transition'>
-                                    <div>
-                                      <p className='text-sm font-medium text-white'>{reward.description}</p>
-                                    </div>
-                                    <span className='inline-flex mt-6 items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-main'>
-                                      {reward.points} puntos
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {/* Conditional Alert for Non-Applicable Days */}
-                          {!isHot && promo.systemType === "visits" && (
-                            <Alert severity='warning' className={`text-sm text-white ${palette.cardBackground}`}>
-                              Esta promoción solo está disponible los días: {applicableDays}. Hoy ({daysOfWeek[today]}) no es un día válido para esta promoción.
-                            </Alert>
-                          )}
-
-                          {/* Conditions Alert */}
-                          <Alert severity='info' className={`text-sm text-gray-300 ${palette.cardBackground}`}>
-                            {formatConditions(promo.conditions)}
-                          </Alert>
-                          {isLoggedInForAccount(account?._id || "") ? (
-                            <Alert severity='success' className={`w-full text-sm text-white ${palette.cardBackground}`}>
-                              ¡Estás automáticamente registrado en todas nuestras promociones! <br></br>
-                              <span
-                                className='cursor-pointer font-bold text-main'
-                                onClick={() => {
-                                  handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
-                                }}
-                              >
-                                Ir a tu FideliCard
-                              </span>
-                            </Alert>
-                          ) : (
-                            <Alert severity='success' className={`w-full text-sm text-white ${palette.cardBackground}`}>
-                              ¡
-                              <DialogClose asChild>
-                                <span
-                                  onClick={() => {
-                                    window.scrollTo({ top: 0, behavior: "smooth" });
-                                  }}
-                                  className='font-bold cursor-pointer'
-                                >
-                                  Registrate
-                                </span>
-                              </DialogClose>{" "}
-                              para empezar a sumar puntos y canjear promociones!
-                            </Alert>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  );
-                })}
-              </div>
-            </div>
 
             {/* Logo y redes sociales */}
             <div className='flex flex-col justify-center'>
-              <div className='m-auto mb-6'>{account?.logo && <img src={account.logo} className='w-[14rem] h-auto' alt={`${account.name} Logo`} />}</div>
+              <div className='m-auto mb-6'>{account?.logo && <img src={account.logo} className='w-[12.5rem] h-auto' alt={`${account.name} Logo`} />}</div>
               <div className='flex flex-row space-x-6 m-auto'>
                 {getSocialLinks().map((link, index) => (
                   <span
                     key={index}
                     onClick={() => window.open(link.href, "_blank", "noopener,noreferrer")}
-                    className={`text-white hover:${palette.textSecondary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
+                    className={`hover:${palette.textSecondary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
                   >
-                    <link.icon size={28} />
+                    <link.icon color={palette.textPrimary.match(/\[(.*?)\]/)?.[1] || "#FFFFFF"} size={28} />
                   </span>
                 ))}
               </div>
+
+              <p className={`flex items-center m-auto italic mt-6 ${palette?.textPrimary}`}>
+                Powered by&nbsp;<span className='font-bold'>FidelidApp.cl</span>
+                <ShieldCheck className='ml-2' />
+              </p>
             </div>
           </>
         )}
       </div>
+
+      {/* Agregar el componente del Scanner */}
+      {showScanner && (
+        <div onClick={() => setShowScanner(false)} className='fixed inset-0 flex justify-center items-center bg-slate-700 bg-opacity-70 p-6 z-50'>
+          <div className='relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md'>
+            <button onClick={() => setShowScanner(false)} className='absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl font-bold'>
+              ✕
+            </button>
+
+            <div className='w-full aspect-square p-6'>
+              <Scanner
+                scanDelay={1000}
+                onScan={handleScan}
+                className='w-full h-full object-contain p-6'
+                constraints={{
+                  video: {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: "environment",
+                  },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <PromotionsDialog
+        account={account}
+        isOpen={isPromotionsDialogOpen}
+        onClose={() => setIsPromotionsDialogOpen(false)}
+        promotions={sortedPromotions}
+        handleRedeemPromotion={handleRedeemVisitPromotion}
+        wasRedeemedToday={(promotion) => wasRedeemedToday(promotion, account?.promotions || [])}
+        isPromotionHot={isPromotionHot}
+        redeemingPromotion={redeemingPromotion}
+        isLoggedIn={isLoggedInForAccount(account?._id || "")}
+        totalPoints={totalPoints}
+      />
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent
+          className={`
+          max-w-[90%] max-h-[80%]
+          max-h-fit 
+          md:max-h-[30%] 
+          overflow-y-scroll 
+          p-4 
+          rounded-lg 
+          shadow-md 
+          border border-gray-400 
+          ${palette.background}
+        `}
+        >
+          <DialogHeader className='pt-16'>
+            <DialogTitle className={`text-lg font-semibold  ${palette.textPrimary}`}>Confirmar Canje</DialogTitle>
+            <DialogDescription className={`text-sm ${palette.textSecondary}`}>
+              ¿Estás seguro de que deseas canjear la promoción "{selectedPromotion?.title}"?
+            </DialogDescription>
+            <Alert severity='info' className={`text-sm mb-4 ${palette.textSecondary}`}>
+              {selectedPromotion?.conditions}
+            </Alert>
+            <DialogFooter className='flex justify-end gap-2 mt-4'>
+              <Button
+                variant='outline'
+                className={`
+                  text-sm px-4 py-2 
+                  ${palette.buttonBackground} 
+                  ${palette.buttonHover}
+                  ${palette.textPrimary}
+                  border-gray-600
+                `}
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                disabled={redeemingPromotion}
+                className={`
+                  text-sm px-4 py-2
+    
+                  ${palette.buttonHover}
+                  ${palette.textPrimary}
+                  ${redeemingPromotion ? "opacity-50" : ""}
+                `}
+                onClick={confirmRedeem}
+              >
+                Confirmar
+              </Button>
+            </DialogFooter>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRedemptionDialog} onOpenChange={setShowRedemptionDialog}>
+        <DialogContent className='h-fit'>
+          <DialogHeader>
+            <DialogTitle className='pt-8'>Promoción Canjeada</DialogTitle>
+            <DialogDescription>
+              {selectedPromotion?.systemType === "points" && selectedReward
+                ? `Has canjeado "${selectedReward?.description}" por ${selectedReward?.points} puntos.`
+                : `Has canjeado la promoción "${selectedPromotion?.title}".`}
+            </DialogDescription>
+            <div className='mt-4 bg-blue-50 p-4 rounded-lg'>
+              <p className='text-sm text-gray-700'>{selectedPromotion?.description}</p>
+            </div>
+            <Alert severity='success' className='text-left'>
+              Muestra este mensaje para validar tu canje. Si no puedes mostrar en tu actividad reciente.
+            </Alert>
+            <Alert severity='info' sx={{ fontWeight: "bold" }}>
+              Canje realizado el: {moment().format("DD/MM/YYYY HH:mm:ss")}
+            </Alert>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setShowRedemptionDialog(false);
+                setSelectedPromotion(null);
+                setSelectedReward(null);
+                setShowConfirmDialog(false);
+              }}
+              disabled={isButtonDisabled}
+            >
+              {isButtonDisabled ? "Cargando..." : "Entendido"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {account?.landing?.waiters?.length > 0 && (
+        <WaiterRatingDialog
+          isOpen={showWaiterRating}
+          onClose={() => setShowWaiterRating(false)}
+          account={account}
+          palette={palette}
+          onSubmit={handleWaiterRating}
+        />
+      )}
     </motion.div>
   );
 }

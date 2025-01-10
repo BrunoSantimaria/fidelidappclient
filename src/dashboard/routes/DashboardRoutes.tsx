@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 
 import { AutomationRulesPage } from "../pages/AutomationRules/AutomationRules";
 import EmailCampaigns, { EmailCampaign } from "../pages/email/EmailCampaign";
+import WaitersPage from "../pages/Waiters/WaitersPage";
 
 import {SmsCampaignManager} from "../pages/sms/SmsCampaignManager"
 
@@ -134,6 +135,7 @@ export const DashboardRoutes = () => {
             )
           }
         />
+        <Route path='/waiters' element={<WaitersPage />} />
         <Route path='/promotion/:id' element={<Promotion />} />
         <Route path='/promotions' element={<PromotionPage />} />
         <Route path='/agenda/create' element={<CreateAgenda />} />
