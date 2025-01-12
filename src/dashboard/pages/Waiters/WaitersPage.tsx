@@ -319,9 +319,10 @@ const WaitersPage = () => {
                         </TableCell>
                         <TableCell style={{ padding: isTablet ? "8px 4px" : "16px" }}>{waiter.totalPoints}</TableCell>
                         <TableCell style={{ padding: isTablet ? "8px 4px" : "16px" }}>
-                          <div className='flex flex-col sm:flex-row items-start sm:items-center gap-1'>
+                          <div className='flex items-center gap-2'>
                             <Rating value={getFilteredAverageRating(waiter)} readOnly precision={0.5} size={isTablet ? "small" : "medium"} />
-                            <span className='text-xs sm:text-sm text-gray-500'>({filterRatings(waiter.ratings).length})</span>
+                            <span className='text-sm'>({getFilteredAverageRating(waiter).toFixed(1)})</span>
+                            <span className='text-xs text-gray-500 ml-1'>{filterRatings(waiter.ratings).length} valoraciones</span>
                           </div>
                         </TableCell>
 
