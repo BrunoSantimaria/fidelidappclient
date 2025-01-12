@@ -527,19 +527,26 @@ const WaiterRatingDialog = ({ isOpen, onClose, account, palette, onSubmit }) => 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (selectedWaiter && rating > 0) {
-      console.log(comment);
-      await onSubmit(selectedWaiter, rating, comment);
-      setSubmitted(true);
-      setTimeout(() => {
-        onClose();
-        setSubmitted(false);
-        setSelectedWaiter("");
-        setRating(0);
-        setComment("");
-      }, 2000);
+      setIsSubmitting(true);
+      try {
+        await onSubmit(selectedWaiter, rating, comment);
+        setSubmitted(true);
+        setTimeout(() => {
+          onClose();
+          setSubmitted(false);
+          setSelectedWaiter("");
+          setRating(0);
+          setComment("");
+        }, 2000);
+      } catch (error) {
+        console.error("Error al enviar valoración:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -590,14 +597,14 @@ const WaiterRatingDialog = ({ isOpen, onClose, account, palette, onSubmit }) => 
               </div>
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedWaiter || rating === 0}
+                disabled={!selectedWaiter || rating === 0 || isSubmitting}
                 className={`
                   ${palette.buttonBackground}
                   ${palette.buttonHover}
-                  ${(!selectedWaiter || rating === 0) && "opacity-50 cursor-not-allowed"}
+                  ${(!selectedWaiter || rating === 0 || isSubmitting) && "opacity-50 cursor-not-allowed"}
                 `}
               >
-                Enviar Evaluación
+                {isSubmitting ? "Enviando..." : "Enviar Evaluación"}
               </Button>
             </div>
           ) : (
