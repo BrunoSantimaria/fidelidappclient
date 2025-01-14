@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from "@mui/material";
 import api from "../../../../utils/api";
+import { toast } from "react-toastify";
 
-const CampaignForm = ({ open, onClose, onCampaignCreated }) => {
-    const [form, setForm] = useState({ name: "", message: "", phoneNumbers: "" });
+const CampaignForm = ({ open, onClose, onCampaignCreated, totalCustomers }) => {
+    const [form, setForm] = useState({ name: "", message: ""});
     const [error, setError] = useState("");
 
     const handleChange = (e) => {
@@ -13,16 +14,24 @@ const CampaignForm = ({ open, onClose, onCampaignCreated }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        //Set alert to confirm the creation of the campaign
+        if (!window.confirm("Estás seguro de que deseas crear esta campana? Esto enviará un mensaje a " + totalCustomers + " clientes de tu lista de contactos.")) { 
+            setError("No se ha enviado la campaña");
+            return;
+        } else {
+            
+        }
+
         try {
-            const { phoneNumbers, ...rest } = form;
-            const phoneNumbersArray = phoneNumbers.split(",").map((num) => num.trim());
-            await api.post("/api/sms/campaign", { ...rest, phoneNumbers: phoneNumbersArray });
-            setForm({ name: "", message: "", phoneNumbers: "" });
+            await api.post("/api/sms/campaign", { name: form.name, message: form.message });
+            setForm({ name: "", message: "" });
+            setError("");
             onCampaignCreated(); // Notify parent about new campaign creation
             onClose(); // Close the dialog
+            toast.success("Campaña creada correctamente");
         } catch (error) {
             console.error("Error creating campaign:", error);
-            setError("Failed to create campaign");
+            toast.error("Error al crear la campaña");
         }
     };
 
@@ -49,33 +58,24 @@ const CampaignForm = ({ open, onClose, onCampaignCreated }) => {
                         value={form.message}
                         onChange={(e) => {
                             const value = e.target.value;
-                            if (value.length <= 160) {
+                            if (value.length <= 150) {
                                 setForm((prev) => ({ ...prev, message: value }));
                             }
                         }}
                         sx={{ mb: 2 }}
                         required
-                        helperText={`${form.message.length}/160 characters`} // Character counter
+                        helperText={`${form.message.length}/150 characters`} // Character counter
                         
-                    />
-                    <TextField
-                        label="Phone Numbers (comma-separated)"
-                        name="phoneNumbers"
-                        fullWidth
-                        value={form.phoneNumbers}
-                        onChange={handleChange}
-                        sx={{ mb: 2 }}
-                        required
                     />
                     {error && <p style={{ color: "red" }}>{error}</p>}
                 </form>
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="secondary">
-                    Cancel
+                    Cancelar
                 </Button>
                 <Button onClick={handleSubmit} variant="contained" color="primary">
-                    Create
+                    Crear
                 </Button>
             </DialogActions>
         </Dialog>

@@ -122,7 +122,7 @@ export const SmsCampaignManager = () => {
         Crear Nueva Campaña
       </Button>
 
-      <CampaignForm open={isFormOpen} onClose={handleFormClose} onCampaignCreated={fetchCampaigns} />
+      <CampaignForm open={isFormOpen} onClose={handleFormClose} onCampaignCreated={fetchCampaigns} totalCustomers={totalCustomers} />
 
       <CampaignTable campaigns={campaigns} />
     </Box>
