@@ -15,6 +15,7 @@ import { AddAdmin } from "./AddAdmin";
 import { useDashboard } from "../../../hooks";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MailRoundedIcon from "@mui/icons-material/MailRounded";
+import TextsmsIcon from '@mui/icons-material/Textsms';
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 import { Divider } from "@mui/material";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
@@ -104,15 +105,13 @@ export const Navigation = () => {
         variants={containerVariants}
         animate={containerControls}
         initial='close'
-        className={`${
-          isOpen ? "fixed" : "hidden"
-        } md:flex bg-[#5b7898] min-h-screen lg:h-screen md:h-screen flex-col justify-between z-50 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
+        className={`${isOpen ? "fixed" : "hidden"
+          } md:flex bg-[#5b7898] min-h-screen lg:h-screen md:h-screen flex-col justify-between z-50 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
       >
         <div className='flex flex-row w-full justify-between place-items-center'>
           <div
-            className={`${!isOpen ? "hidden" : ""} ${
-              user?.accounts?.logo ? "w-16" : "bg-gradient-to-br from-orange-500 to-amber-700 w-10 h-10"
-            } flex rounded-full cursor-pointer`}
+            className={`${!isOpen ? "hidden" : ""} ${user?.accounts?.logo ? "w-16" : "bg-gradient-to-br from-orange-500 to-amber-700 w-10 h-10"
+              } flex rounded-full cursor-pointer`}
             onClick={() => handleNavigate("/dashboard/settings")}
           >
             {user?.accounts?.logo ? (
@@ -132,62 +131,59 @@ export const Navigation = () => {
           </motion.button>
         </div>
 
-        <div className='flex flex-col h-full mt-6 md:mt-10 lg:mt-10 gap-6'>
+        <div className='flex flex-col h-full mt-6 md:mt-3 lg:mt-4 gap-4'>
           <NavigationLink name='Dashboard' link='/dashboard'>
             <SpaceDashboardRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-          </NavigationLink>
-
-          <NavigationLink name='Promociones' link='/dashboard/promotions'>
-            <LoyaltyRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
 
           <NavigationLink name='Reporte' link='/dashboard/report'>
             <AssessmentIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
 
-          <NavigationLink name='Código qr' link='/dashboard/qr/'>
-            <QrCode2RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          <NavigationLink name='Promociones' link='/dashboard/promotions'>
+            <LoyaltyRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
 
           <NavigationLink name='Clientes' link='/dashboard/clients/list'>
             <GroupsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
 
-          <div>
-            <NavigationLink name='Correos' link='/dashboard/email-sender' isOpen={isOpen}>
-              <MailRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-            </NavigationLink>
-          </div>
-          <div>
-            <NavigationLink name='Campañas' link='/dashboard/email-campaign' isOpen={isOpen}>
-              <CampaignRoundedIcon />
-            </NavigationLink>
-          </div>
+          <NavigationLink name='Email Marketing' link='/dashboard/email-campaign' isOpen={isOpen}>
+            <MailRoundedIcon />
+          </NavigationLink>
+          
+          <NavigationLink name='Campañas SMS' link='/dashboard/sms-sender' isOpen={isOpen}>
+            <TextsmsIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
+
           {/*  <div onClick={handleModal}>  <NavigationLink name='Agregar administradores'>
               <PersonAddAlt1RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
           </div>*/}
 
+          <NavigationLink name='Meseros' link='/dashboard/waiters'>
+            <Person className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
+
+        </div>
+
+        <div className='flex flex-col h-full mt-6 md:mt-5 lg:mt-7 gap-4'>
           <Divider className='bg-gray-300/80' />
-          <div>
-            <NavigationLink name='Meseros' link='/dashboard/waiters'>
-              <Person className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-            </NavigationLink>
-          </div>
-          <div>
-            <NavigationLink name='Ajustes' link='/dashboard/settings'>
-              <SettingsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
-            </NavigationLink>
-          </div>
+          <AddAdmin open={openModal} handleClose={handleModal} />
+          <NavigationLink name='Ajustes' link='/dashboard/settings'>
+            <SettingsRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
+          <NavigationLink name='Código qr' link='/dashboard/qr/'>
+            <QrCode2RoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
           <div onClick={startLoggingOut}>
             <NavigationLink name='Salir'>
               <LogoutRoundedIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2 ' />
             </NavigationLink>
           </div>
-        </div>
-        <AddAdmin open={openModal} handleClose={handleModal} />
-        <div className='flex justify-center items-center'>
-          <img src={logo} alt='Logo' className='w-16 mt-6 scale-90 md:scale-150 lg:scale-150 h-auto mb-4' />
+          <div className='flex justify-center items-center'>
+            <img src={logo} alt='Logo' className='w-16 mt-11 scale-90 md:scale-150 lg:scale-150 h-auto mb-4' />
+          </div>
         </div>
       </motion.nav>
     </>

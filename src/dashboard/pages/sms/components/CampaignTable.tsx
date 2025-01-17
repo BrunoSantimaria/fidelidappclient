@@ -15,9 +15,11 @@ const CampaignTable = ({ campaigns }) => {
         <TableHead>
           <TableRow>
             <TableCell><strong>Nombre Campaña</strong></TableCell>
-            <TableCell><strong>Mensaje</strong></TableCell>
+            <TableCell ><strong>Mensaje</strong></TableCell>
             <TableCell><strong>Estado</strong></TableCell>
             <TableCell><strong>Fecha</strong></TableCell>
+            <TableCell><strong>Enviados</strong></TableCell>
+            <TableCell><strong>Fallidos</strong></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -25,9 +27,13 @@ const CampaignTable = ({ campaigns }) => {
             campaigns.map((campaign) => (
               <TableRow key={campaign._id}>
                 <TableCell>{campaign.name}</TableCell>
-                <TableCell>{campaign.message}</TableCell>
+                <TableCell sx={{ maxWidth: '300px'}}>
+                  {campaign.message}
+                </TableCell>
                 <TableCell>{campaign.status}</TableCell>
                 <TableCell>{campaign.createdAt.slice(0, 10)}</TableCell>
+                <TableCell>{campaign.metrics.sent}</TableCell>
+                <TableCell>{campaign.metrics.failed}</TableCell>
               </TableRow>
             ))
           ) : (
