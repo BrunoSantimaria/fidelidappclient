@@ -28,8 +28,7 @@ import { AutomationRulesPage } from "../pages/AutomationRules/AutomationRules";
 import EmailCampaigns, { EmailCampaign } from "../pages/email/EmailCampaign";
 import WaitersPage from "../pages/Waiters/WaitersPage";
 
-import {SmsCampaignManager} from "../pages/sms/SmsCampaignManager"
-
+import { SmsCampaignManager } from "../pages/sms/smsCampaignManager";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
