@@ -29,7 +29,11 @@ const RulesTable: React.FC<RulesTableProps> = ({ rules, onEdit, onDelete }) => {
             <TableCell>{rule.conditionValue}</TableCell>
             <TableCell>
               <strong>Subject:</strong> {rule.subject} <br />
-              <strong>Message:</strong> {rule.message}
+              <strong>Message:</strong>
+              <div
+                dangerouslySetInnerHTML={{ __html: rule.message }}
+                style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '5px', borderRadius: '4px' }}
+              />
             </TableCell>
             <TableCell>{rule.isActive ? 'Yes' : 'No'}</TableCell>
             <TableCell>
