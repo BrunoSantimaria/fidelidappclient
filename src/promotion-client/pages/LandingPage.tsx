@@ -992,10 +992,10 @@ export function LandingPage() {
 
   return (
     <>
-      <Helmet>
+      {/* <Helmet>
         <title>{account?.name} | Landing de Fidelización</title>
         <meta name='description' content={account?.landing?.title || ""} />
-      </Helmet>
+      </Helmet> */}
 
       <motion.div
         initial={{ opacity: 0, y: -50 }}
