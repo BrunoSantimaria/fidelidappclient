@@ -23,7 +23,6 @@ import moment from "moment";
 import { Accordion, AccordionSummary, AccordionDetails, Typography, LinearProgress, Alert } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Helmet } from "react-helmet-async";
 
 interface SocialMedia {
   instagram: string;
@@ -449,8 +448,8 @@ const PromotionsDialog = ({
                                       {redeemingPromotion
                                         ? "Canjeando..."
                                         : totalPoints < reward.points
-                                          ? `Te faltan ${reward.points - totalPoints} punto(s)`
-                                          : `Canjear por ${reward.points} punto(s)`}
+                                        ? `Te faltan ${reward.points - totalPoints} punto(s)`
+                                        : `Canjear por ${reward.points} punto(s)`}
                                     </Button>
                                   </div>
                                 ))}
@@ -467,15 +466,16 @@ const PromotionsDialog = ({
                               }
                             }}
                             disabled={isLoggedIn ? isRedeemedToday || redeemingPromotion : false}
-                            className={`w-full mt-4 ${palette.buttonBackground} ${!isRedeemedToday && !redeemingPromotion ? palette.buttonHover : ""} ${isRedeemedToday ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
+                            className={`w-full mt-4 ${palette.buttonBackground} ${!isRedeemedToday && !redeemingPromotion ? palette.buttonHover : ""} ${
+                              isRedeemedToday ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                           >
                             {isLoggedIn
                               ? isRedeemedToday
                                 ? "Ya canjeaste hoy"
                                 : redeemingPromotion
-                                  ? "Canjeando..."
-                                  : "Canjear promoción"
+                                ? "Canjeando..."
+                                : "Canjear promoción"
                               : "Regístrate o inicia sesión para canjear"}
                           </Button>
                         )}
@@ -504,8 +504,9 @@ const StarRating = ({ totalStars = 5, onRating }) => {
         return (
           <Star
             key={index}
-            className={`cursor-pointer transition-all duration-200 hover:scale-110 ${ratingValue <= (hover || rating) ? "text-[#ff4dff] fill-[#ff4dff]" : "text-purple-300"
-              }`}
+            className={`cursor-pointer transition-all duration-200 hover:scale-110 ${
+              ratingValue <= (hover || rating) ? "text-[#ff4dff] fill-[#ff4dff]" : "text-purple-300"
+            }`}
             size={28}
             onClick={() => {
               setRating(ratingValue);
@@ -991,65 +992,59 @@ export function LandingPage() {
   };
 
   return (
-    <>
-      {/* <Helmet>
-        <title>{account?.name} | Landing de Fidelización</title>
-        <meta name='description' content={account?.landing?.title || ""} />
-      </Helmet> */}
-
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className={`min-h-screen  ${palette.gradient} py-12 px-4 sm:px-6 lg:px-8 text-white`}
-      >
-        <div className='max-w-4xl md:max-w-5xl lg:max-w-6xl mx-auto space-y-8'>
-          {/* Componente de carga */}
-          {loading ? (
-            <div className='flex justify-center items-center min-h-[400px]'>
-              <div className='spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-white' role='status'>
-                <span className='sr-only'>Cargando...</span>
-              </div>
+    <motion.div
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`min-h-screen  ${palette.gradient} py-12 px-4 sm:px-6 lg:px-8 text-white`}
+    >
+      <div className='max-w-4xl md:max-w-5xl lg:max-w-6xl mx-auto space-y-8'>
+        {/* Componente de carga */}
+        {loading ? (
+          <div className='flex justify-center items-center min-h-[400px]'>
+            <div className='spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-white' role='status'>
+              <span className='sr-only'>Cargando...</span>
             </div>
-          ) : (
-            <>
-              {/* Título de la página */}
-              <motion.div
-                initial={{ opacity: 0, y: -50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className={`text-center ${isLoggedInForAccount(account?._id || "") && "mt-12"} `}
-              >
-                <h1 className={`text-5xl mb-2 font-bold ${palette.textPrimary}`}>{account?.name || "Restaurante"}</h1>
-                <p className={`mt-2 text-xl font-bold w-full md:w-2/3 justify-center m-auto ${palette.textPrimary} font-poppins`}>
-                  {account?.landing?.title || ""}
-                </p>
-                {/*  <p className={`mt-2 text-md w-full md:w-2/3 justify-center m-auto ${palette.textSecondary}`}>{account?.landing?.subtitle || ""}</p> */}
+          </div>
+        ) : (
+          <>
+            {/* Título de la página */}
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className={`text-center ${isLoggedInForAccount(account?._id || "") && "mt-12"} `}
+            >
+              <h1 className={`text-5xl mb-2 font-bold ${palette.textPrimary}`}>{account?.name || "Restaurante"}</h1>
+              <p className={`mt-2 text-xl font-bold w-full md:w-2/3 justify-center m-auto ${palette.textPrimary} font-poppins`}>
+                {account?.landing?.title || ""}
+              </p>
+              {/*  <p className={`mt-2 text-md w-full md:w-2/3 justify-center m-auto ${palette.textSecondary}`}>{account?.landing?.subtitle || ""}</p> */}
+            </motion.div>
+            {!isLoggedInForAccount(account?._id) && account && (
+              <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <AuthDialog
+                  accountId={account._id}
+                  selectedPalette={palette}
+                  onAuthSuccess={(userId, token, clientId) => {
+                    login(account._id, userId, token, clientId);
+                    getAccInfo();
+                    window.location.reload();
+                  }}
+                  slug={slug}
+                />
               </motion.div>
-              {!isLoggedInForAccount(account?._id) && account && (
-                <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                  <AuthDialog
-                    accountId={account._id}
-                    selectedPalette={palette}
-                    onAuthSuccess={(userId, token, clientId) => {
-                      login(account._id, userId, token, clientId);
-                      getAccInfo();
-                      window.location.reload();
-                    }}
-                    slug={slug}
-                  />
-                </motion.div>
-              )}
+            )}
 
-              <div className='flex flex-col justify-center space-y-6'>
-                <MenuDialog account={account} isOpen={isMenuDialogOpen} onClose={() => setIsMenuDialogOpen(false)} />
+            <div className='flex flex-col justify-center space-y-6'>
+              <MenuDialog account={account} isOpen={isMenuDialogOpen} onClose={() => setIsMenuDialogOpen(false)} />
 
-                {isLoggedInForAccount(account?._id || "") && (
-                  <>
-                    <Button
-                      onClick={() => setShowScanner(true)}
-                      disabled={!canRedeemPoints}
-                      className={`
+              {isLoggedInForAccount(account?._id || "") && (
+                <>
+                  <Button
+                    onClick={() => setShowScanner(true)}
+                    disabled={!canRedeemPoints}
+                    className={`
                       ${!hasPointPromotion ? "hidden" : ""}
     ${palette.buttonBackground} 
     ${palette.buttonHover}
@@ -1060,17 +1055,17 @@ export function LandingPage() {
         hover:ring-[${palette.textSecondary}]
         ${!canRedeemPoints && "opacity-50 cursor-not-allowed"}
   `}
-                      style={{
-                        color: palette?.textPrimary.split("[")[1].split("]")[0],
-                      }}
-                    >
-                      {canRedeemPoints ? "Sumar puntos" : "Ya sumaste puntos hoy"} <QrCode />
-                    </Button>
-                  </>
-                )}
-                <Button
-                  onClick={() => setIsPromotionsDialogOpen(true)}
-                  className={`
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
+                  >
+                    {canRedeemPoints ? "Sumar puntos" : "Ya sumaste puntos hoy"} <QrCode />
+                  </Button>
+                </>
+              )}
+              <Button
+                onClick={() => setIsPromotionsDialogOpen(true)}
+                className={`
                   ${palette?.buttonBackground} 
                   ${palette?.buttonHover}
                   ${palette?.textPrimary}
@@ -1079,23 +1074,23 @@ export function LandingPage() {
                   hover:ring-2
                   hover:ring-[${palette?.textSecondary}]
                 `}
-                  style={{
-                    color: palette?.textPrimary.split("[")[1].split("]")[0],
-                  }}
-                >
-                  Promociones <Gift />
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (account?.landing?.card.type === "link") {
-                      window.open(account?.landing?.card.content[0], "_blank");
-                    } else if (account?.landing?.card.type === "view_on_site") {
-                      setIsPdfDialogOpen(true);
-                    } else if (account?.landing?.card.type === "menu") {
-                      setIsMenuDialogOpen(true);
-                    }
-                  }}
-                  className={`
+                style={{
+                  color: palette?.textPrimary.split("[")[1].split("]")[0],
+                }}
+              >
+                Promociones <Gift />
+              </Button>
+              <Button
+                onClick={() => {
+                  if (account?.landing?.card.type === "link") {
+                    window.open(account?.landing?.card.content[0], "_blank");
+                  } else if (account?.landing?.card.type === "view_on_site") {
+                    setIsPdfDialogOpen(true);
+                  } else if (account?.landing?.card.type === "menu") {
+                    setIsMenuDialogOpen(true);
+                  }
+                }}
+                className={`
     ${!account?.landing?.card.content && "hidden"}
     ${palette?.buttonBackground} 
     ${palette?.buttonHover}
@@ -1104,16 +1099,16 @@ export function LandingPage() {
     hover:ring-2
     hover:ring-[${palette.textSecondary}]
   `}
-                  style={{
-                    color: palette?.textPrimary.split("[")[1].split("]")[0],
-                  }}
-                >
-                  {account?.landing?.card.title || "Ver nuestra carta"} <Notebook />
-                </Button>
-                {account?.landing?.googleBusiness && (
-                  <Button
-                    onClick={() => window.open(account?.landing?.googleBusiness, "_blank")}
-                    className={`
+                style={{
+                  color: palette?.textPrimary.split("[")[1].split("]")[0],
+                }}
+              >
+                {account?.landing?.card.title || "Ver nuestra carta"} <Notebook />
+              </Button>
+              {account?.landing?.googleBusiness && (
+                <Button
+                  onClick={() => window.open(account?.landing?.googleBusiness, "_blank")}
+                  className={`
      
     ${palette.buttonBackground} 
     ${palette?.buttonHover}
@@ -1123,36 +1118,36 @@ export function LandingPage() {
     hover:ring-[${palette?.textSecondary}]
         hover:ring-[${palette?.textSecondary}]
       `}
-                    style={{
-                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                  style={{
+                    color: palette?.textPrimary.split("[")[1].split("]")[0],
+                  }}
+                >
+                  Valóranos en Google
+                  <Star />
+                </Button>
+              )}
+              {isLoggedInForAccount(account?._id || "") && (
+                <div className='flex justify-between w-full absolute top-0 right-0 px-6'>
+                  <motion.button
+                    onClick={() => {
+                      logout(account?._id);
+                      setTotalPoints;
+                      handleNavigate(`/landing/${slug}`);
                     }}
-                  >
-                    Valóranos en Google
-                    <Star />
-                  </Button>
-                )}
-                {isLoggedInForAccount(account?._id || "") && (
-                  <div className='flex justify-between w-full absolute top-0 right-0 px-6'>
-                    <motion.button
-                      onClick={() => {
-                        logout(account?._id);
-                        setTotalPoints;
-                        handleNavigate(`/landing/${slug}`);
-                      }}
-                      whileHover='hover'
-                      initial='rest'
-                      animate='rest'
-                      variants={{
-                        rest: { width: "auto" },
-                        hover: {
-                          width: 180,
-                          transition: {
-                            duration: 0.3,
-                            type: "tween",
-                          },
+                    whileHover='hover'
+                    initial='rest'
+                    animate='rest'
+                    variants={{
+                      rest: { width: "auto" },
+                      hover: {
+                        width: 180,
+                        transition: {
+                          duration: 0.3,
+                          type: "tween",
                         },
-                      }}
-                      className={`
+                      },
+                    }}
+                    className={`
                     ${palette.buttonBackground} 
                     ${palette.buttonHover}
                     p-2 text-white font-bold 
@@ -1160,59 +1155,59 @@ export function LandingPage() {
                     overflow-hidden 
                     rounded-md
                   `}
-                      style={{
-                        color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
+                  >
+                    <motion.div
+                      variants={{
+                        rest: {
+                          padding: "0.5rem",
+                          x: 0,
+                        },
+                        hover: {
+                          padding: "0.5rem",
+                          x: 0,
+                          transition: {
+                            duration: 0.3,
+                            type: "tween",
+                          },
+                        },
                       }}
+                      className={`flex items-center ring-0 
+                      hover:ring-2
+                      hover:ring-[${palette.textSecondary}]`}
                     >
-                      <motion.div
+                      <CiLogout className='mr-2' />
+                      <motion.span
                         variants={{
                           rest: {
-                            padding: "0.5rem",
-                            x: 0,
+                            opacity: 0,
+                            width: 0,
+                            display: "none",
                           },
                           hover: {
-                            padding: "0.5rem",
-                            x: 0,
+                            opacity: 1,
+                            width: "auto",
+                            display: "block",
                             transition: {
                               duration: 0.3,
-                              type: "tween",
+                              delay: 0.2,
                             },
                           },
                         }}
-                        className={`flex items-center ring-0 
-                      hover:ring-2
-                      hover:ring-[${palette.textSecondary}]`}
+                        className='whitespace-nowrap'
                       >
-                        <CiLogout className='mr-2' />
-                        <motion.span
-                          variants={{
-                            rest: {
-                              opacity: 0,
-                              width: 0,
-                              display: "none",
-                            },
-                            hover: {
-                              opacity: 1,
-                              width: "auto",
-                              display: "block",
-                              transition: {
-                                duration: 0.3,
-                                delay: 0.2,
-                              },
-                            },
-                          }}
-                          className='whitespace-nowrap'
-                        >
-                          Cerrar sesión
-                        </motion.span>
-                      </motion.div>
-                    </motion.button>
+                        Cerrar sesión
+                      </motion.span>
+                    </motion.div>
+                  </motion.button>
 
-                    <Button
-                      onClick={() => {
-                        handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
-                      }}
-                      className={`
+                  <Button
+                    onClick={() => {
+                      handleNavigate(`/landing/${slug}/fidelicard/${clientId}`);
+                    }}
+                    className={`
                     ${palette.buttonBackground} 
                     ${palette.buttonHover}
                     p-6 text-white font-bold transition-colors duration-300
@@ -1220,91 +1215,91 @@ export function LandingPage() {
                     hover:ring-2
                     hover:ring-[${palette.textSecondary}]
                   `}
-                      style={{
-                        color: palette?.textPrimary.split("[")[1].split("]")[0],
-                      }}
-                    >
-                      FideliCard <CreditCard />
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <Dialog open={isPdfDialogOpen} onOpenChange={setIsPdfDialogOpen}>
-                <DialogContent className='p-0 bg-transparent flex justify-center items-center'>
-                  <DialogHeader className='sr-only'>
-                    <DialogTitle>Nuestra Carta</DialogTitle>
-                  </DialogHeader>
-                  <ImageViewer account={account} currentPage={currentPage} numPages={numPages} goToPrevPage={goToPrevPage} goToNextPage={goToNextPage} />{" "}
-                </DialogContent>
-              </Dialog>
-
-              {/* Logo y redes sociales */}
-              <div className='flex flex-col justify-center'>
-                <div className='m-auto mb-6'>{account?.logo && <img src={account.logo} className='w-[12.5rem] h-auto' alt={`${account.name} Logo`} />}</div>
-                <div className='flex flex-row space-x-6 m-auto'>
-                  {getSocialLinks().map((link, index) => (
-                    <span
-                      key={index}
-                      onClick={() => window.open(link.href, "_blank", "noopener,noreferrer")}
-                      className={`hover:${palette.textSecondary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
-                    >
-                      <link.icon color={palette.textPrimary.match(/\[(.*?)\]/)?.[1] || "#FFFFFF"} size={28} />
-                    </span>
-                  ))}
+                    style={{
+                      color: palette?.textPrimary.split("[")[1].split("]")[0],
+                    }}
+                  >
+                    FideliCard <CreditCard />
+                  </Button>
                 </div>
+              )}
+            </div>
 
-                <p className={`flex items-center m-auto italic mt-6 ${palette?.textPrimary}`}>
-                  Powered by&nbsp;<span className='font-bold'>FidelidApp.cl</span>
-                  <ShieldCheck className='ml-2' />
-                </p>
+            <Dialog open={isPdfDialogOpen} onOpenChange={setIsPdfDialogOpen}>
+              <DialogContent className='p-0 bg-transparent flex justify-center items-center'>
+                <DialogHeader className='sr-only'>
+                  <DialogTitle>Nuestra Carta</DialogTitle>
+                </DialogHeader>
+                <ImageViewer account={account} currentPage={currentPage} numPages={numPages} goToPrevPage={goToPrevPage} goToNextPage={goToNextPage} />{" "}
+              </DialogContent>
+            </Dialog>
+
+            {/* Logo y redes sociales */}
+            <div className='flex flex-col justify-center'>
+              <div className='m-auto mb-6'>{account?.logo && <img src={account.logo} className='w-[12.5rem] h-auto' alt={`${account.name} Logo`} />}</div>
+              <div className='flex flex-row space-x-6 m-auto'>
+                {getSocialLinks().map((link, index) => (
+                  <span
+                    key={index}
+                    onClick={() => window.open(link.href, "_blank", "noopener,noreferrer")}
+                    className={`hover:${palette.textSecondary} transition-colors duration-500 transform hover:scale-110 cursor-pointer`}
+                  >
+                    <link.icon color={palette.textPrimary.match(/\[(.*?)\]/)?.[1] || "#FFFFFF"} size={28} />
+                  </span>
+                ))}
               </div>
-            </>
-          )}
-        </div>
 
-        {/* Agregar el componente del Scanner */}
-        {showScanner && (
-          <div onClick={() => setShowScanner(false)} className='fixed inset-0 flex justify-center items-center bg-slate-700 bg-opacity-70 p-6 z-50'>
-            <div className='relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md'>
-              <button onClick={() => setShowScanner(false)} className='absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl font-bold'>
-                ✕
-              </button>
+              <p className={`flex items-center m-auto italic mt-6 ${palette?.textPrimary}`}>
+                Powered by&nbsp;<span className='font-bold'>FidelidApp.cl</span>
+                <ShieldCheck className='ml-2' />
+              </p>
+            </div>
+          </>
+        )}
+      </div>
 
-              <div className='w-full aspect-square p-6'>
-                <Scanner
-                  scanDelay={1000}
-                  onScan={handleScan}
-                  className='w-full h-full object-contain p-6'
-                  constraints={{
-                    video: {
-                      width: { ideal: 640 },
-                      height: { ideal: 480 },
-                      facingMode: "environment",
-                    },
-                  }}
-                />
-              </div>
+      {/* Agregar el componente del Scanner */}
+      {showScanner && (
+        <div onClick={() => setShowScanner(false)} className='fixed inset-0 flex justify-center items-center bg-slate-700 bg-opacity-70 p-6 z-50'>
+          <div className='relative bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md'>
+            <button onClick={() => setShowScanner(false)} className='absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl font-bold'>
+              ✕
+            </button>
+
+            <div className='w-full aspect-square p-6'>
+              <Scanner
+                scanDelay={1000}
+                onScan={handleScan}
+                className='w-full h-full object-contain p-6'
+                constraints={{
+                  video: {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: "environment",
+                  },
+                }}
+              />
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        <PromotionsDialog
-          account={account}
-          isOpen={isPromotionsDialogOpen}
-          onClose={() => setIsPromotionsDialogOpen(false)}
-          promotions={sortedPromotions}
-          handleRedeemPromotion={handleRedeemVisitPromotion}
-          wasRedeemedToday={(promotion) => wasRedeemedToday(promotion, account?.promotions || [])}
-          isPromotionHot={isPromotionHot}
-          redeemingPromotion={redeemingPromotion}
-          isLoggedIn={isLoggedInForAccount(account?._id || "")}
-          totalPoints={totalPoints}
-        />
+      <PromotionsDialog
+        account={account}
+        isOpen={isPromotionsDialogOpen}
+        onClose={() => setIsPromotionsDialogOpen(false)}
+        promotions={sortedPromotions}
+        handleRedeemPromotion={handleRedeemVisitPromotion}
+        wasRedeemedToday={(promotion) => wasRedeemedToday(promotion, account?.promotions || [])}
+        isPromotionHot={isPromotionHot}
+        redeemingPromotion={redeemingPromotion}
+        isLoggedIn={isLoggedInForAccount(account?._id || "")}
+        totalPoints={totalPoints}
+      />
 
-        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-          <DialogContent
-            className={`
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent
+          className={`
           max-w-[90%] max-h-[80%]
           max-h-fit 
           md:max-h-[30%] 
@@ -1315,92 +1310,91 @@ export function LandingPage() {
           border border-gray-400 
           ${palette.background}
         `}
-          >
-            <DialogHeader className='pt-16'>
-              <DialogTitle className={`text-lg font-semibold  ${palette.textPrimary}`}>Confirmar Canje</DialogTitle>
-              <DialogDescription className={`text-sm ${palette.textSecondary}`}>
-                ¿Estás seguro de que deseas canjear la promoción "{selectedPromotion?.title}"?
-              </DialogDescription>
-              <Alert severity='info' className={`text-sm mb-4 ${palette.textSecondary}`}>
-                {selectedPromotion?.conditions}
-              </Alert>
-              <DialogFooter className='flex justify-end gap-2 mt-4'>
-                <Button
-                  variant='outline'
-                  className={`
+        >
+          <DialogHeader className='pt-16'>
+            <DialogTitle className={`text-lg font-semibold  ${palette.textPrimary}`}>Confirmar Canje</DialogTitle>
+            <DialogDescription className={`text-sm ${palette.textSecondary}`}>
+              ¿Estás seguro de que deseas canjear la promoción "{selectedPromotion?.title}"?
+            </DialogDescription>
+            <Alert severity='info' className={`text-sm mb-4 ${palette.textSecondary}`}>
+              {selectedPromotion?.conditions}
+            </Alert>
+            <DialogFooter className='flex justify-end gap-2 mt-4'>
+              <Button
+                variant='outline'
+                className={`
                   text-sm px-4 py-2 
                   ${palette.buttonBackground} 
                   ${palette.buttonHover}
                   ${palette.textPrimary}
                   border-gray-600
                 `}
-                  onClick={() => setShowConfirmDialog(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  disabled={redeemingPromotion}
-                  className={`
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                disabled={redeemingPromotion}
+                className={`
                   text-sm px-4 py-2
     
                   ${palette.buttonHover}
                   ${palette.textPrimary}
                   ${redeemingPromotion ? "opacity-50" : ""}
                 `}
-                  onClick={confirmRedeem}
-                >
-                  Confirmar
-                </Button>
-              </DialogFooter>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={showRedemptionDialog} onOpenChange={setShowRedemptionDialog}>
-          <DialogContent className='h-fit'>
-            <DialogHeader>
-              <DialogTitle className='pt-8'>Promoción Canjeada</DialogTitle>
-              <DialogDescription>
-                {selectedPromotion?.systemType === "points" && selectedReward
-                  ? `Has canjeado "${selectedReward?.description}" por ${selectedReward?.points} puntos.`
-                  : `Has canjeado la promoción "${selectedPromotion?.title}".`}
-              </DialogDescription>
-              <div className='mt-4 bg-blue-50 p-4 rounded-lg'>
-                <p className='text-sm text-gray-700'>{selectedPromotion?.description}</p>
-              </div>
-              <Alert severity='success' className='text-left'>
-                Muestra este mensaje para validar tu canje. Si no puedes mostrar en tu actividad reciente.
-              </Alert>
-              <Alert severity='info' sx={{ fontWeight: "bold" }}>
-                Canje realizado el: {moment().format("DD/MM/YYYY HH:mm:ss")}
-              </Alert>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                onClick={() => {
-                  setShowRedemptionDialog(false);
-                  setSelectedPromotion(null);
-                  setSelectedReward(null);
-                  setShowConfirmDialog(false);
-                }}
-                disabled={isButtonDisabled}
+                onClick={confirmRedeem}
               >
-                {isButtonDisabled ? "Cargando..." : "Entendido"}
+                Confirmar
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
 
-        {account?.landing?.waiters?.length > 0 && (
-          <WaiterRatingDialog
-            isOpen={showWaiterRating}
-            onClose={() => setShowWaiterRating(false)}
-            account={account}
-            palette={palette}
-            onSubmit={handleWaiterRating}
-          />
-        )}
-      </motion.div>
-    </>
+      <Dialog open={showRedemptionDialog} onOpenChange={setShowRedemptionDialog}>
+        <DialogContent className='h-fit'>
+          <DialogHeader>
+            <DialogTitle className='pt-8'>Promoción Canjeada</DialogTitle>
+            <DialogDescription>
+              {selectedPromotion?.systemType === "points" && selectedReward
+                ? `Has canjeado "${selectedReward?.description}" por ${selectedReward?.points} puntos.`
+                : `Has canjeado la promoción "${selectedPromotion?.title}".`}
+            </DialogDescription>
+            <div className='mt-4 bg-blue-50 p-4 rounded-lg'>
+              <p className='text-sm text-gray-700'>{selectedPromotion?.description}</p>
+            </div>
+            <Alert severity='success' className='text-left'>
+              Muestra este mensaje para validar tu canje. Si no puedes mostrar en tu actividad reciente.
+            </Alert>
+            <Alert severity='info' sx={{ fontWeight: "bold" }}>
+              Canje realizado el: {moment().format("DD/MM/YYYY HH:mm:ss")}
+            </Alert>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setShowRedemptionDialog(false);
+                setSelectedPromotion(null);
+                setSelectedReward(null);
+                setShowConfirmDialog(false);
+              }}
+              disabled={isButtonDisabled}
+            >
+              {isButtonDisabled ? "Cargando..." : "Entendido"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {account?.landing?.waiters?.length > 0 && (
+        <WaiterRatingDialog
+          isOpen={showWaiterRating}
+          onClose={() => setShowWaiterRating(false)}
+          account={account}
+          palette={palette}
+          onSubmit={handleWaiterRating}
+        />
+      )}
+    </motion.div>
   );
 }
