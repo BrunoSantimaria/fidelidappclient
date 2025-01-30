@@ -550,9 +550,8 @@ export function LandingPage() {
   const [showRedemptionDialog, setShowRedemptionDialog] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedReward, setSelectedReward] = useState(null);
-  const [isChatbotDialogOpen, setIsChatbotDialogOpen] = useState(false);
-  const [chatbotMessage, setChatbotMessages] = useState([]);
 
+  
   // Cargar la información de la cuenta
   const getAccInfo = async () => {
     if (!slug) return;
@@ -861,9 +860,6 @@ export function LandingPage() {
 
   // Para el chatbot
 
-  const handleChatbotButton = () => {
-    setIsChatbotDialogOpen(!isChatbotDialogOpen);
-  };
 
   useEffect(() => {
     if (showRedemptionDialog) {
@@ -1124,81 +1120,9 @@ export function LandingPage() {
 
         <button onClick={async () => { console.log(getClientData()) }} className={`text-white ${palette.buttonHover}`}>Obtener datos clientes</button>
 
-        {/* Frame del chatbot */}
-        <AnimatePresence>
-          {isChatbotDialogOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0, y: 200, x: 200 }}
-              animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-              exit={{ opacity: 0, scale: 0, y: 200, x: 200 }}
-              transition={{ duration: 0.1, ease: "easeInOut" }}
-              className="fixed bottom-24 right-28 w-96 h-96 bg-white shadow-lg rounded-lg z-50"
-            >
-              {/* Header del chatbot */}
-              <div className={`flex items-center justify-between p-4 ${palette.background} rounded-t-lg`}>
-                <h3 className="text-lg font-bold">Chatbot</h3>
-              </div>
-
-              {/* Contenido del chatbot */}
-              <div className={`flex-1 overflow-y-auto ${palette.cardBackground} ${palette.textPrimary} p-4 h-[calc(100%-64px)]`}>
-                {/* Aquí puedes agregar lógica para el chat */}
-                <div>
-                  {/* Imagina que tienes una función que diga generateResponse, ahora quiero que este campo se autoinserte por cada respuesta */}
-                  {chatbotMessage.map((message, index) => (
-                    <div key={index} className="mb-2">
-                      <p className="text-sm">{message}</p>
-                    </div>
-
-                  ))}
-                  <div className={`px-4 ${palette.textPrimary}`}>
-                    {/* Mensaje del cliente */}
-                    <div className="mb-4">
-                      <p className="font-bold">Cliente:</p>
-                      <p className="pl-4">Hola, ¿puedes ayudarme con algo?</p>
-                    </div>
-                  </div>
-                  <div className={`px-4 ${palette.textPrimary}`}>
-                    {/* Respuesta del chatbot */}
-                    <div className="mb-4">
-                      <p className="font-bold">Chatbot:</p>
-                      <p className="pl-4">¡Claro! ¿En qué necesitas ayuda?</p>
-                    </div>
-                  </div>
+        {/* Agregar el componente del chatbot */}
 
 
-                </div>
-              </div>
-
-              <div className={`flex ${palette.background} p-4 rounded-b-lg`}>
-                {/* padding del texto de input */}
-
-                <input type="text" className="flex-1 p-2 border border-gray-300" />
-                <button className={`p-2 ${palette.buttonBackground} ${palette.buttonHover} text-white rounded-lg`}>Enviar</button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-
-
-
-        {/* Agregar el botón que abre el chatbot */}
-
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, transform: "scale(0)" }}
-            animate={{ opacity: 1, transform: "scale(1)" }}
-            transition={{ duration: 0.5 }}
-            className='fixed bottom-4 right-4 z-50'
-          >
-            <button
-              onClick={handleChatbotButton}
-              className={`p-6 rounded-full ${palette.buttonBackground} ${palette.buttonHover}`}
-            >
-              <ChatBubble></ChatBubble>
-            </button>
-          </motion.div>
-        </AnimatePresence>
       </div>
 
       {/* Agregar el componente del Scanner */}
