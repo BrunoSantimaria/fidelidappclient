@@ -7,8 +7,8 @@ const LandingMain = ({ refs }) => {
   const featuresRef = useRef<HTMLDivElement>(null);
   return (
     <div>
-      <Hero refs={refs.homeRef} />
-      <WhatIsFidelidapp refs={refs} />
+      <Hero refs={refs} />
+      <WhatIsFidelidapp refs={refs.WhatIsFidelidapp} />
       <div ref={featuresRef}>
         <Features />
       </div>
