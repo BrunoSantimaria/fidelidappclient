@@ -32,6 +32,7 @@ export interface Testimonial {
   name: string;
   position: string;
   industry: string;
+  rating: number;
 }
 
 export interface Plan {

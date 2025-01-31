@@ -4,7 +4,8 @@ import { handleScrollTo } from "../../utils/handleScrollTo";
 import { useLocation } from "react-router";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 
-export const ImportantLinks = ({ refs }) => {
+export const ImportantLinks = ({ refs }: { refs: any }) => {
+  console.log(refs);
   const location = useLocation();
   const { handleNavigate } = useNavigateTo();
 
@@ -23,7 +24,7 @@ export const ImportantLinks = ({ refs }) => {
         handleScrollTo(refs.homeRef);
         break;
       case "Cómo Funciona":
-        handleScrollTo(refs.servicesRef);
+        handleScrollTo(refs.WhatIsFidelidapp);
         break;
       case "Planes":
         handleScrollTo(refs.plansRef);

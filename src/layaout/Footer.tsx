@@ -7,7 +7,7 @@ import { useNavigateTo } from "../hooks/useNavigateTo";
 export const Footer = ({ refs }) => {
   const location = useLocation();
   const { handleNavigate } = useNavigateTo();
-  const allowedRoutes = ["/", "/auth/login"];
+  const allowedRoutes = ["/", "/auth/login", "/features", "/services"];
   const isAgendasRoute = location.pathname.startsWith("/agendas/");
 
   const handleSectionClick = (sectionId: string) => {

@@ -1,0 +1,86 @@
+import { motion } from "framer-motion";
+import { Star, Quote } from "lucide-react";
+import { FadeIn } from "@/landing/components/animations/FadeIn";
+import { testimonials } from "@/data/testimonials";
+import { useNavigateTo } from "@/hooks/useNavigateTo";
+import Plans from "./Plans";
+
+export const Testimonials = ({ refs }) => {
+  const { handleNavigate } = useNavigateTo();
+  return (
+    <div className='py-24 bg-gray-50'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <FadeIn>
+          <div className='text-center'>
+            <h2 className='text-base text-main font-semibold tracking-wide uppercase'>Testimonios</h2>
+            <p className='mt-2 text-4xl font-extrabold text-gray-900 sm:text-5xl'>Lo que dicen nuestros clientes</p>
+            <p className='mt-4 text-xl text-gray-500 max-w-3xl mx-auto'>Descubre cómo Fidelidapp está transformando negocios en diferentes industrias</p>
+          </div>
+        </FadeIn>
+
+        <div className='mt-20 grid gap-8 lg:grid-cols-3'>
+          {testimonials.map((testimonial, index) => (
+            <FadeIn key={index} delay={index * 0.2}>
+              <motion.div className='bg-white rounded-2xl shadow-lg p-8 relative' whileHover={{ y: -5 }} transition={{ duration: 0.3 }}>
+                {/* Quote Icon */}
+                <div className='absolute -top-10 right-10'>
+                  <div className='bg-main rounded-full p-4'>
+                    <Quote className='h-6 w-6 text-white' />
+                  </div>
+                </div>
+
+                {/* Rating */}
+                <div className='flex mb-6'>
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className='h-5 w-5 text-yellow-400 fill-current' aria-hidden='true' />
+                  ))}
+                </div>
+
+                {/* Testimonial Message */}
+                <blockquote className='text-gray-700 mb-8'>"{testimonial.message}"</blockquote>
+
+                {/* Author Info */}
+                <div className='flex items-center'>
+                  <div className='flex-shrink-0'>
+                    <div className='relative h-14 w-14'>
+                      <img src={testimonial.avatar || "/placeholder.svg"} alt={testimonial.name} className='rounded-full object-cover' />
+                    </div>
+                  </div>
+                  <div className='ml-4'>
+                    <div className='text-lg font-medium text-gray-900'>{testimonial.name}</div>
+                    <div className='text-base text-gray-600'>{testimonial.position}</div>
+                    <div className='text-sm text-main'>{testimonial.industry}</div>
+                  </div>
+                </div>
+              </motion.div>
+            </FadeIn>
+          ))}
+        </div>
+
+        <FadeIn delay={0.5}>
+          <div className='mt-20'>
+            <div className='relative rounded-2xl overflow-hidden'>
+              <div className='relative bg-gradient-to-r from-main to-blue-900/90 px-8 py-16'>
+                <div className='max-w-3xl mx-auto text-center'>
+                  <h3 className='text-3xl font-bold text-white mb-4'>¿Listo para impulsar tu negocio?</h3>
+                  <p className='text-xl text-blue-100 mb-8'>Únete a los cientos de negocios que ya están creciendo con Fidelidapp</p>
+                  <motion.button
+                    onClick={() => {
+                      handleNavigate("/auth/login#register");
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className='inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition-colors duration-300'
+                  >
+                    Comienza tu prueba gratuita
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+        <Plans refs={refs} />
+      </div>
+    </div>
+  );
+};

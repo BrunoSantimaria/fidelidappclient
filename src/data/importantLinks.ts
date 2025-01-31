@@ -4,12 +4,20 @@ export const ImportantLinksList: ImportantLinks = {
   title: "Links Importantes",
   elements: [
     {
-      title: "Home",
-      link: "#",
+      title: "Inicio",
+      link: "/",
     },
     {
       title: "Cómo Funciona",
       link: "#",
+    },
+    {
+      title: "Características",
+      link: "#features",
+    },
+    {
+      title: "Servicios",
+      link: "#services",
     },
     {
       title: "Planes",

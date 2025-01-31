@@ -4,34 +4,37 @@ export const planList: Plan[] = [
   {
     type: "Gratis",
 
-    description: ["1 promoción activa", "Agenda", "Maximo 250 clientes", "Carga de Clientes por CSV", "Reportes generales y por promoción"],
+    description: ["1 promoción activa", "1 agenda activa", "Hasta 250 clientes", "Carga de Clientes por CSV", "Reportes y métricas", "Soporte básico"],
     button: "COMIENZA GRATIS",
   },
   {
     type: "Premium",
     price: "49.990",
     description: [
-      "10 promociones activas",
-      "Agenda",
-      "Clientes activos ilimitados",
+      "Promociones ilimitadas",
+      "Agenda ilimitada",
+      "ChatBot",
+      "Segmentación de clientes",
       "Email marketing personalizados hasta 10 mil correos por mes",
       "Carga de Clientes por CSV",
       "Reportes generales y por promoción",
       "Evaluación y segmentación inicial",
-      "Apoyo en implementación",
+      "Asistencia en implementación",
     ],
     button: "QUIERO COMENZAR",
   },
+
   {
     type: "Servicios Extras",
 
     description: [
-      "Activación Presencial",
-      "Impresión de Pendones / Afiches",
+      "Activación On Site",
+      "Campañas SMS",
+      "Gestión de Google y Meta Ads",
       "Gestión de RRSS",
       "Email Marketing Personalizado (Diseño y Envío)",
-      "Creaciónde Landing Page",
-      "Estrategia / Implementación Google Ads",
+      "Creación de Landing Page corporativa",
+      "Soporte 24/7",
     ],
     button: "HABLEMOS",
   },

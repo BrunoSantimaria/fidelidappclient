@@ -1,6 +1,7 @@
+import { testimonials } from "@/data/testimonials";
 import { motion } from "framer-motion";
 import { Quote } from "lucide-react";
-import { testimonials } from "../../data/testimonials";
+
 
 export const Testimonials = () => {
   return (

@@ -22,8 +22,8 @@ import api from "../utils/api";
 
 const fetchExistingAppointments = async (agendaId) => {
   try {
-    const response = await api.get(`/api/agenda/getExistingAppointments/${agendaId}`);
-    return response.data.appointments;
+    const response = await api.get(`/api/agenda/${agendaId}/appointments`);
+    return response.data;
   } catch (error) {
     console.error("Error fetching existing appointments:", error);
     return [];
@@ -35,6 +35,22 @@ const ExistingAppointments = ({ agendaId }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState({ open: false, action: null, appointmentId: null });
+
+  useEffect(() => {
+    const loadAppointments = async () => {
+      try {
+        const data = await fetchExistingAppointments(agendaId);
+        setAppointments(data);
+      } catch (error) {
+        console.error("Error loading appointments:", error);
+        toast.error("Error al cargar las citas");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAppointments();
+  }, [agendaId]);
 
   const handleOpenDialog = (action, appointmentId) => {
     setOpenDialog({ open: true, action, appointmentId });
@@ -58,100 +74,91 @@ const ExistingAppointments = ({ agendaId }) => {
     }
   };
 
-  useEffect(() => {
-    const getAppointments = async () => {
-      const fetchedAppointments = await fetchExistingAppointments(agendaId);
-      if (fetchedAppointments.length > 0) {
-        await setIsAdmin(true);
-      }
-      setAppointments(fetchedAppointments);
-      setLoading(false);
-    };
+  if (loading) {
+    return (
+      <Box display='flex' justifyContent='center' alignItems='center' minHeight='200px'>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-    getAppointments();
-  }, [agendaId]);
-
-  if (!isAdmin) return null;
+  if (!appointments || appointments.length === 0) {
+    return (
+      <Box p={3}>
+        <Typography variant='h6' align='center'>
+          No hay citas programadas
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box mt={4} mb={4}>
-      <Typography variant='h5' component='div' gutterBottom>
-        Citas Existentes
-      </Typography>
-      {loading ? (
-        <Box display='flex' justifyContent='center' alignItems='center' style={{ height: "100px" }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Email del Cliente</TableCell>
-                <TableCell>Fecha</TableCell>
-                <TableCell>Hora Inicio</TableCell>
-                <TableCell>Hora Fin</TableCell>
-                <TableCell>Estado</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {appointments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align='center'>
-                    <Typography>No hay citas disponibles.</Typography>
+    <Box>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Cliente</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Fecha</TableCell>
+              <TableCell>Hora Inicio</TableCell>
+              <TableCell>Hora Fin</TableCell>
+              <TableCell>Estado</TableCell>
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {appointments.map((appointment) => {
+              // Asegurarse de que las fechas sean válidas
+              const startTime = new Date(appointment.startTime);
+              const endTime = new Date(appointment.endTime);
+
+              return (
+                <TableRow key={appointment._id}>
+                  <TableCell>{appointment.clientName || "Sin nombre"}</TableCell>
+                  <TableCell>{appointment.clientEmail || "Sin email"}</TableCell>
+                  <TableCell>{startTime.toLocaleDateString()}</TableCell>
+                  <TableCell>{startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</TableCell>
+                  <TableCell>{endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</TableCell>
+                  <TableCell>{appointment.status || "Pendiente"}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {appointment.status === "Past" || appointment.status === "Confirmed" ? (
+                      <>
+                        <Button variant='contained' size='small' onClick={() => handleOpenDialog("complete", appointment._id)} sx={{ mr: 2 }}>
+                          Completar
+                        </Button>
+                        <Button variant='outlined' size='small' color='error' onClick={() => handleOpenDialog("noShow", appointment._id)} sx={{ mr: 2 }}>
+                          Ocultar
+                        </Button>
+                      </>
+                    ) : appointment.status === "Completed" ? (
+                      <></>
+                    ) : (
+                      <>
+                        <Button variant='contained' size='small' onClick={() => handleOpenDialog("confirm", appointment._id)} sx={{ mr: 2 }}>
+                          Confirmar
+                        </Button>
+                        <Button variant='outlined' size='small' color='error' onClick={() => handleOpenDialog("cancel", appointment._id)}>
+                          Cancelar
+                        </Button>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
-              ) : (
-                appointments.map((appointment) => (
-                  <TableRow key={appointment._id}>
-                    <TableCell>{appointment.clientId.email}</TableCell>
-                    <TableCell>{appointment.startTime.split("T")[0]}</TableCell>
-                    <TableCell>{appointment.startTime.split("T")[1].split(":00.")[0]}</TableCell>
-                    <TableCell>{appointment.endTime.split("T")[1].split(":00.")[0]}</TableCell>
-                    <TableCell>{appointment.status}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {appointment.status === "Past" || appointment.status === "Confirmed" ? (
-                        <>
-                          <Button variant='contained' size='small' onClick={() => handleOpenDialog("complete", appointment._id)} sx={{ mr: 2 }}>
-                            Completar
-                          </Button>
-                          <Button variant='outlined' size='small' color='error' onClick={() => handleOpenDialog("noShow", appointment._id)} sx={{ mr: 2 }}>
-                            Ocultar
-                          </Button>
-                        </>
-                      ) : appointment.status === "Completed" ? (
-                        <></>
-                      ) : (
-                        <>
-                          <Button variant='contained' size='small' onClick={() => handleOpenDialog("confirm", appointment._id)} sx={{ mr: 2 }}>
-                            Confirmar
-                          </Button>
-                          <Button variant='outlined' size='small' color='error' onClick={() => handleOpenDialog("cancel", appointment._id)}>
-                            Cancelar
-                          </Button>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {/* Dialog de confirmación */}
       <Dialog open={openDialog.open} onClose={handleCloseDialog}>
         <DialogTitle>{`Confirm ${openDialog.action} appointment`}</DialogTitle>
         <DialogContent>
           <DialogContentText>Are you sure you want to {openDialog.action} this appointment?</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color='primary'>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmAction} color='primary' autoFocus>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleConfirmAction} autoFocus>
             Confirm
           </Button>
         </DialogActions>
