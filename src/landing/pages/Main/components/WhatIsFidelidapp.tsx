@@ -6,7 +6,7 @@ export const WhatIsFidelidapp = ({ refs }: { refs: any }) => {
   return (
     <Box
       component='section'
-      ref={refs?.WhatIsFidelidapp}
+      ref={refs}
       sx={{
         py: 16,
         mb: 10,

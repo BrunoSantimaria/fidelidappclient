@@ -5,10 +5,11 @@ import { handleScrollTo } from "@/utils/handleScrollTo";
 import { useNavigateTo } from "@/hooks/useNavigateTo";
 import { useLocation } from "react-router-dom";
 import { ModalLanding } from "@/landing/components/ModalLanding";
+import { WhatIsFidelidapp } from "./WhatIsFidelidapp";
 
 export const Hero = ({ refs }) => {
   const [open, setOpen] = useState(false);
-
+  console.log(refs);
   const { handleNavigate } = useNavigateTo();
   const location = useLocation();
 
@@ -37,7 +38,7 @@ export const Hero = ({ refs }) => {
         justifyContent: "center",
         overflow: "hidden",
       }}
-      ref={refs}
+      ref={refs.homeRef}
     >
       {/* Contenido principal */}
       <Box
@@ -97,9 +98,9 @@ export const Hero = ({ refs }) => {
       <span
         onClick={() => handleScrollTo(refs.WhatIsFidelidapp)}
         aria-label='Scroll hacia abajo'
-        className='absolute bg-main rounded-md bottom-2 animate-bounce p-4 cursor-pointer group hover:bg-white'
+        className='absolute bg-main rounded-md bottom-12 animate-pulse p-4 cursor-pointer group hover:bg-white'
       >
-        <svg xmlns='http://www.w3.org/2000/svg' className='text-white group-hover:text-main' viewBox='0 0 24 24' fill='currentColor' width='24' height='24'>
+        <svg xmlns='http://www.w3.org/2000/svg' className='text-white group-hover:text-main' viewBox='0 0 24 24' fill='currentColor' width='18' height='18'>
           <path d='M12 2L12 20M18 14L12 20L6 14' />
         </svg>
       </span>
