@@ -8,6 +8,7 @@ export const testimonials: Testimonial[] = [
     name: "Dr. Eduardo Calderón",
     position: "Dentista y Gerente",
     industry: "Clinica Dental - DaVinci",
+    rating: 5,
   },
   {
     avatar: "https://res.cloudinary.com/di92lsbym/image/upload/v1733399694/FidelidApp/Assets/1618076649805_a0brgs.jpg",
@@ -16,6 +17,7 @@ export const testimonials: Testimonial[] = [
     name: "Rodrigo Valenzuela",
     position: "Jefe de Servicio",
     industry: "Inugami - Ramen Restobar",
+    rating: 5,
   },
   {
     avatar: "https://res.cloudinary.com/di92lsbym/image/upload/v1733399779/FidelidApp/Assets/1708364692764_ohn6an.jpg",
@@ -24,5 +26,6 @@ export const testimonials: Testimonial[] = [
     name: "Hayermín León",
     position: "Líder de Proyectso E-learning",
     industry: "Ewaffle - Cursos E-learning",
+    rating: 5,
   },
 ];

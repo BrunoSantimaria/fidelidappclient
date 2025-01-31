@@ -79,7 +79,7 @@ export const useDashboard = () => {
       }
 
       try {
-        const agendasResp = await api.get("/api/agenda");
+        const agendasResp = await api.get(`/api/agenda/account/${accounts._id}`);
         if (agendasResp?.data) {
           dispatch(setAgendas(agendasResp.data));
         }

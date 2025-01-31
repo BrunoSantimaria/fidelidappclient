@@ -4,8 +4,8 @@ import { NavBar, Footer } from "../layaout";
 import { Box } from "@mui/material";
 import { DashboardRoutes } from "../dashboard/routes/DashboardRoutes";
 import { useAuthSlice } from "../hooks/useAuthSlice";
-import React, { useEffect, useRef } from "react";
-import { Landing } from "../landing/pages";
+import { useEffect, useRef } from "react";
+
 import { PromotionClient } from "../promotion-client/pages";
 import "react-toastify/dist/ReactToastify.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,32 +18,17 @@ import { PromotionQrLanding } from "../landing/components/PromotionQrLanding";
 import { PromotionPage } from "../dashboard/pages/Promotions/PromotionPage";
 import { ToastContainer } from "react-toastify";
 import { LandingPage } from "../promotion-client/pages/LandingPage";
-import { AuthProvider } from "@/promotion-client/utils/AuthContext";
+
 import { LandingClientRoutes } from "@/promotion-client/pages/LandingClientRoutes";
 import WhatsAppButton from "../layaout/components/FloatingWhatsAppButton";
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+import { LandingRoutes } from "@/landing/routes/LandingRoutes";
+import { TableAgenda } from "@/dashboard/pages/Agenda/TableAgenda";
+import { CreateAgenda } from "@/dashboard/pages/Agenda/CreateAgenda";
+import { CalendarView } from "@/dashboard/pages/Agenda/CalendarView";
+import FidelidApp from "@/landing/pages/FidelidApp";
+import Services from "@/landing/pages/Services/components/Services";
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
-    }
-
-    return this.props.children;
-  }
-}
 export const AppRouter = () => {
   const { status } = useAuthSlice();
 
@@ -52,7 +37,7 @@ export const AppRouter = () => {
     promotionRef: useRef(null),
     servicesRef: useRef(null),
     patternRef: useRef(null),
-    howItWorksRef: useRef(null),
+    WhatIsFidelidapp: useRef(null),
     testimonialsRef: useRef(null),
     stepsRef: useRef(null),
     plansRef: useRef(null),
@@ -91,11 +76,13 @@ export const AppRouter = () => {
             <Route path='/promotion/:id' element={<PromotionClient />} />
             <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
             <Route path='/thankyou' element={<ThankYou />} />
+            <Route element={<FidelidApp />} path={"/features"} />
+            <Route element={<Services />} path={"/services"} />
             <Route path='/landing/:slug' element={<LandingPage />} />
             {status === "non-authenticated" ? (
               <>
                 <Route path='/agendas/:agendaId' element={<Agenda />} />
-                <Route path='/' element={<Landing refs={refs} />} />
+                <Route path='/' element={<LandingRoutes refs={refs} />} />
                 <Route path='/thankyou' element={<ThankYou />} />
                 <Route path='/promotionqrlanding' element={<PromotionQrLanding />} />
                 <Route path='/landing/:slug/*' element={<LandingClientRoutes />} />
@@ -105,10 +92,13 @@ export const AppRouter = () => {
               </>
             ) : (
               <>
-                <Route path='/' element={<Landing refs={refs} />} />
+                <Route path='/' element={<LandingRoutes refs={refs} />} />
 
                 <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
                 <Route path='/thankyou' element={<ThankYou />} />
+                <Route path='/dashboard/agenda' element={<TableAgenda />} />
+                <Route path='/dashboard/agenda/create' element={<CreateAgenda />} />
+                <Route path='/dashboard/agenda/calendar' element={<CalendarView />} />
                 <Route path='/dashboard/promotions' element={<PromotionPage />} />
                 <Route path='/dashboard/*' element={<DashboardRoutes />} />
               </>

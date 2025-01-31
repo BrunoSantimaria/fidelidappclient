@@ -1,129 +1,331 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Box, Grid } from "@mui/material";
-
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  Grid,
+  Typography,
+  IconButton,
+} from "@mui/material";
+import { TimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { Delete as DeleteIcon, Add as AddIcon } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 import api from "../../../utils/api";
+import { useNavigate } from "react-router-dom";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useAuthSlice } from "@/hooks/useAuthSlice";
+
+const DAYS_OF_WEEK = [
+  { value: 1, label: "Lunes" },
+  { value: 2, label: "Martes" },
+  { value: 3, label: "Miércoles" },
+  { value: 4, label: "Jueves" },
+  { value: 5, label: "Viernes" },
+  { value: 6, label: "Sábado" },
+  { value: 0, label: "Domingo" },
+];
+
 export const CreateAgenda = () => {
-  const [name, setAgendaName] = useState("");
-  const [eventDuration, setEventDuration] = useState("");
-  const [availableDays, setAvailableDays] = useState([]);
-  const [availableHours, setAvailableHours] = useState([]);
-  const [slots, setSlots] = useState("");
   const navigate = useNavigate();
+  const [agendaType, setAgendaType] = useState("recurring");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [duration, setDuration] = useState(60);
+  const [slots, setSlots] = useState(1);
+  const [requiresCapacity, setRequiresCapacity] = useState(false);
+  const { user } = useAuthSlice();
+  // Para agendas recurrentes
+  const [selectedDays, setSelectedDays] = useState([]);
+  const [timeSlots, setTimeSlots] = useState([{ start: dayjs().set("hour", 9).set("minute", 0), end: dayjs().set("hour", 10).set("minute", 0) }]);
+  const [validFrom, setValidFrom] = useState(dayjs());
+  const [validUntil, setValidUntil] = useState(dayjs().add(1, "year"));
 
-  const handleDayChange = (event) => setAvailableDays(event.target.value);
-  const handleHourChange = (event) => setAvailableHours(event.target.value);
+  // Para eventos especiales
+  const [specialDates, setSpecialDates] = useState([
+    {
+      date: dayjs(),
+      timeSlots: [{ start: dayjs().set("hour", 9).set("minute", 0), end: dayjs().set("hour", 10).set("minute", 0) }],
+    },
+  ]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (eventDuration <= 0 || slots <= 0) {
-      toast.error("La duración y los cupos deben ser mayores que cero");
-      return;
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const response = await api.post("/api/agenda/createagenda", {
+      const agendaData = {
         name,
+        description,
+        type: agendaType,
+        duration,
         slots,
-        eventDuration,
-        availableDays,
-        availableHours,
-      });
+        requiresCapacity,
+        accountId: user.accounts._id,
+      };
 
-      toast.success("Agenda creada correctamente");
-      navigate("/dashboard/");
+      if (agendaType === "recurring") {
+        agendaData.recurringConfig = {
+          daysOfWeek: selectedDays,
+          timeSlots: timeSlots.map((slot) => ({
+            start: slot.start.format("HH:mm"),
+            end: slot.end.format("HH:mm"),
+          })),
+          validFrom: validFrom.toISOString(),
+          validUntil: validUntil.toISOString(),
+        };
+      } else {
+        agendaData.specialDates = specialDates.map((special) => ({
+          date: special.date.toISOString(),
+          timeSlots: special.timeSlots.map((slot) => ({
+            start: slot.start.format("HH:mm"),
+            end: slot.end.format("HH:mm"),
+          })),
+        }));
+      }
+
+      await api.post("/api/agenda", agendaData);
+      toast.success("Agenda creada exitosamente");
+      navigate("/dashboard/agenda");
     } catch (error) {
-      console.error("Error creando la agenda:", error);
-      toast.error("No se ha podido crear la agenda");
+      console.error("Error al crear la agenda:", error);
+      toast.error("Error al crear la agenda");
     }
   };
 
+  const addTimeSlot = () => {
+    const lastSlot = timeSlots[timeSlots.length - 1];
+    const newStart = lastSlot.end.clone();
+    const newEnd = newStart.add(1, "hour");
+    setTimeSlots([...timeSlots, { start: newStart, end: newEnd }]);
+  };
+
+  const removeTimeSlot = (index) => {
+    setTimeSlots(timeSlots.filter((_, i) => i !== index));
+  };
+
+  const addSpecialDate = () => {
+    setSpecialDates([
+      ...specialDates,
+      {
+        date: dayjs(),
+        timeSlots: [{ start: dayjs().set("hour", 9).set("minute", 0), end: dayjs().set("hour", 10).set("minute", 0) }],
+      },
+    ]);
+  };
+
+  const removeSpecialDate = (index) => {
+    setSpecialDates(specialDates.filter((_, i) => i !== index));
+  };
+
   return (
-    <section className='flex flex-col p-10 ml-0 md:w-[95%] md:ml-20 lg:ml-20 w-full gap-5'>
-      <span className='font-bold text-4xl'>Crear una nueva agenda</span>
-      <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField label='Nombre de Agenda' value={name} onChange={(e) => setAgendaName(e.target.value)} fullWidth margin='normal' required />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label='Cupos'
-              value={slots}
-              onChange={(e) => setSlots(e.target.value)}
-              fullWidth
-              margin='normal'
-              type='number'
-              inputProps={{ min: 1 }}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label='Duración (Minutos)'
-              value={eventDuration}
-              onChange={(e) => setEventDuration(e.target.value)}
-              fullWidth
-              margin='normal'
-              type='number'
-              inputProps={{ min: 1 }}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth margin='normal'>
-              <InputLabel>Días Disponibles</InputLabel>
-              <Select multiple value={availableDays} onChange={handleDayChange} renderValue={(selected) => selected.join(", ")} required>
-                {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((day) => (
-                  <MenuItem key={day} value={day}>
-                    {day}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth margin='normal'>
-              <InputLabel>Horas Disponibles</InputLabel>
-              <Select multiple value={availableHours} onChange={handleHourChange} renderValue={(selected) => selected.join(", ")}>
-                {[
-                  "00:00",
-                  "01:00",
-                  "02:00",
-                  "03:00",
-                  "04:00",
-                  "05:00",
-                  "06:00",
-                  "07:00",
-                  "08:00",
-                  "09:00",
-                  "10:00",
-                  "11:00",
-                  "12:00",
-                  "13:00",
-                  "14:00",
-                  "15:00",
-                  "16:00",
-                  "17:00",
-                  "18:00",
-                  "19:00",
-                  "20:00",
-                  "21:00",
-                  "22:00",
-                  "23:00",
-                ].map((hour) => (
-                  <MenuItem key={hour} value={hour}>
-                    {hour}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-        </Grid>
-        <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-          Crear Agenda
-        </Button>
-      </Box>
-    </section>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Card>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Typography variant='h5' gutterBottom>
+                  Crear Nueva Agenda
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label='Nombre' value={name} onChange={(e) => setName(e.target.value)} required />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Tipo de Agenda</InputLabel>
+                  <Select value={agendaType} onChange={(e) => setAgendaType(e.target.value)} label='Tipo de Agenda'>
+                    <MenuItem value='recurring'>Recurrente</MenuItem>
+                    <MenuItem value='special'>Evento Especial</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField fullWidth label='Descripción' multiline rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth type='number' label='Duración (minutos)' value={duration} onChange={(e) => setDuration(Number(e.target.value))} required />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth type='number' label='Slots disponibles' value={slots} onChange={(e) => setSlots(Number(e.target.value))} required />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControlLabel
+                  control={<Checkbox checked={requiresCapacity} onChange={(e) => setRequiresCapacity(e.target.checked)} />}
+                  label='¿Requiere especificar cantidad de personas?'
+                />
+              </Grid>
+
+              {agendaType === "recurring" ? (
+                <>
+                  <Grid item xs={12}>
+                    <Typography variant='h6' gutterBottom>
+                      Días y Horarios Recurrentes
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <FormControl fullWidth>
+                      <InputLabel>Días de la Semana</InputLabel>
+                      <Select
+                        multiple
+                        value={selectedDays}
+                        onChange={(e) => setSelectedDays(e.target.value)}
+                        label='Días de la Semana'
+                        renderValue={(selected) => selected.map((day) => DAYS_OF_WEEK.find((d) => d.value === day)?.label).join(", ")}
+                      >
+                        {DAYS_OF_WEEK.map((day) => (
+                          <MenuItem key={day.value} value={day.value}>
+                            <Checkbox checked={selectedDays.indexOf(day.value) > -1} />
+                            {day.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {timeSlots.map((slot, index) => (
+                    <Grid item xs={12} container spacing={2} key={index}>
+                      <Grid item xs={5}>
+                        <TimePicker
+                          label='Hora inicio'
+                          value={slot.start}
+                          onChange={(newValue) => {
+                            const newSlots = [...timeSlots];
+                            newSlots[index].start = newValue;
+                            setTimeSlots(newSlots);
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={5}>
+                        <TimePicker
+                          label='Hora fin'
+                          value={slot.end}
+                          onChange={(newValue) => {
+                            const newSlots = [...timeSlots];
+                            newSlots[index].end = newValue;
+                            setTimeSlots(newSlots);
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={2}>
+                        <IconButton color='error' onClick={() => removeTimeSlot(index)} disabled={timeSlots.length === 1}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  ))}
+
+                  <Grid item xs={12}>
+                    <Button startIcon={<AddIcon />} onClick={addTimeSlot} variant='outlined'>
+                      Agregar Horario
+                    </Button>
+                  </Grid>
+                </>
+              ) : (
+                <>
+                  {specialDates.map((specialDate, dateIndex) => (
+                    <Grid item xs={12} key={dateIndex}>
+                      <Card variant='outlined'>
+                        <CardContent>
+                          <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                              <Typography variant='subtitle1'>Fecha Especial {dateIndex + 1}</Typography>
+                            </Grid>
+
+                            {specialDate.timeSlots.map((slot, slotIndex) => (
+                              <Grid item xs={12} container spacing={2} key={slotIndex}>
+                                <Grid item xs={5}>
+                                  <TimePicker
+                                    label='Hora inicio'
+                                    value={slot.start}
+                                    onChange={(newValue) => {
+                                      const newDates = [...specialDates];
+                                      newDates[dateIndex].timeSlots[slotIndex].start = newValue;
+                                      setSpecialDates(newDates);
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={5}>
+                                  <TimePicker
+                                    label='Hora fin'
+                                    value={slot.end}
+                                    onChange={(newValue) => {
+                                      const newDates = [...specialDates];
+                                      newDates[dateIndex].timeSlots[slotIndex].end = newValue;
+                                      setSpecialDates(newDates);
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={2}>
+                                  <IconButton
+                                    color='error'
+                                    onClick={() => {
+                                      const newDates = [...specialDates];
+                                      newDates[dateIndex].timeSlots = newDates[dateIndex].timeSlots.filter((_, i) => i !== slotIndex);
+                                      setSpecialDates(newDates);
+                                    }}
+                                    disabled={specialDate.timeSlots.length === 1}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Grid>
+                              </Grid>
+                            ))}
+
+                            <Grid item xs={12}>
+                              <Button
+                                startIcon={<AddIcon />}
+                                onClick={() => {
+                                  const newDates = [...specialDates];
+                                  const lastSlot = specialDate.timeSlots[specialDate.timeSlots.length - 1];
+                                  newDates[dateIndex].timeSlots.push({
+                                    start: lastSlot.end.clone(),
+                                    end: lastSlot.end.add(1, "hour"),
+                                  });
+                                  setSpecialDates(newDates);
+                                }}
+                                variant='outlined'
+                                size='small'
+                              >
+                                Agregar Horario
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+
+                  <Grid item xs={12}>
+                    <Button startIcon={<AddIcon />} onClick={addSpecialDate} variant='outlined'>
+                      Agregar Fecha Especial
+                    </Button>
+                  </Grid>
+                </>
+              )}
+
+              <Grid item xs={12}>
+                <Button type='submit' variant='contained' color='primary' size='large' fullWidth>
+                  Crear Agenda
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        </CardContent>
+      </Card>
+    </LocalizationProvider>
   );
 };

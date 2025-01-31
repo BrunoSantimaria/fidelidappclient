@@ -1,19 +1,54 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AvailableSlotsTable from "./AvailableSlotsTable.tsx";
 import ExistingAppointments from "./ExistingAppointments.tsx";
 import api from "../utils/api.js";
-import { NavBar } from "../layaout/NavBar.tsx";
-import Footer from "../layaout/Footer.tsx";
-api;
 
 const fetchAvailableSlots = async (agendaId) => {
   try {
-    const response = await api.get(`/api/agenda/getAvailableSlots/${agendaId}`);
-    return { availableSlotsByDay: response.data.availableSlotsByDay, name: response.data.name, description: response.data.description };
+    // Primero intentar obtener por ID
+    let response = await api.get(`/api/agenda/${agendaId}/available-slots`);
+
+    if (response.status === 404) {
+      // Si no se encuentra por ID, intentar por uniqueLink
+      response = await api.get(`/api/agenda/by-link/${agendaId}`);
+    }
+
+    const data = response.data;
+    return {
+      availableSlotsByDay: data.availableSlotsByDay || {},
+      name: data.name || "",
+      description: data.description || "",
+      type: data.type || "",
+      requiresCapacity: data.requiresCapacity || false,
+      recurringConfig: {
+        daysOfWeek: data.recurringConfig?.daysOfWeek || [],
+        timeSlots: data.recurringConfig?.timeSlots || [],
+        validFrom: data.recurringConfig?.validFrom || null,
+        validUntil: data.recurringConfig?.validUntil || null,
+        duration: data.recurringConfig?.duration || 0,
+        slots: data.recurringConfig?.slots || 0,
+      },
+      uniqueLink: data.uniqueLink || "",
+    };
   } catch (error) {
     console.error("Error al obtener las horas disponibles:", error);
-    return {};
+    return {
+      availableSlotsByDay: {},
+      name: "",
+      description: "",
+      type: "",
+      requiresCapacity: false,
+      recurringConfig: {
+        daysOfWeek: [],
+        timeSlots: [],
+        validFrom: null,
+        validUntil: null,
+        duration: 0,
+        slots: 0,
+      },
+      uniqueLink: "",
+    };
   }
 };
 
@@ -22,28 +57,36 @@ const Agenda = () => {
   const [availableSlotsByDay, setAvailableSlotsByDay] = useState({});
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [agendaConfig, setAgendaConfig] = useState({
+    type: "",
+    requiresCapacity: false,
+    recurringConfig: {
+      daysOfWeek: [],
+      timeSlots: [],
+      validFrom: null,
+      validUntil: null,
+      duration: 0,
+      slots: 0,
+    },
+    uniqueLink: "",
+  });
 
   useEffect(() => {
     const getAvailableSlots = async () => {
-      const { availableSlotsByDay, name, description } = await fetchAvailableSlots(agendaId);
-      setName(name);
-      setDescription(description);
-      setAvailableSlotsByDay(availableSlotsByDay);
+      const response = await fetchAvailableSlots(agendaId);
+      setName(response.name);
+      setDescription(response.description);
+      setAvailableSlotsByDay(response.availableSlotsByDay);
+      setAgendaConfig({
+        type: response.type,
+        requiresCapacity: response.requiresCapacity,
+        recurringConfig: response.recurringConfig,
+        uniqueLink: response.uniqueLink,
+      });
     };
-    //asd
     getAvailableSlots();
   }, [agendaId]);
-  const refs = {
-    homeRef: useRef(null),
-    servicesRef: useRef(null),
-    patternRef: useRef(null),
-    howItWorksRef: useRef(null),
-    testimonialsRef: useRef(null),
-    stepsRef: useRef(null),
-    plansRef: useRef(null),
-    faqsRef: useRef(null),
-    contactRef: useRef(null),
-  };
+
   return (
     <div className='mx-20'>
       <AvailableSlotsTable availableSlotsByDay={availableSlotsByDay} name={name} agendaId={agendaId} description={description} />
