@@ -215,7 +215,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
                   <select
                     value={selectedPrefix}
                     onChange={(e) => setSelectedPrefix(e.target.value)}
-                    className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} rounded-md p-2 w-36`}
+                    className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} rounded-md p-2 w-1/3 `}
                   >
                     {countryPrefixes.map((country) => (
                       <option key={country.prefix} value={country.prefix} className={`${selectedPalette.cardBackground} ${selectedPalette.textPrimary}`}>
@@ -228,7 +228,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
                     placeholder='Número de teléfono'
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
-                    className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} flex-1`}
+                    className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} w-2/3`}
                     required
                   />
                 </div>
