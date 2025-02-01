@@ -16,13 +16,30 @@ import { useNavigateTo } from "@/hooks/useNavigateTo";
 interface AuthProps {
   accountId: string;
   onAuthSuccess: () => void;
+  selectedPalette: any;
+  slug: string;
 }
+
+const countryPrefixes = [
+  { country: "Chile", prefix: "+56", emoji: "🇨🇱", code: "CL" },
+  { country: "Argentina", prefix: "+54", emoji: "🇦🇷", code: "AR" },
+  { country: "Perú", prefix: "+51", emoji: "🇵🇪", code: "PE" },
+  { country: "Colombia", prefix: "+57", emoji: "🇨🇴", code: "CO" },
+  { country: "México", prefix: "+52", emoji: "🇲🇽", code: "MX" },
+  { country: "Brasil", prefix: "+55", emoji: "🇧🇷", code: "BR" },
+  { country: "Uruguay", prefix: "+598", emoji: "🇺🇾", code: "UY" },
+  { country: "Paraguay", prefix: "+595", emoji: "🇵🇾", code: "PY" },
+  { country: "Bolivia", prefix: "+591", emoji: "🇧🇴", code: "BO" },
+  { country: "Ecuador", prefix: "+593", emoji: "🇪🇨", code: "EC" },
+  { country: "Venezuela", prefix: "+58", emoji: "🇻🇪", code: "VE" },
+];
 
 export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: AuthProps) {
   const [isRegistering, setIsRegistering] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [selectedPrefix, setSelectedPrefix] = useState("+56");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { toast } = useToast();
   const { login, registerAccount } = useAuth();
@@ -41,7 +58,10 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
   };
 
   const validatePhone = (phone: string) => {
-    return /^\+?\d{6,}$/.test(phone);
+    // Elimina el prefijo del país (comienza con +) y cualquier espacio
+    const numberWithoutPrefix = phone.replace(/^\+\d{2,4}/, "");
+    // Verifica que el número (sin prefijo) tenga al menos 8 dígitos
+    return /^\d{6,}$/.test(numberWithoutPrefix);
   };
 
   const formatName = (name: string) =>
@@ -55,7 +75,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
     setIsLoading(true);
     const formattedName = formatName(name);
     const formattedEmail = email.trim().toLowerCase();
-    const formattedPhone = phone.trim();
+    const formattedPhone = `${selectedPrefix}${phoneNumber.trim()}`;
 
     const newErrors: { [key: string]: string } = {};
 
@@ -67,7 +87,7 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
       newErrors.email = "Correo electrónico inválido";
     }
 
-    if (!validatePhone(formattedPhone)) {
+    if (!validatePhone(phoneNumber)) {
       newErrors.phone = "Número de teléfono inválido";
     }
 
@@ -190,18 +210,31 @@ export function AuthDialog({ accountId, onAuthSuccess, selectedPalette, slug }: 
             />
             {errors.email && <p className='text-red-400 text-sm'>{errors.email}</p>}
             {isRegistering && (
-              <Input
-                type='tel'
-                name='phone'
-                placeholder='Tu número de teléfono'
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required={isRegistering}
-                autoComplete='tel'
-                className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} placeholder-gray-400`}
-              />
+              <div className='space-y-2'>
+                <div className='flex gap-2'>
+                  <select
+                    value={selectedPrefix}
+                    onChange={(e) => setSelectedPrefix(e.target.value)}
+                    className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} rounded-md p-2 w-36`}
+                  >
+                    {countryPrefixes.map((country) => (
+                      <option key={country.prefix} value={country.prefix} className={`${selectedPalette.cardBackground} ${selectedPalette.textPrimary}`}>
+                        {country.code} {country.prefix}
+                      </option>
+                    ))}
+                  </select>
+                  <Input
+                    type='tel'
+                    placeholder='Número de teléfono'
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                    className={`${selectedPalette.cardBackground} border-gray-600 ${selectedPalette.textPrimary} flex-1`}
+                    required
+                  />
+                </div>
+                {errors.phone && <p className='text-red-400 text-sm'>{errors.phone}</p>}
+              </div>
             )}
-            {errors.phone && isRegistering && <p className='text-red-400 text-sm'>{errors.phone}</p>}
             <Button
               type='submit'
               className={`${selectedPalette.buttonBackground} ${selectedPalette.textPrimary} hover:${selectedPalette.buttonHover} w-full text-white font-bold`}
