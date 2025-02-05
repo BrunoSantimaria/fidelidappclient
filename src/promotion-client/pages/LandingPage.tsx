@@ -23,8 +23,11 @@ import moment from "moment";
 import { Accordion, AccordionSummary, AccordionDetails, Typography, LinearProgress, Alert } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { ClientChatbotInteraction } from "@/landing/components/ClientChatbot";
-import { ChatBubble } from "@mui/icons-material";
+import { ChatBubble, Send, ArrowDropUp, ArrowDropDown } from "@mui/icons-material";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { default_responses } from "@/chatbot_test/default_responses";
+import { ChatbotMessage } from "@/chatbot_test/interfacesChat" ;
+import ReactMarkdown  from "react-markdown";
 
 interface SocialMedia {
   instagram: string;
@@ -490,44 +493,6 @@ const PromotionsDialog = ({
   );
 };
 
-const ChatbotDialog = ({ account, isOpen, onClose }) => {
-  const palette = generatePalette(account?.landing?.colorPalette);
-  if (!isOpen) return null;
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className={`fixed inset-0 h-screen overflow-hidden z-50 ${palette.background}`}
-      >
-        <div className='h-full flex flex-col'>
-          {/* Header */}
-          <div className='sticky top-0 z-10 bg-inherit'>
-            <div className='flex items-center justify-between p-4'>
-              <h1 className={`text-2xl font-bold ${palette.textPrimary}`}>Chatbot</h1>
-              <button onClick={onClose} className={`p-2 rounded-full hover:${palette.buttonHover}`}>
-                <X className={`w-6 h-6 ${palette.textPrimary}`} />
-              </button>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className='flex-1 overflow-y-auto'>
-            <div className='container mx-auto px-4 py-6'>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8'>
-                <ClientChatbot></ClientChatbot>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  );
-
-};
-
 export function LandingPage() {
   const { slug } = useParams();
   const [totalPoints, setTotalPoints] = useState(0);
@@ -551,7 +516,17 @@ export function LandingPage() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedReward, setSelectedReward] = useState(null);
 
-  
+  // States para el chatbot
+
+  const [isChatbotDialogOpen, setIsChatbotDialogOpen] = useState(false);
+  const [chatbotMessage, setChatbotMessages] = useState<ChatbotMessage[]>([]);
+  const [typeQuestions, setTypeQuestions] = useState<number[]>([]);
+  const [enableInput, setEnableInput] = useState(true);
+  const [isChatbotAtTop, setIsChatbotAtTop] = useState(false);
+  const [message, setMessage] = useState<string>("");
+  const [showOptions, setShowOptions] = useState(true);
+  const [isResponding, setIsResponding] = useState(false);
+
   // Cargar la información de la cuenta
   const getAccInfo = async () => {
     if (!slug) return;
@@ -691,13 +666,17 @@ export function LandingPage() {
   const palette = generatePalette(account?.landing?.colorPalette);
 
   const getClientData = async () => {
+    if (!clientId || !account?._id) return null;
     try {
       const response = await api.get(`/api/landing/${slug}/fidelicard`, {
         params: { email: clientId, accountId: account?._id },
       });
+
       console.log(response.data);
+      return response.data;
     } catch (error) {
       console.error(error);
+      console.log(error);
     }
   };
 
@@ -859,6 +838,131 @@ export function LandingPage() {
 
 
   // Para el chatbot
+
+  // Dentro del componente ChatbotPage
+  const messageContainerRef = useRef<HTMLDivElement>(null); // Referencia al contenedor de mensajes
+
+  const scrollToBottom = () => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+    }
+  };
+
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  // Llama al scroll cada vez que los mensajes cambien
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatbotMessage]);
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const keys = Object.keys(default_responses).map(Number);
+      setIsChatbotDialogOpen(false);
+      setEnableInput(true);
+      setTypeQuestions([...keys]);
+      if (!isChatbotDialogOpen) setChatbotMessages([]);
+    };
+
+    fetchQuestions();
+
+    const updateChatbotPosition = () => {
+      const viewportHeight = window.innerHeight;
+      setIsChatbotAtTop(viewportHeight > 800);
+    };
+
+    updateChatbotPosition();
+    window.addEventListener("resize", updateChatbotPosition);
+
+    return () => {
+      window.removeEventListener("resize", updateChatbotPosition);
+    };
+  }, []);
+
+  const handleChatbotButton = () => {
+    setIsChatbotDialogOpen(!isChatbotDialogOpen);
+  }
+
+  const addMessage = (message: string, name: string) => {
+    setChatbotMessages((prevMessages) => [
+      ...prevMessages,
+      { name: name, message: message },
+    ]);
+  };
+
+  const selectOption = async (questionIndex: number) => {
+    console.log("Seleccionando opción:", questionIndex);
+
+    //setTypeQuestions((prevTypes: number[]) z prevTypes.filter((type) => type !== typeToRemove)  )
+    //setIsVisibleBackQuestion(false);
+    const question = default_responses[questionIndex].question;
+    const response = default_responses[questionIndex].response;
+    addMessage(question, "Usuario");
+    // Espera 1 segundo antes de agregar la respuesta del chatbot
+    await delay(1000);
+    addMessage(response, "Chatbot");
+    await delay(500);
+
+    // Espera 500ms más antes de mostrar el botón
+    //await delay(500);
+    //setIsVisibleBackQuestion(true);
+  };
+
+  const fetchCustomResponse = async (message: string, clientData: any): Promise<string> => {
+    try {
+      // Petición al endpoint del chatbot
+      const response = await api.post(`/api/chatbot`, {
+        client_data: clientData,
+        message: message,
+        info: {menu: account?.landing?.menu,
+          promotions: account?.promotions,
+        }  ,
+      });
+  
+      // Verificar si la respuesta del servidor es válida
+      if (response?.data?.response) {
+        return response.data.response; // Accede correctamente a la respuesta
+      } else {
+        console.error("Respuesta inválida:", response.data);
+        return "Lo siento, no pude procesar tu solicitud. Por favor, inténtalo de nuevo.";
+      }
+    } catch (error) {
+      console.error("Error en fetchCustomResponse:", error);
+      return "Ocurrió un error al intentar conectarse con el servidor.";
+    }
+  };
+  
+  const sendMessage = async (message: string) => {
+    if (!message) return; // Verificar que haya un mensaje válido
+    if (isResponding) return; // Evita que se seleccione otra opción mientras el chatbot está respondiendo
+    addMessage(message, "Usuario"); // Mostrar el mensaje del usuario en el chat
+    
+    try {
+      setMessage("");
+      setIsResponding(true);
+      // Obtener datos del cliente
+
+      const clientData = await getClientData();
+      const clientInfo = clientData || { name: "Usuario" }; // Usar "User" si no hay datos del cliente
+      // Obtener respuesta personalizada del chatbot
+      const response = await fetchCustomResponse(message, clientInfo);
+  
+      console.log("Respuesta personalizada recibida:", response);
+  
+      // Agregar la respuesta del chatbot al chat
+      addMessage(response, "Chatbot");
+    } catch (error) {
+      console.error("Error en sendMessage:", error);
+  
+      // En caso de error, mostrar un mensaje genérico al usuario
+      addMessage(
+        "Lo siento, ocurrió un error al procesar tu mensaje. Por favor, inténtalo nuevamente más tarde.",
+        "Chatbot"
+      );
+    } finally {
+    setIsResponding(false);
+    }
+  };
 
 
   useEffect(() => {
@@ -1121,7 +1225,103 @@ export function LandingPage() {
         <button onClick={async () => { console.log(getClientData()) }} className={`text-white ${palette.buttonHover}`}>Obtener datos clientes</button>
 
         {/* Agregar el componente del chatbot */}
+        <div className="max-w-4xl md:max-w-5xl lg:max-w-6xl mx-auto space-y-8">
+          <AnimatePresence>
+            {isChatbotDialogOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: isChatbotAtTop ? -200 : 200 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: isChatbotAtTop ? -200 : 200 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className={`fixed top-24 right-4 w-[90%] max-w-sms sm:w-[30rem] sm:h-[30rem] ${palette.cardBackground} shadow-lg rounded-lg z-50`}
+              >
+                <div className={`flex items-center justify-between p-4 ${palette.background} rounded-t-lg`}>
+                  <h3 className={`text-lg font-bold ${palette.textPrimary}`}>Chatbot</h3>
+                  <button
+                    onClick={() => setShowOptions(!showOptions)} // Cambiar estado al hacer click
+                    className={`text-sm ${palette.textPrimary} ${palette.buttonHover} p-2 rounded-lg`}
+                  >
+                    {showOptions ? "Ocultar opciones" : "Mostrar opciones"}
+                    {!showOptions ? <ArrowDropUp className="ml-2" /> : <ArrowDropDown className="ml-2" />}
+                  </button>
+                </div>
 
+                {/* Contenedor flexible para las opciones */}
+                <div className={`flex flex-col h-[calc(100%-64px)] ${palette.cardBackground} ${palette.textPrimary} p-2`}>
+                  {showOptions && (
+                    <div className="mb-4 flex flex-col space-y-2 overflow-y-auto max-h-[calc(100%-64px)]">
+                      {typeQuestions.map((questionIndex, i) => {
+                        const questionText = default_responses[questionIndex]?.question || "Pregunta no definida";
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => selectOption(i)}
+                            className={`w-full py-2 px-4 my-2 text-center ${palette.buttonBackground} ${palette.buttonHover} ${palette.textPrimary}`}
+                          >
+                            {questionText}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {/* Chatbot */}
+                  <div className="flex flex-col flex-1 overflow-y-auto">
+                    {/* Mensajes del chatbot */}
+                    <div className="flex-1 overflow-y-auto p-4 max-h-[calc(50vh-64px)]" ref={messageContainerRef}>
+                      {chatbotMessage.map((message, i) => ( 
+                        <div key={i} className={`p-4 ${palette.textPrimary}`}>
+                          <p className="text-m font-bold">{message.name}</p>
+                          <ReactMarkdown className="text-sm" >{message.message}</ReactMarkdown>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Contenedor para el campo de entrada */}
+                    <div className={`flex ${palette.background} p-4 rounded-b-lg`}>
+                      {enableInput && (
+                        <div className="flex w-full">
+                          <input
+                            type="text"
+                            className={`flex-1 p-2 border border-gray-300 ${palette.textPrimary}`}
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            onKeyUp={(e) => {
+                              if (e.key === "Enter") sendMessage(message);
+                            }}
+                            placeholder="Escribe tu mensaje..."
+                            disabled={isResponding}
+                          />
+                          <button
+                            onClick={() => { sendMessage(message) }}
+                            className={`p-2 ${palette.textSecondary} ${palette.buttonHover} text-white rounded-full`}
+                            disabled={isResponding}
+                          >
+                            <Send></Send>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, transform: "scale(0)" }}
+              animate={{ opacity: 1, transform: "scale(1)" }}
+              transition={{ duration: 0.5 }}
+              className="fixed bottom-4 right-4 z-50"
+            >
+              <button
+                onClick={handleChatbotButton}
+                className={`p-6 rounded-full ${palette.buttonBackground} ${palette.buttonHover}`}
+              >
+                <ChatBubble className={`${palette.textPrimary}`} />
+              </button>
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
       </div>
 

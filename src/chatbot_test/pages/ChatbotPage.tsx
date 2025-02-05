@@ -37,11 +37,9 @@ export function ChatbotPage() {
   const [loading, setLoading] = useState(true);
   const [isChatbotDialogOpen, setIsChatbotDialogOpen] = useState(false);
   const [chatbotMessage, setChatbotMessages] = useState<ChatbotMessage[]>([]);
-  const [typeAnswer, setTypeAnswer] = useState(-1);
   const [typeQuestions, setTypeQuestions] = useState<number[]>([]);
   const [enableInput, setEnableInput] = useState(true);
   const [isChatbotAtTop, setIsChatbotAtTop] = useState(false);
-  const [isVisibleBackQuestions, setIsVisibleBackQuestion] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [showOptions, setShowOptions] = useState(true);
   const [isResponding, setIsResponding] = useState(false);
@@ -99,6 +97,7 @@ export function ChatbotPage() {
   };
 
   const selectOption = async (questionIndex: number) => {
+    if(isResponding) return; // Evita que se seleccione otra opción mientras el chatbot está respondiendo
     console.log("Seleccionando opción:", questionIndex);
 
     //setTypeQuestions((prevTypes: number[]) z prevTypes.filter((type) => type !== typeToRemove)  )
@@ -146,8 +145,6 @@ export function ChatbotPage() {
 
   const sendMessage = async (message: string) => {
     if (!message) return; // Verificar que haya un mensaje válido
-
-    setIsVisibleBackQuestion(false); // Ocultar la pregunta
     addMessage(message, "Usuario"); // Mostrar el mensaje del usuario en el chat
 
     try {
@@ -166,16 +163,7 @@ export function ChatbotPage() {
         "Lo siento, ocurrió un error al procesar tu mensaje. Por favor, inténtalo nuevamente más tarde.",
         "Chatbot"
       );
-    } finally {
-      setIsVisibleBackQuestion(true); // Mostrar la pregunta nuevamente
     }
-  };
-
-
-  const resetToQuestions = () => {
-    setTypeAnswer(-1);
-    setEnableInput(false);
-    setIsVisibleBackQuestion(false);
   };
 
   const palette = generatePalette("miami-lights");
