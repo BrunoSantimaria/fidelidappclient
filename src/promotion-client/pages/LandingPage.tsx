@@ -947,8 +947,6 @@ export function LandingPage() {
       // Obtener respuesta personalizada del chatbot
       const response = await fetchCustomResponse(message, clientInfo);
   
-      console.log("Respuesta personalizada recibida:", response);
-  
       // Agregar la respuesta del chatbot al chat
       addMessage(response, "Chatbot");
     } catch (error) {
@@ -1221,8 +1219,6 @@ export function LandingPage() {
             </div>
           </>
         )}
-
-        <button onClick={async () => { console.log(getClientData()) }} className={`text-white ${palette.buttonHover}`}>Obtener datos clientes</button>
 
         {/* Agregar el componente del chatbot */}
         <div className="max-w-4xl md:max-w-5xl lg:max-w-6xl mx-auto space-y-8">
