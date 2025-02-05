@@ -393,7 +393,7 @@ const PromotionsDialog = ({
                         <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{promotion.title}</h3>
                         <p className={`text-sm mb-4 ${palette.textSecondary}`}>{promotion.description}</p>
 
-                        {promotion.imageUrl && <img src={promotion.imageUrl} alt={promotion.title} className='w-full h-48 object-cover' />}
+                        {promotion.imageUrl && <img src={promotion.imageUrl} alt={promotion.title} className='w-full h-full object-cover' />}
 
                         {isPointsPromotion ? (
                           <>
