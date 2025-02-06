@@ -141,11 +141,27 @@ export const EmailSender = () => {
   const [currentTab, setCurrentTab] = useState("design");
   const [emailDesign, setEmailDesign] = useState(null);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [tags, setTags] = useState([]);
+  const [selectedTag, setSelectedTag] = useState("");
+
   const navigate = useNavigate();
 
   useEffect(() => {
     getPromotionsAndMetrics();
+    fetchTags();
+
   }, []);
+
+
+  const fetchTags = async () => {
+    try {
+      const response = await api.get("/api/clients/getDistinctTags");
+      const data = await response.data;
+      setTags(data);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
+  };
 
   const handleWhatsAppClick = () => {
     const whatsappNumber = "56996706983";
@@ -167,7 +183,8 @@ export const EmailSender = () => {
         return false;
       }
 
-      const totalSelectedRecipients = contactSource === "csv" ? selectedCsvData.length : selectedClients.length;
+      const totalSelectedRecipients = selectedCsvData.length + selectedClients.length + tags.find(tag => tag._id === selectedTag)?.count
+
       if (totalSelectedRecipients === 0) {
         toast.warning("Debes seleccionar al menos un destinatario");
         return false;
@@ -217,8 +234,11 @@ export const EmailSender = () => {
     }
 
     const isValid = await checkEmailContent();
+
     if (isValid) {
-      const totalEmails = contactSource === "csv" ? selectedCsvData.length : selectedClients.length;
+      const totalEmails =
+        selectedCsvData.length + selectedClients.length + tags.find(tag => tag._id === selectedTag)?.count
+
       setEmailCount(totalEmails);
       setOpenDialog(true);
     }
@@ -282,85 +302,7 @@ export const EmailSender = () => {
       setSelectedClients((prevSelected) => (isChecked ? [...prevSelected, email] : prevSelected.filter((selected) => selected !== email)));
     }
   };
-  // Confirmar el envío de correos
-  const handleConfirmSend = async () => {
-    try {
-      setOpenDialog(false);
-
-      // Mostrar mensaje de éxito y redireccionar
-      toast.success("La campaña de correos se ha iniciado correctamente. Recibirás una notificación por correo cuando se complete el envío.", {
-        autoClose: 3000,
-        onClose: () => navigate("/dashboard/email-campaign"),
-      });
-
-      let recipients;
-
-      if (contactSource === "csv") {
-        recipients = csvData
-          .filter((row) => selectedCsvData.includes(row.email) && row.email && /\S+@\S+\.\S+/.test(row.email))
-          .map((row) => ({
-            email: row.email,
-            name: row.name || "",
-          }));
-      } else if (contactSource === "clients") {
-        recipients = clients
-          .filter((client) => selectedClients.includes(client.email) && client.email && /\S+@\S+\.\S+/.test(client.email))
-          .map((client) => ({
-            email: client.email,
-            name: client.name || "",
-          }));
-      }
-
-      const templateHtml = await new Promise((resolve, reject) => {
-        if (emailEditorRef.current) {
-          emailEditorRef.current.editor.exportHtml((data) => {
-            const { html } = data;
-            if (html && html.trim() !== "") {
-              resolve(html);
-            } else {
-              reject("El contenido del email está vacío.");
-            }
-          });
-        } else {
-          reject("Editor no disponible.");
-        }
-      });
-
-      const formData = {
-        subject: subject,
-        template: templateHtml,
-        clients: recipients,
-      };
-      setOnLoadChange(true);
-      await api.post("/api/email/send", formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      // Limpiar todo el contenido
-      setSubject("");
-      setCsvFile(null);
-      setSelectedClients([]);
-      setSelectedCsvData([]);
-      setCsvData([]);
-      setEmailDesign(null);
-      setContactSource("csv");
-      setCurrentTab("design");
-
-      // Limpiar el editor después de un pequeño delay para asegurar que está listo
-      setTimeout(() => {
-        if (emailEditorRef.current?.editor) {
-          emailEditorRef.current.editor.loadDesign({ body: { rows: [] } });
-        }
-      }, 100);
-    } catch (error) {
-      console.error("Error al iniciar la campaña:", error);
-      toast.error(" Hubo un problema al iniciar la campaña de correos.");
-    } finally {
-      setOnLoadChange(false);
-    }
-  };
+  
   useEffect(() => {
     refreshAccount();
   }, [clients]);
@@ -588,6 +530,93 @@ export const EmailSender = () => {
     }
   }, [currentTab, emailDesign]);
 
+  //Funciones de envio de correos
+
+  // Confirmar el envío de correos sin programar
+  const handleConfirmSend = async () => {
+    try {
+      setOpenDialog(false);
+
+      // Mostrar mensaje de éxito y redireccionar
+      toast.success("La campaña de correos se ha iniciado correctamente. Recibirás una notificación por correo cuando se complete el envío.", {
+        autoClose: 3000,
+        onClose: () => navigate("/dashboard/email-campaign"),
+      });
+
+      let recipients;
+
+      if (contactSource === "csv") {
+        recipients = csvData
+          .filter((row) => selectedCsvData.includes(row.email) && row.email && /\S+@\S+\.\S+/.test(row.email))
+          .map((row) => ({
+            email: row.email,
+            name: row.name || "",
+          }));
+      } else if (contactSource === "clients") {
+        recipients = clients
+          .filter((client) => selectedClients.includes(client.email) && client.email && /\S+@\S+\.\S+/.test(client.email))
+          .map((client) => ({
+            email: client.email,
+            name: client.name || "",
+          }));
+      }
+
+      const templateHtml = await new Promise((resolve, reject) => {
+        if (emailEditorRef.current) {
+          emailEditorRef.current.editor.exportHtml((data) => {
+            const { html } = data;
+            if (html && html.trim() !== "") {
+              resolve(html);
+            } else {
+              reject("El contenido del email está vacío.");
+            }
+          });
+        } else {
+          reject("Editor no disponible.");
+        }
+      });
+
+      const formData = {
+        subject: subject,
+        template: templateHtml,
+        clients: recipients,
+        contactSource,
+        tag: selectedTag,
+      };
+
+      console.log("formData", formData);
+      setOnLoadChange(true);
+      await api.post("/api/email/send", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      // Limpiar todo el contenido
+      setSubject("");
+      setCsvFile(null);
+      setSelectedClients([]);
+      setSelectedCsvData([]);
+      setCsvData([]);
+      setEmailDesign(null);
+      setContactSource("csv");
+      setCurrentTab("design");
+
+      // Limpiar el editor después de un pequeño delay para asegurar que está listo
+      setTimeout(() => {
+        if (emailEditorRef.current?.editor) {
+          emailEditorRef.current.editor.loadDesign({ body: { rows: [] } });
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error al iniciar la campaña:", error);
+      toast.error(" Hubo un problema al iniciar la campaña de correos.");
+    } finally {
+      setOnLoadChange(false);
+    }
+  };
+
+  // Confirmar y programar envio de correos
   const handleScheduleEmail = async (selectedDate) => {
     try {
       // Validar que haya destinatarios seleccionados
@@ -635,6 +664,8 @@ export const EmailSender = () => {
         scheduledDate: selectedDate.toISOString(),
         userId: accounts._id,
         campaignName: subject,
+        contactSource,
+        tag: selectedTag,
       };
 
       const response = await api.post("/api/email/schedule", formData);
@@ -771,11 +802,17 @@ export const EmailSender = () => {
                 <FormControl fullWidth>
                   <InputLabel>Fuente de Contactos</InputLabel>
                   <Select value={contactSource} onChange={(e) => setContactSource(e.target.value)} label='Fuente de Contactos'>
-                    <MenuItem value='csv'>Cargar desde CSV</MenuItem>
-                    <MenuItem value='clients'>Seleccionar Clientes</MenuItem>
+                    <MenuItem value='csv' onClick={() => setSelectedTag("")}>Cargar desde CSV</MenuItem>
+                    <MenuItem value='clients' >Seleccionar Clientes</MenuItem>
+                    {tags.map((tag, index) => (
+                      <MenuItem key={index} value={tag._id} onClick={() => setSelectedTag(tag._id)}>
+                        {tag._id}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Box>
+
 
               {contactSource === "csv" && (
                 <Box className='space-y-4'>
@@ -837,7 +874,7 @@ export const EmailSender = () => {
                 </Box>
               )}
 
-              {contactSource === "clients" ? (
+              {contactSource === "clients" && (
                 // Tabla de clientes
                 <TableContainer component={Paper}>
                   <Table>
@@ -880,16 +917,22 @@ export const EmailSender = () => {
                     labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                   />
                 </TableContainer>
-              ) : (
-                // Resumen de selección
-                <Box className='mt-4 p-4 bg-gray-50 rounded-md'>
-                  <Typography variant='subtitle1' className='font-medium'>
-                    Destinatarios seleccionados: {contactSource === "csv" ? selectedCsvData.length : selectedClients.length}
-                  </Typography>
-                </Box>
               )}
             </Box>
           )}
+          <Box className='mt-4 p-4 bg-gray-50 rounded-md'>
+            <Typography variant='subtitle1' className='font-medium'>
+              Destinatarios seleccionados:
+              {contactSource === "csv"
+                ? selectedCsvData.length
+                : contactSource === "clients"
+                  ? selectedClients.length
+                  : selectedTag
+                    ? tags.find(tag => tag._id === selectedTag)?.count || "Sin información"
+                    : "Seleccciona clientes o un tag"}
+            </Typography>
+          </Box>
+
         </CardContent>
 
         <Box className='flex justify-between p-4 border-t'>
@@ -927,7 +970,7 @@ export const EmailSender = () => {
         <DialogTitle>Confirmar Envío de Campaña</DialogTitle>
         <DialogContent>
           <Typography variant='body1' gutterBottom>
-            Estás a punto de iniciar una campaña de correos para {selectedClients.length + selectedCsvData.length} destinatarios.
+            Estás a punto de iniciar una campaña de correos para {emailCount} destinatarios.
           </Typography>
           <Typography variant='body2' color='textSecondary'>
             Una vez iniciada la campaña:

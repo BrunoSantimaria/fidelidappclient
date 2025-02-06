@@ -128,29 +128,29 @@ const FilterComponent = ({ onApplyFilters, filteredClients }) => {
     };
 
     useEffect(() => {
-        const fetchTags = async () => {
-            try {
-                const response = await api.get("/api/clients/getDistinctTags");
-                const data = await response.data;
-                setTags(data);
-            } catch (error) {
-                console.error("Error fetching tags:", error);
-            }
-        };
-
         fetchTags();
     }, []);
 
+    const fetchTags = async () => {
+        try {
+            const response = await api.get("/api/clients/getDistinctTags");
+            const data = await response.data;
+            setTags(data);
+        } catch (error) {
+            console.error("Error fetching tags:", error);
+        }
+    };
+
     return (
         <section className="w-full">
-            <div className="flex flex-col space-y-4 p-4">
+            <div className='w-[90%] flex flex-col md:flex-col m-auto justify-between mb-10'>
                 <Accordion>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         Segmenta tus clientes en un click!
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid container spacing={2}>
-                        <Grid item xs={12} sm={4}>
+                            <Grid item xs={12} sm={4}>
                                 <FormControl fullWidth>
                                     <InputLabel id="tags-select-label">Segmentos Existentes</InputLabel>
                                     <Select
@@ -161,10 +161,11 @@ const FilterComponent = ({ onApplyFilters, filteredClients }) => {
                                         renderValue={(selected) => selected.join(", ")}
                                     >
                                         {tags.map((tag, index) => (
-                                            <MenuItem key={index} value={tag}>
-                                                {tag}
+                                            <MenuItem key={index} value={tag._id}>
+                                                {tag._id}
                                             </MenuItem>
                                         ))}
+
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -183,7 +184,7 @@ const FilterComponent = ({ onApplyFilters, filteredClients }) => {
                                 />
                             </Grid>
 
-                            
+
 
                             <Grid item xs={12} sm={4}>
                                 <FormControl fullWidth>
@@ -195,7 +196,7 @@ const FilterComponent = ({ onApplyFilters, filteredClients }) => {
                                         onChange={handleActivityChange}
                                         renderValue={(selected) => selected.join(", ")}
                                     >
-                                                            {[
+                                        {[
                                             "Ninguna",
                                             "Registro",
                                             "Sumó Puntos",
