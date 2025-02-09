@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AvailableSlotsTable from "./AvailableSlotsTable.tsx";
-import ExistingAppointments from "./ExistingAppointments.tsx";
+
 import api from "../utils/api.js";
 
 const fetchAvailableSlots = async (agendaId) => {
@@ -88,9 +88,8 @@ const Agenda = () => {
   }, [agendaId]);
 
   return (
-    <div className='mx-20'>
+    <div className=' bg-gray-100/20 w-screen m-auto m-0'>
       <AvailableSlotsTable availableSlotsByDay={availableSlotsByDay} name={name} agendaId={agendaId} description={description} />
-      <ExistingAppointments agendaId={agendaId} />
     </div>
   );
 };

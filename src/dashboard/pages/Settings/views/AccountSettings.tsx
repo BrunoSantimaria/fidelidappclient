@@ -1,23 +1,23 @@
-import { Button, Input, Tooltip } from "@mui/material";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import { motion } from "framer-motion";
 import { useAuthSlice } from "../../../../hooks/useAuthSlice";
 import { useState, useEffect } from "react";
 import api from "../../../../utils/api";
+import { Alert, Tooltip } from "@mui/material";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { toast } from "react-toastify";
 import { Settings } from "@mui/icons-material";
 
 export const AccountSettings = () => {
   const { user, refreshAccount } = useAuthSlice();
-  const [name, setName] = useState(user?.accounts.name || "");
+  const [name, setName] = useState(user?.accounts.landing.name || "");
   const [senderEmail, setSenderEmail] = useState(user?.accounts.senderEmail || "");
   const [phone, setPhone] = useState(user?.accounts.phone || "");
   const [error, setError] = useState("");
   const [isModified, setIsModified] = useState(false);
   const [onLoadChange, setOnLoadChange] = useState(false);
   // Efecto para verificar cambios en los campos de entrada
+  console.log(user.accounts.landing.name);
   useEffect(() => {
-    setIsModified(name !== user?.accounts.name || senderEmail !== user?.accounts.senderEmail || phone !== user?.accounts.phone);
+    setIsModified(name !== user?.accounts.landing.name || senderEmail !== user?.accounts.senderEmail || phone !== user?.accounts.phone);
   }, [name, senderEmail, phone, user]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,7 +35,7 @@ export const AccountSettings = () => {
 
     // Crear el objeto `settings` con solo los campos modificados
     const settings: Partial<typeof user.accounts> = {};
-    if (name !== user?.accounts.name) settings.name = name;
+    if (name !== user?.accounts.landing.name) settings.landing.name = name;
     if (senderEmail !== user?.accounts.senderEmail) settings.senderEmail = senderEmail;
     if (phone !== user?.accounts.phone) settings.phone = phone;
 
@@ -63,7 +63,14 @@ export const AccountSettings = () => {
         <h2 className='text-lg text-gray-700'>Configuración de la Cuenta</h2>
       </div>
       <p className='text-sm text-gray-600 mb-6'>Administra la configuración de tu cuenta y preferencias</p>
-
+      <Alert severity='info' className='text-sm text-gray-600 mb-6'>
+        <strong>¿Qué es Sender Email?</strong> <br></br>
+        El sender email es el correo electrónico desde el cual se enviarán tus correos de marketing. Usar un correo de tu empresa, como contacto@fidelidapp.cl,
+        ayuda a que los destinatarios te identifiquen fácilmente.<br></br>
+        Una vez guardado el sender email, te llegará un correo con instrucciones para verificarlo. <br></br>
+        <strong>¿Qué es el nombre de tu negocio?</strong> <br></br>
+        El nombre de tu negocio es el nombre que se mostrará en el pie de pagina de las campañas de email y en el landing page de tu negocio.
+      </Alert>
       {/* Campos del formulario */}
       <div className='space-y-4'>
         <div>
@@ -119,7 +126,7 @@ export const AccountSettings = () => {
           <button
             className='px-4 py-2 text-gray-600 bg-white border border-main hover:bg-gray-100 rounded'
             onClick={() => {
-              setName(user?.name || "");
+              setName(user?.accounts.landing.name || "");
               setSenderEmail(user?.accounts.senderEmail || "");
               setPhone(user?.phone || "");
               setError("");

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuthSlice } from "../../../hooks/useAuthSlice";
 import QRCode from "react-qr-code";
 import { Card, CardContent, Typography, Button } from "@mui/material";
-import { QrCode, QrCodeScanner, EmojiEvents, Person } from "@mui/icons-material";
+import { QrCode, QrCodeScanner, EmojiEvents, Person, Download } from "@mui/icons-material";
 import { toPng } from "html-to-image";
 
 export const AccountQr = () => {
@@ -67,7 +67,7 @@ export const AccountQr = () => {
               </div>
               <Button
                 variant='contained'
-                startIcon={<QrCodeScanner />}
+                endIcon={<Download />}
                 onClick={handleDownloadQR}
                 sx={{ backgroundColor: "#5b7898", "&:hover": { backgroundColor: "#4a6277" } }}
               >

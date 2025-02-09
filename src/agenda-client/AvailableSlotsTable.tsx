@@ -13,8 +13,26 @@ import "dayjs/locale/es";
 import api from "../utils/api";
 import { toast } from "react-toastify";
 import { es } from "date-fns/locale";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { BiInfoCircle } from "react-icons/bi";
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 const steps = ["Fecha", "Hora", "Detalles", "Confirmación"];
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#5b7898",
+    },
+  },
+});
 
 const AvailableSlotsTable = ({ agendaId, name, description }) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -31,12 +49,13 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
   const [notes, setNotes] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchAgendaData = async () => {
       try {
         const response = await api.get(`/api/agenda/by-link/${agendaId}`);
-        console.log("Datos completos de la agenda:", response.data);
+
         setAgendaData(response.data);
 
         if (response.data.type === "recurring") {
@@ -50,67 +69,76 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
     fetchAgendaData();
   }, [agendaId]);
 
+  const findNextAvailableDay = (startDate) => {
+    let date = dayjs(startDate);
+    let daysChecked = 0;
+
+    while (daysChecked < 14) {
+      // Límite de 2 semanas para evitar bucle infinito
+      if (availableDays.includes(date.day())) {
+        return date;
+      }
+      date = date.add(1, "day");
+      daysChecked++;
+    }
+    return date; // Retorna la última fecha si no encuentra disponibilidad
+  };
+
+  useEffect(() => {
+    if (availableDays.length > 0 && !selectedDate) {
+      const nextAvailable = findNextAvailableDay(dayjs());
+      setSelectedDate(nextAvailable);
+    }
+  }, [availableDays]);
+
   useEffect(() => {
     if (selectedDate) {
       fetchAvailableSlots();
     }
-  }, [selectedDate, agendaId]);
+  }, [selectedDate]);
 
   const fetchAvailableSlots = async () => {
     try {
       const formattedDate = selectedDate.format("YYYY-MM-DD");
-      console.log("Fecha formateada:", formattedDate);
-
-      // Obtener la agenda
       const agendaResponse = await api.get(`/api/agenda/by-link/${agendaId}`);
-      console.log("Respuesta agenda:", agendaResponse.data);
-
-      // Modificar la llamada para obtener solo las citas sin populate
       const appointmentsResponse = await api.get(`/api/agenda/${agendaId}/appointments?date=${formattedDate}`);
       const existingAppointments = appointmentsResponse.data;
-      console.log("Citas existentes:", existingAppointments);
-
       if (agendaResponse.data.recurringConfig) {
         const { timeSlots } = agendaResponse.data.recurringConfig;
         const duration = agendaResponse.data.duration;
         const slots = [];
-        const firstSlot = timeSlots[0];
-        const capacity = firstSlot.capacity || 1;
 
-        let currentTime = dayjs(`${formattedDate} ${firstSlot.start}`);
-        const endTime = dayjs(`${formattedDate} ${firstSlot.end}`);
+        for (const timeSlot of timeSlots) {
+          let currentTime = dayjs(`${formattedDate} ${timeSlot.start}`);
+          const endTime = dayjs(`${formattedDate} ${timeSlot.end}`);
 
-        while (currentTime.isBefore(endTime)) {
-          const startTime = currentTime.clone();
-          const endTime = startTime.clone().add(duration, "minutes");
-          const existingBookings = existingAppointments.filter((appointment) => dayjs(appointment.startTime).isSame(startTime));
+          // Generar slots cada 'duration' minutos
+          while (currentTime.add(duration, "minutes").isSameOrBefore(endTime)) {
+            const slotStartTime = currentTime;
+            const slotEndTime = currentTime.add(duration, "minutes");
 
-          // Calcular capacidad disponible considerando el número de personas por reserva
-          const usedCapacity = existingBookings.reduce((total, appointment) => total + (appointment.numberOfPeople || 1), 0);
-          const availableCapacity = capacity - usedCapacity;
-
-          if (availableCapacity > 0) {
-            slots.push({
-              startTime,
-              endTime,
-              availableCapacity,
-              totalCapacity: capacity,
+            // Verificar si hay citas existentes para este horario
+            const conflictingAppointments = existingAppointments.filter((appointment) => {
+              const appointmentStart = dayjs(appointment.startTime);
+              const appointmentEnd = dayjs(appointment.endTime);
+              return slotStartTime.isSameOrBefore(appointmentEnd) && slotEndTime.isSameOrAfter(appointmentStart);
             });
-          }
 
-          currentTime = currentTime.add(duration, "minutes");
+            // Si no hay citas para este horario o hay capacidad disponible, agregar el slot
+            if (conflictingAppointments.length < (timeSlot.capacity || 1)) {
+              slots.push({
+                startTime: slotStartTime,
+                endTime: slotEndTime,
+                availableCapacity: (timeSlot.capacity || 1) - conflictingAppointments.length,
+                totalCapacity: timeSlot.capacity || 1,
+              });
+            }
+
+            currentTime = currentTime.add(duration, "minutes");
+          }
         }
 
-        console.log(
-          "Slots generados:",
-          slots.map((slot) => ({
-            start: slot.startTime.format("HH:mm"),
-            end: slot.endTime.format("HH:mm"),
-            disponibles: slot.availableCapacity,
-            capacidadTotal: slot.totalCapacity,
-          }))
-        );
-
+        console.log("Slots generados:", slots); // Para debugging
         setAvailableSlots(slots);
       }
     } catch (error) {
@@ -118,6 +146,12 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
       toast.error("Error al cargar horarios disponibles");
     }
   };
+
+  useEffect(() => {
+    if (selectedDate && agendaData) {
+      fetchAvailableSlots();
+    }
+  }, [selectedDate, agendaData]);
 
   const handleNextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -133,8 +167,26 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
     }
   };
 
+  const checkPendingAppointments = async (email) => {
+    try {
+      const response = await api.get(`/api/agenda/appointments/pending?email=${email}`);
+      console.log("Citas pendientes:", response.data);
+      return response.data.count || 0;
+    } catch (error) {
+      console.error("Error al verificar citas pendientes:", error);
+      return 0;
+    }
+  };
+
   const handleBookingConfirmation = async () => {
     try {
+      setIsSubmitting(true);
+      const pendingCount = await checkPendingAppointments(clientEmail);
+      if (pendingCount >= 3) {
+        toast.error("No puedes agendar más citas. Tienes más de 3 citas pendientes.");
+        return;
+      }
+
       const appointmentData = {
         agendaId,
         startTime: selectedSlot.startTime.format(),
@@ -151,6 +203,8 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
     } catch (error) {
       console.error("Error al confirmar la reserva:", error);
       toast.error("Error al confirmar la reserva");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -161,19 +215,6 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
     const isAvailableDay = availableDays.includes(day);
     const isPastDate = dayjs(date).isBefore(dayjs(), "day");
 
-    console.log(
-      "Evaluando fecha:",
-      dayjs(date).format("YYYY-MM-DD"),
-      "Día:",
-      day,
-      "Días disponibles:",
-      availableDays,
-      "Es día disponible:",
-      isAvailableDay,
-      "Es fecha pasada:",
-      isPastDate
-    );
-
     return !isAvailableDay || isPastDate;
   };
 
@@ -181,78 +222,57 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
     switch (currentStep) {
       case 0:
         return (
-          <div className='space-y-4'>
-            <div className='p-4 bg-white rounded-lg shadow-md flex justify-center'>
-              <Calendar
-                mode='single'
-                selected={selectedDate.toDate()}
-                onSelect={(date) => setSelectedDate(dayjs(date))}
-                disabled={isDateDisabled}
-                locale={es}
-                fromDate={new Date()}
-                toDate={dayjs().add(3, "months").toDate()}
-                initialFocus
-                classNames={{
-                  months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                  month: "space-y-4",
-                  caption: "flex justify-center pt-1 relative items-center h-10",
-                  caption_label: "text-sm font-medium text-[#5b7898]",
-                  nav: "flex items-center justify-center text-center absolute w-full",
-                  nav_button:
-                    "h-10 w-10 bg-[#5b7898] text-white hover:bg-[#5b7898]/90 rounded-md transition-colors text-center disabled:opacity-50 disabled:hover:bg-[#5b7898]",
-                  nav_button_previous: "absolute left-1",
-                  nav_button_next: "absolute right-1",
-                  table: "w-full border-collapse space-y-1",
-                  head_row: "flex",
-                  head_cell: "text-[#5b7898] rounded-md w-9 font-semibold text-[0.8rem]",
-                  row: "flex w-full mt-2",
-                  cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-[#5b7898]/10",
-                  day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-md transition-colors focus:outline-none focus-visible:ring focus-visible:ring-[#5b7898] focus-visible:ring-opacity-50",
-                  day_selected: "bg-[#5b7898] text-white hover:bg-[#5b7898] hover:text-white",
-                  day_today: "bg-[#5b7898]/20 text-[#5b7898] font-semibold",
-                  day_outside: "text-gray-400 opacity-50",
-                  day_disabled: "text-gray-400 hover:bg-transparent opacity-50 cursor-not-allowed",
-                  day_range_middle: "aria-selected:bg-[#5b7898]/20",
-                  day_hidden: "invisible",
-                }}
-                components={{
-                  DayContent: ({ date }) => {
-                    const isDisabled = isDateDisabled(date);
-                    const isSelected = selectedDate && dayjs(date).isSame(selectedDate, "day");
-                    const isToday = dayjs(date).isSame(dayjs(), "day");
-
-                    return (
-                      <div
-                        className={`
-                          h-9 w-9 flex items-center justify-center rounded-md transition-colors
-                          ${
-                            isSelected
-                              ? "bg-[#5b7898] text-white font-semibold"
-                              : isDisabled
-                              ? "text-gray-300 cursor-not-allowed bg-gray-50"
-                              : isToday
-                              ? "bg-[#5b7898]/20 text-[#5b7898] font-semibold hover:bg-[#5b7898]/30"
-                              : "bg-[#5b7898]/20 text-[#5b7898] font-medium hover:bg-[#5b7898]/30 hover:text-[#5b7898] border-2 border-[#5b7898]"
-                          }
-                        `}
-                      >
-                        {date.getDate()}
-                      </div>
-                    );
-                  },
-                }}
-              />
+          <div className='space-y-4 '>
+            <div className='p-4 bg-white rounded-lg shadow-md'>
+              <ThemeProvider theme={theme}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
+                  <DatePicker
+                    label='Selecciona una fecha'
+                    value={selectedDate}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        const nextAvailable = findNextAvailableDay(newValue);
+                        setSelectedDate(nextAvailable);
+                      }
+                    }}
+                    disablePast
+                    maxDate={dayjs().add(3, "months")}
+                    shouldDisableDate={isDateDisabled}
+                    views={["day"]}
+                    format='DD/MM/YYYY'
+                    sx={{
+                      width: "100%",
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "#5b7898",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#5b7898",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#5b7898",
+                        },
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#5b7898",
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </ThemeProvider>
             </div>
             {availableSlots.length > 0 && (
               <div className='text-center mt-4'>
-                <p className='text-sm text-[#5b7898]'>{availableSlots.reduce((total, slot) => total + slot.availableCapacity, 0)} espacios disponibles</p>
+                <p className='text-sm text-[#5b7898]'>
+                  {availableSlots.length} horarios disponibles para el {selectedDate.format("DD/MM/YYYY")}
+                </p>
               </div>
             )}
           </div>
         );
       case 1:
         return (
-          <div className='space-y-4'>
+          <div className='space-y-4 '>
             {agendaData?.recurringConfig?.timeSlots[0]?.capacity > 1 && (
               <div className='mb-4 bg-white p-4 rounded-lg shadow-sm border border-[#5b7898]/20'>
                 <Label htmlFor='people' className='text-sm font-medium text-[#5b7898]'>
@@ -330,6 +350,14 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
               <Label htmlFor='phone'>Teléfono</Label>
               <Input id='phone' type='tel' value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
             </div>
+            {agendaData?.requiresCapacity && (
+              <div>
+                <Label htmlFor='notes'>Numero de personas</Label>
+
+                <Input id='notes' type='number' value={numberOfPeople} onChange={(e) => setNumberOfPeople(e.target.value)} />
+              </div>
+            )}
+
             <div>
               <Label htmlFor='notes'>Notas adicionales</Label>
               <Textarea id='notes' value={notes} onChange={(e) => setNotes(e.target.value)} />
@@ -364,14 +392,14 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
 
   if (showConfirmation) {
     return (
-      <Card className='w-full max-w-md mx-auto mt-8'>
+      <Card className='w-full max-w-md mx-auto mt-8 my-0 flex items-center justify-center mt-40'>
         <CardContent className='pt-6'>
           <div className='text-center'>
-            <CheckCircle className='w-16 h-16 text-green-500 mx-auto mb-4' />
-            <h2 className='text-2xl font-bold mb-2'>¡Reserva Confirmada!</h2>
-            <p className='text-gray-600 mb-4'>
+            <BiInfoCircle className='w-16 h-16 text-green-500 mx-auto mb-4' />
+            <h2 className='text-2xl font-bold mb-2'>¡Te enviamos un correo para confirmar la reserva!</h2>
+            {/* <p className='text-gray-600 mb-4'>
               Gracias por tu reserva. Te esperamos el {selectedDate.format("DD/MM/YYYY")} a las {selectedSlot?.startTime.format("HH:mm")}.
-            </p>
+            </p> */}
             <Button onClick={() => window.location.reload()} className='mt-4'>
               Hacer otra reserva
             </Button>
@@ -417,14 +445,16 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
               className={`ml-auto bg-[#5b7898] hover:bg-[#5b7898]/90 text-white ${
                 (currentStep === 0 && !selectedDate) ||
                 (currentStep === 1 && !selectedSlot) ||
-                (currentStep === 2 && (!clientName || !clientEmail || !clientPhone))
+                (currentStep === 2 && (!clientName || !clientEmail || !clientPhone)) ||
+                (currentStep === steps.length - 1 && isSubmitting)
                   ? "opacity-50 cursor-not-allowed"
                   : ""
               }`}
               disabled={
                 (currentStep === 0 && !selectedDate) ||
                 (currentStep === 1 && !selectedSlot) ||
-                (currentStep === 2 && (!clientName || !clientEmail || !clientPhone))
+                (currentStep === 2 && (!clientName || !clientEmail || !clientPhone)) ||
+                (currentStep === steps.length - 1 && isSubmitting)
               }
             >
               {currentStep === steps.length - 1 ? "Confirmar Reserva" : "Siguiente"}

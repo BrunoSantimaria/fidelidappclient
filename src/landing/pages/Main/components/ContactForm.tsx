@@ -96,7 +96,7 @@ export const ContactForm = ({ refs }) => {
           md: "60%",
         },
       }}
-      ref={contactRef}
+      ref={refs.contactRef}
     >
       <Helmet>
         <script async src='https://www.googletagmanager.com/gtag/js?id=AW-16750398859'></script>

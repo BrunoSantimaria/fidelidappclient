@@ -50,24 +50,6 @@ export const PromotionPage = () => {
       icon: <PackageIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
       tooltip: "Número de programas de fidelización activos",
     },
-    {
-      title: "Clientes Registrados",
-      value: `${updatedMetrics?.registeredClients || 0} / ${plan?.clientLimit || "Ilimitado"}`,
-      icon: <UsersIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
-      tooltip: "Total de clientes registrados en tus programas",
-    },
-    {
-      title: "Visitas Totales",
-      value: updatedMetrics?.totalVisits || 0,
-      icon: <VisitsIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
-      tooltip: "Número total de visitas registradas",
-    },
-    {
-      title: "Promociones Canjeadas",
-      value: updatedMetrics?.redeemedPromotions || 0,
-      icon: <RewardsIcon sx={{ fontSize: 24, color: "#5b7898" }} />,
-      tooltip: "Total de promociones canjeadas por tus clientes",
-    },
   ];
 
   return (
@@ -82,77 +64,11 @@ export const PromotionPage = () => {
           className='p-4 md:p-8 w-full lg:w-[90%] mx-auto space-y-4 md:space-y-8'
         >
           {/* Tarjeta de Bienvenida */}
-          <Card sx={{ borderTop: 4, borderColor: "#5b7898" }}>
-            <CardContent>
-              <Typography
-                variant='h5'
-                sx={{
-                  color: "#5b7898",
-                  mb: 1,
-                  fontSize: { xs: "1.2rem", sm: "1.5rem" },
-                }}
-              >
-                ¡Bienvenido a FidelidApp {user.accounts?.name || ""}!
-              </Typography>
-              <Typography variant='body1' color='text.secondary'>
-                Aquí encontrarás herramientas diseñadas para mejorar la fidelidad de tus clientes y maximizar el rendimiento de tus programas de fidelización.
-              </Typography>
-            </CardContent>
-          </Card>
 
           {/* Grid de Estadísticas */}
-          <Grid container spacing={{ xs: 2, md: 3 }}>
-            {statsCards.map((stat, index) => (
-              <Grid item xs={12} sm={6} lg={3} key={index}>
-                <Card
-                  sx={{
-                    bgcolor: "background.paper",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                        flexWrap: { xs: "wrap", sm: "nowrap" },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Typography variant='subtitle2' color='text.secondary'>
-                          {stat.title}
-                        </Typography>
-                        <Tooltip title={stat.tooltip}>
-                          <IconButton size='small'>
-                            <HelpIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                      {stat.icon}
-                    </Box>
-                    <Typography
-                      variant='h4'
-                      sx={{
-                        color: "#5b7898",
-                        fontWeight: 500,
-                        fontSize: { xs: "1.5rem", sm: "2rem" },
-                      }}
-                    >
-                      {stat.value}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
 
           {/* Tabla de Programas */}
-          <TablePromotions onDelete={handlePromotionDelete} />
+          <TablePromotions onDelete={handlePromotionDelete} statsCards={statsCards} />
         </motion.div>
       </div>
     </div>

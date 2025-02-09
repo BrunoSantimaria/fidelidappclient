@@ -7,7 +7,6 @@ import { handleScrollTo } from "../utils/handleScrollTo";
 import { motion } from "framer-motion"; // Importamos Framer Motion
 
 import logo from "../assets/LOGO-SIN-FONDO.png";
-import { WhatIsFidelidapp } from "../landing/pages/Main/components/WhatIsFidelidapp";
 
 export const NavBar = ({ refs }) => {
   console.log(refs);
@@ -23,7 +22,6 @@ export const NavBar = ({ refs }) => {
   };
 
   const allowedRoutes = ["/", "/auth/login", "/features", "/services"];
-  const isAgendasRoute = location.pathname.startsWith("/agendas/");
 
   const isHome = location.pathname === "/";
 
@@ -71,7 +69,7 @@ export const NavBar = ({ refs }) => {
   }, []);
 
   // Renderizar el NavBar siempre, pero realizar condiciones solo sobre el contenido.
-  if (!allowedRoutes.includes(location.pathname) && !isAgendasRoute) {
+  if (!allowedRoutes.includes(location.pathname)) {
     return null; // No renderizar nada si no está permitido
   }
 

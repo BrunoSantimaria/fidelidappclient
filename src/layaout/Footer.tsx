@@ -3,12 +3,13 @@ import Logo from "../assets/LOGO-SIN-FONDO.png";
 import { useLocation } from "react-router-dom";
 import { Mail, MapPin, Phone, Facebook, Instagram, Linkedin } from "lucide-react";
 import { useNavigateTo } from "../hooks/useNavigateTo";
+import { handleScrollTo } from "@/utils/handleScrollTo";
 
 export const Footer = ({ refs }) => {
+  console.log(refs.WhatIsFidelidapp);
   const location = useLocation();
   const { handleNavigate } = useNavigateTo();
   const allowedRoutes = ["/", "/auth/login", "/features", "/services"];
-  const isAgendasRoute = location.pathname.startsWith("/agendas/");
 
   const handleSectionClick = (sectionId: string) => {
     if (location.pathname === "/") {
@@ -22,7 +23,7 @@ export const Footer = ({ refs }) => {
     }
   };
 
-  if (!allowedRoutes.includes(location.pathname) && !isAgendasRoute) {
+  if (!allowedRoutes.includes(location.pathname)) {
     return null;
   }
 
@@ -66,29 +67,67 @@ export const Footer = ({ refs }) => {
             <h3 className='text-lg font-semibold'>Links Importantes</h3>
             <ul className='space-y-2'>
               <li>
-                <a onClick={() => navigate("/")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
-                  Home
+                <a
+                  onClick={() => {
+                    location.pathname !== "/" ? handleNavigate("/") : handleScrollTo(refs.homeRef);
+                  }}
+                  className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'
+                >
+                  Inicio
                 </a>
               </li>
+
               <li>
-                <a onClick={() => handleSectionClick("#como-funciona")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                <a
+                  onClick={() => {
+                    if (location.pathname !== "/") {
+                      handleNavigate("/");
+                      setTimeout(() => handleScrollTo(refs.WhatIsFidelidapp), 500);
+                    } else {
+                      handleScrollTo(refs.WhatIsFidelidapp);
+                    }
+                  }}
+                  className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'
+                >
                   Cómo Funciona
                 </a>
               </li>
               <li>
-                <a onClick={() => handleSectionClick("#planes")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                <a
+                  onClick={() => {
+                    if (location.pathname !== "/") {
+                      handleNavigate("/");
+                      setTimeout(() => handleScrollTo(refs.WhatIsFidelidapp), 500);
+                    } else {
+                      handleScrollTo(refs.WhatIsFidelidapp);
+                    }
+                  }}
+                  className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'
+                >
                   Planes
                 </a>
               </li>
+
               <li>
-                <a onClick={() => handleSectionClick("#contacto")} className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'>
+                <a
+                  onClick={() => {
+                    if (location.pathname !== "/") {
+                      handleNavigate("/");
+                      setTimeout(() => handleScrollTo(refs.contactRef), 500);
+                    } else {
+                      handleScrollTo(refs.contactRef);
+                    }
+                  }}
+                  className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'
+                >
                   Contacto
                 </a>
               </li>
+
               <li>
                 <a
                   onClick={() => handleNavigate("/auth/login#register", { state: { showRegister: true } })}
-                  className='text-sm text-slate-200 hover:text-white transition-colors'
+                  className='text-sm text-slate-200 hover:text-white transition-colors cursor-pointer'
                 >
                   Registrarse
                 </a>
@@ -106,15 +145,7 @@ export const Footer = ({ refs }) => {
             <h3 className='text-lg font-semibold'>Síguenos</h3>
             <div className='flex gap-4'>
               <a
-                href='https://linkedin.com'
-                target='_blank'
-                rel='noopener noreferrer'
-                className='h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors'
-              >
-                <Linkedin className='h-4 w-4 text-white' />
-              </a>
-              <a
-                href='https://instagram.com'
+                href='https://instagram.com/fidelidapp'
                 target='_blank'
                 rel='noopener noreferrer'
                 className='h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors'
@@ -122,18 +153,29 @@ export const Footer = ({ refs }) => {
                 <Instagram className='h-4 w-4 text-white' />
               </a>
               <a
-                href='https://facebook.com'
+                href='https://www.linkedin.com/company/fidelidappcl/posts/?feedView=all'
                 target='_blank'
                 rel='noopener noreferrer'
                 className='h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors'
               >
-                <Facebook className='h-4 w-4 text-white' />
+                <Linkedin className='h-4 w-4 text-white' />
               </a>
+
+              {/* <a
+                href='https://facebook.com'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors'
+
+
+            >
+              <Facebook className='h-4 w-4 text-white' />
+            </a>
+             */}
             </div>
           </div>
         </div>
 
-        {/* Separador y Copyright */}
         <div className='border-t border-white/20 mt-8 pt-8'>
           <div className='flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-200'>
             <p>© {new Date().getFullYear()} FidelidApp. Todos los derechos reservados.</p>

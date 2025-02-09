@@ -4,68 +4,123 @@ import { toast } from "react-toastify";
 import api from "../utils/api";
 
 const AppointmentDialog = ({ open, handleClose, selectedSlot, selectedDate, agendaId }) => {
-  const [clientEmail, setClientEmail] = useState("");
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    clientName: "",
+    clientEmail: "",
+    clientPhone: "",
+    notes: "",
+    numberOfPeople: 1,
+  });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.clientName.trim()) newErrors.clientName = "El nombre es obligatorio";
+    if (!formData.clientEmail.trim()) {
+      newErrors.clientEmail = "El email es obligatorio";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.clientEmail)) {
+      newErrors.clientEmail = "Email inválido";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleConfirm = async () => {
-    if (!clientEmail) {
-      setError("Email del cliente es obligatorio");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(clientEmail)) {
-      setError("Formato de correo electrónico inválido");
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
-      const response = await api.post("/api/agenda/createAppointment", {
+      const response = await api.post("/api/agenda/appointments", {
         agendaId,
-        clientEmail,
         startTime: selectedSlot.startTime,
+        endTime: selectedSlot.endTime,
+        ...formData,
       });
 
       if (response.status === 201) {
-        toast.success("Cita programada correctamente");
+        toast.success("Solicitud de cita enviada. Por favor revisa tu correo para confirmarla.");
         handleClose();
       }
     } catch (err) {
-      console.error("Error creando la cita:", err);
-      toast.error("Error creating appointment");
+      console.error("Error al crear la cita:", err);
+      toast.error(err.response?.data?.message || "Error al crear la cita");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Confirmar Cita</DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
+      <DialogTitle>Solicitar Cita</DialogTitle>
       <DialogContent>
-        {selectedSlot && (
-          <Typography>
-            ¿Quiéres programar una cita en {selectedDate} de las {selectedSlot.startTime.split("T")[1].split(":00.")[0]} hasta las{" "}
-            {selectedSlot.endTime.split("T")[1].split(":00.")[0]}?
-          </Typography>
-        )}
+        <Typography variant='subtitle1' gutterBottom>
+          Fecha: {selectedDate}
+          <br />
+          Hora: {selectedSlot?.startTime.split("T")[1].split(":00.")[0]} - {selectedSlot?.endTime.split("T")[1].split(":00.")[0]}
+        </Typography>
+
         <TextField
-          label='Email del Cliente'
-          value={clientEmail}
-          onChange={(e) => setClientEmail(e.target.value)}
+          name='clientName'
+          label='Nombre completo'
+          value={formData.clientName}
+          onChange={handleChange}
           fullWidth
           margin='dense'
-          error={Boolean(error)}
-          helperText={error}
+          error={!!errors.clientName}
+          helperText={errors.clientName}
+        />
+
+        <TextField
+          name='clientEmail'
+          label='Email'
+          value={formData.clientEmail}
+          onChange={handleChange}
+          fullWidth
+          margin='dense'
+          error={!!errors.clientEmail}
+          helperText={errors.clientEmail}
+        />
+
+        <TextField name='clientPhone' label='Teléfono (opcional)' value={formData.clientPhone} onChange={handleChange} fullWidth margin='dense' />
+
+        <TextField
+          name='notes'
+          label='Notas adicionales (opcional)'
+          value={formData.notes}
+          onChange={handleChange}
+          fullWidth
+          margin='dense'
+          multiline
+          rows={2}
+        />
+
+        <TextField
+          name='numberOfPeople'
+          label='Número de personas'
+          type='number'
+          value={formData.numberOfPeople}
+          onChange={handleChange}
+          fullWidth
+          margin='dense'
+          InputProps={{ inputProps: { min: 1 } }}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleConfirm} color='primary' variant='contained' disabled={loading}>
-          {loading ? "Cargando..." : "Confirmar Cita"}
-        </Button>
-        <Button onClick={handleClose} color='primary' variant='outlined'>
+        <Button onClick={handleClose} color='inherit'>
           Cancelar
+        </Button>
+        <Button onClick={handleConfirm} color='primary' variant='contained' disabled={loading}>
+          {loading ? "Enviando..." : "Solicitar Cita"}
         </Button>
       </DialogActions>
     </Dialog>

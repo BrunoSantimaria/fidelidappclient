@@ -28,7 +28,8 @@ import { useDashboard } from "../../hooks";
 import { useNavigateTo } from "../../hooks/useNavigateTo";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import { useTheme } from "@mui/material/styles";
+import { useAuthSlice } from "@/hooks/useAuthSlice";
 const getSystemType = (type: string | undefined) => {
   if (!type) return "-";
   switch (type) {
@@ -41,12 +42,32 @@ const getSystemType = (type: string | undefined) => {
   }
 };
 
-export const TablePromotions = ({ onDelete }) => {
+const calculateEndDate = (promotion) => {
+  if (promotion.systemType === "points") {
+    const startDate = promotion.startDate ? new Date(promotion.startDate) : new Date(promotion.createdAt);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + parseInt(promotion.promotionDuration));
+    return endDate.toLocaleDateString();
+  }
+  return promotion.endDate ? new Date(promotion.endDate).toLocaleDateString() : promotion.promotionDuration;
+};
+
+const isPromotionExpired = (promotion) => {
+  const endDate =
+    promotion.systemType === "points"
+      ? new Date(new Date(promotion.startDate || promotion.createdAt).getTime() + parseInt(promotion.promotionDuration) * 24 * 60 * 60 * 1000)
+      : new Date(promotion.endDate);
+
+  return endDate < new Date();
+};
+
+export const TablePromotions = ({ onDelete, statsCards }) => {
   const { metrics, plan, promotions, deletePromotion } = useDashboard();
+  console.log(promotions);
   const { handleNavigate } = useNavigateTo();
 
-  // Estado para controlar el diálogo
   const [dialogOpen, setDialogOpen] = useState(false);
+
   const [promotionToDelete, setPromotionToDelete] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedPromotionId, setSelectedPromotionId] = useState<string | null>(null);
@@ -119,6 +140,19 @@ export const TablePromotions = ({ onDelete }) => {
             <Typography variant='body2' color='text.secondary'>
               Gestiona tus programas de fidelización y sus configuraciones
             </Typography>
+
+            {statsCards.map((card) => (
+              <Card key={card.title} sx={{ borderTop: 4, borderColor: "#5b7898", width: "100%", marginTop: 2 }}>
+                <CardContent>
+                  <Typography variant='h6' sx={{ color: "#5b7898" }}>
+                    {card.title}
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                    {card.value}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
           </Box>
           <Button
             variant='contained'
@@ -151,9 +185,6 @@ export const TablePromotions = ({ onDelete }) => {
                       Status
                     </TableCell>
                     <TableCell align='center'>Tipo</TableCell>
-                    <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                      Visitas
-                    </TableCell>
                     <TableCell align='right'>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
@@ -167,15 +198,15 @@ export const TablePromotions = ({ onDelete }) => {
                       </TableCell>
                       <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>{promotion.description.slice(0, 100)}...</TableCell>
                       <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                        {promotion.startDate ? promotion.startDate.split("T")[0] : promotion.createdAt.split("T")[0]}
+                        {promotion.startDate ? new Date(promotion.startDate).toLocaleDateString() : promotion.createdAt.split("T")[0]}
                       </TableCell>
                       <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                        {promotion.endDate ? promotion.endDate.split("T")[0] : promotion.promotionDuration}
+                        {calculateEndDate(promotion)}
                       </TableCell>
                       <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
                         <Box
                           sx={{
-                            bgcolor: promotion.status === "active" ? "#5b7898" : "grey.300",
+                            bgcolor: isPromotionExpired(promotion) ? "grey.500" : promotion.status === "active" ? "#5b7898" : "grey.300",
                             color: "white",
                             px: 2,
                             py: 0.5,
@@ -184,13 +215,10 @@ export const TablePromotions = ({ onDelete }) => {
                             fontSize: "0.875rem",
                           }}
                         >
-                          {promotion.status === "active" ? "Activa" : "Inactiva"}
+                          {isPromotionExpired(promotion) ? "Expirada" : promotion.status === "active" ? "Activa" : "Inactiva"}
                         </Box>
                       </TableCell>
                       <TableCell align='center'>{getSystemType(promotion.systemType)}</TableCell>
-                      <TableCell align='center' sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                        {promotion.visitsRequired || "-"}
-                      </TableCell>
                       <TableCell align='right'>
                         <IconButton size='small' onClick={(e) => handleMenuOpen(e, promotion._id)} sx={{ color: "grey.500" }}>
                           <MoreVert />

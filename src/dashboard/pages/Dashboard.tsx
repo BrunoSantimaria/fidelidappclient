@@ -196,8 +196,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Clientes Recientes */}
-        <div className='flex flex-col gap-8'>
+        {/*  <div className='flex flex-col gap-8'>
           <div className='bg-white rounded-lg border border-t-4 border-black/20 border-t-[#5b7898] p-6 flex flex-col h-full'>
             <h2 className='text-xl font-bold text-[#5b7898]'>Clientes Recientes</h2>
             <p className='text-gray-600 text-sm mt-1'>Últimos clientes registrados</p>
@@ -231,13 +230,13 @@ export const Dashboard = () => {
                     </div>
                   </div>
 
-                  {/* Paginación */}
+                 
                   <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color='primary' className='mt-4 flex justify-center' />
                 </>
               )}
             </div>
           </div>
-        </div>
+        </div>*/}
       </div>
     </div>
   );

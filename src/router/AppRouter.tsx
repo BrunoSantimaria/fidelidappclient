@@ -23,11 +23,13 @@ import { LandingClientRoutes } from "@/promotion-client/pages/LandingClientRoute
 import WhatsAppButton from "../layaout/components/FloatingWhatsAppButton";
 
 import { LandingRoutes } from "@/landing/routes/LandingRoutes";
-import { TableAgenda } from "@/dashboard/pages/Agenda/TableAgenda";
-import { CreateAgenda } from "@/dashboard/pages/Agenda/CreateAgenda";
+
 import { CalendarView } from "@/dashboard/pages/Agenda/CalendarView";
 import FidelidApp from "@/landing/pages/FidelidApp";
 import Services from "@/landing/pages/Services/components/Services";
+import AppointmentResult from "@/agenda-client/AppointmentResult";
+import AppointmentConfirmation from "@/agenda-client/AppointmentConfirmation";
+import AppointmentCancellation from "@/agenda-client/AppointmentCancellation";
 
 export const AppRouter = () => {
   const { status } = useAuthSlice();
@@ -72,12 +74,16 @@ export const AppRouter = () => {
             <Route path='/agendas/:agendaId' element={<Agenda />} />
             <Route path='/agenda/confirm/:appointmentId' element={<ConfirmAppointment />} />
             <Route path='/agenda/cancel/:appointmentId' element={<CancelAppointment />} />
+            <Route path='/agenda/appointments/cancel-token/:token' element={<AppointmentCancellation />} />
             <Route path='/promotions/:id' element={<PromotionClient />} />
             <Route path='/promotion/:id' element={<PromotionClient />} />
             <Route path='/promotions/:cid/:pid' element={<ClientPromotionCard />} />
             <Route path='/thankyou' element={<ThankYou />} />
+
             <Route element={<FidelidApp />} path={"/features"} />
             <Route element={<Services />} path={"/services"} />
+            <Route path='/appointments/confirm/:token' element={<AppointmentConfirmation />} />
+            <Route path='/appointment-result' element={<AppointmentResult />} />
             <Route path='/landing/:slug' element={<LandingPage />} />
             {status === "non-authenticated" ? (
               <>
@@ -96,8 +102,7 @@ export const AppRouter = () => {
 
                 <Route path='/auth/*' element={<Navigate to='/dashboard' replace />} />
                 <Route path='/thankyou' element={<ThankYou />} />
-                <Route path='/dashboard/agenda' element={<TableAgenda />} />
-                <Route path='/dashboard/agenda/create' element={<CreateAgenda />} />
+
                 <Route path='/dashboard/agenda/calendar' element={<CalendarView />} />
                 <Route path='/dashboard/promotions' element={<PromotionPage />} />
                 <Route path='/dashboard/*' element={<DashboardRoutes />} />
