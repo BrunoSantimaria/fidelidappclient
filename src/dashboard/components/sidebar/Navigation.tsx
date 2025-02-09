@@ -15,14 +15,14 @@ import { AddAdmin } from "./AddAdmin";
 import { useDashboard } from "../../../hooks";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MailRoundedIcon from "@mui/icons-material/MailRounded";
-import TextsmsIcon from '@mui/icons-material/Textsms';
+import TextsmsIcon from "@mui/icons-material/Textsms";
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 import { Divider } from "@mui/material";
 import { useNavigateTo } from "../../../hooks/useNavigateTo";
 
 import { useNavigate } from "react-router-dom";
 import { PersonStandingIcon } from "lucide-react";
-import { Person } from "@mui/icons-material";
+import { DateRangeRounded, Person, StarRounded } from "@mui/icons-material";
 
 const containerVariants = {
   close: {
@@ -105,13 +105,15 @@ export const Navigation = () => {
         variants={containerVariants}
         animate={containerControls}
         initial='close'
-        className={`${isOpen ? "fixed" : "hidden"
-          } md:flex bg-[#5b7898] min-h-screen lg:h-screen md:h-screen flex-col justify-between z-50 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
+        className={`${
+          isOpen ? "fixed" : "hidden"
+        } md:flex bg-[#5b7898] min-h-screen lg:h-screen md:h-screen flex-col justify-between z-50 p-5 md:fixed lg:fixed top-0 left-0 shadow shadow-neutral`}
       >
         <div className='flex flex-row w-full justify-between place-items-center'>
           <div
-            className={`${!isOpen ? "hidden" : ""} ${user?.accounts?.logo ? "w-16" : "bg-gradient-to-br from-orange-500 to-amber-700 w-10 h-10"
-              } flex rounded-full cursor-pointer`}
+            className={`${!isOpen ? "hidden" : ""} ${
+              user?.accounts?.logo ? "w-16" : "bg-gradient-to-br from-orange-500 to-amber-700 w-10 h-10"
+            } flex rounded-full cursor-pointer`}
             onClick={() => handleNavigate("/dashboard/settings")}
           >
             {user?.accounts?.logo ? (
@@ -151,7 +153,7 @@ export const Navigation = () => {
           <NavigationLink name='Email Marketing' link='/dashboard/email-campaign' isOpen={isOpen}>
             <MailRoundedIcon />
           </NavigationLink>
-          
+
           <NavigationLink name='Campañas SMS' link='/dashboard/sms-sender' isOpen={isOpen}>
             <TextsmsIcon className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
@@ -161,10 +163,12 @@ export const Navigation = () => {
           </NavigationLink>
           </div>*/}
 
-          <NavigationLink name='Meseros' link='/dashboard/waiters'>
-            <Person className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          <NavigationLink name='Evaluaciones' link='/dashboard/waiters'>
+            <StarRounded className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
           </NavigationLink>
-
+          <NavigationLink name='Agendas' link='/dashboard/agenda'>
+            <DateRangeRounded className='stroke-inherit stroke-[0.75] min-w-2 w-2' />
+          </NavigationLink>
         </div>
 
         <div className='flex flex-col h-full mt-6 md:mt-5 lg:mt-7 gap-4'>

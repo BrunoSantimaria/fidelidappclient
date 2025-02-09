@@ -20,6 +20,7 @@ import { log } from "console";
 export const useDashboard = () => {
   const { accounts, plan } = useSelector((state) => state.auth.user);
   const { user } = useAuthSlice();
+  console.log(accounts);
   const { metrics, promotions, activePromotion, agendas, clients, loading, lastUpdate, cacheExpiration } = useSelector((state) => state.dashboard);
   const { refreshAccount } = useAuthSlice();
   const dispatch = useDispatch();

@@ -270,8 +270,9 @@ export const Promotion = () => {
                       </div>
                       <div>
                         <p className='font-medium'>Fecha Fin</p>
-                        <p>{activePromotion.endDate.split("T")[0]}</p>
+                        <p>{activePromotion.endDate ? activePromotion.endDate.split("T")[0] : activePromotion.promotionDuration}</p>
                       </div>
+
                       {activePromotion.daysOfWeek.length > 0 && (
                         <div>
                           <p className='font-medium'>Días Activa</p>
@@ -297,16 +298,17 @@ export const Promotion = () => {
             </div>
           </CardContent>
 
-          <PromotionMetrics metrics={activePromotion} />
+          {/* <PromotionMetrics metrics={activePromotion} /> */}
 
           {activePromotion.systemType === "points"
             ? activePromotion?.statistics.pointsPerDay?.length > 0 && <PointsChart pointsPerDay={activePromotion.statistics.pointsPerDay} />
             : activePromotion?.statistics.visitsPerDay?.length > 0 && <VisitCharts promotions={activePromotion.statistics.visitsPerDay} />}
 
-          <ClientList
+          {/* <ClientList
             clients={activePromotion?.statistics.clientList}
             promotion={activePromotion}
             systemType={activePromotion.systemType} // Pasar el tipo de sistema (puntos o visitas)
+
           />
 
           {/* Modal modificado con nueva estética */}

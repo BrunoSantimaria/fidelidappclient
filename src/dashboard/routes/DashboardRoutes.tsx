@@ -29,6 +29,7 @@ import EmailCampaigns, { EmailCampaign } from "../pages/email/EmailCampaign";
 import WaitersPage from "../pages/Waiters/WaitersPage";
 
 import { SmsCampaignManager } from "../pages/sms/smsCampaignManager";
+import { TableAgenda } from "../pages/Agenda/TableAgenda";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
@@ -52,11 +53,15 @@ export const DashboardRoutes = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const LimitReachedComponent = () => {
-    useEffect(() => {
-      toast.info("Límite de promociones activas alcanzado", {});
-    }, []);
+    if (metrics?.activePromotions >= plan?.promotionLimit) {
+      useEffect(() => {
+        toast.info("Límite de promociones activas alcanzado", {});
+      }, []);
 
-    return <Navigate to='/dashboard' replace />;
+      return <Navigate to='/dashboard' replace />;
+    } else {
+      return <Navigate to='/dashboard/promotions/create' replace />;
+    }
   };
 
   useEffect(() => {
@@ -137,10 +142,12 @@ export const DashboardRoutes = () => {
         <Route path='/waiters' element={<WaitersPage />} />
         <Route path='/promotion/:id' element={<Promotion />} />
         <Route path='/promotions' element={<PromotionPage />} />
+        <Route path='/agenda/' element={<TableAgenda />} />
         <Route path='/agenda/create' element={<CreateAgenda />} />
         <Route path='/clients/list' element={<Clients />} />
         <Route path='/qr' element={<AccountQr />} />
         <Route path='/settings' element={<Settings />} />
+
         <Route path='/settings' element={<Settings />} />
         <Route path='/automation-rules' element={<AutomationRulesPage />} />
         <Route path='/*' element={<Navigate to='/' replace />} />

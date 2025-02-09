@@ -2,7 +2,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { onLogin, onLogOut, refreshAccountAndPlan } from "../store/auth/authSlice";
 import api from "../utils/api";
-import Cookies from "js-cookie";
 import { useNavigateTo } from "./useNavigateTo";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
@@ -22,6 +21,7 @@ export const useAuthSlice = () => {
       };
 
       const response = await api.post("/auth/signin", modifiedFormData);
+      console.log(response);
       token = response.data.token;
 
       localStorage.setItem("token", token);

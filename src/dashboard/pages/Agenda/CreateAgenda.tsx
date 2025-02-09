@@ -13,6 +13,8 @@ import {
   Grid,
   Typography,
   IconButton,
+  Alert,
+  Container,
 } from "@mui/material";
 import { TimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Delete as DeleteIcon, Add as AddIcon } from "@mui/icons-material";
@@ -125,207 +127,233 @@ export const CreateAgenda = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Card>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Typography variant='h5' gutterBottom>
-                  Crear Nueva Agenda
-                </Typography>
-              </Grid>
+      <Container maxWidth='lg' className='py-6 space-y-8'>
+        <Card>
+          <CardContent>
+            <Typography variant='h5' gutterBottom>
+              Crear Nueva Agenda
+            </Typography>
 
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label='Nombre' value={name} onChange={(e) => setName(e.target.value)} required />
-              </Grid>
+            <Alert severity='info' className='mb-4'>
+              <strong>Recurrente:</strong> Una agenda recurrente se repite en los días y horarios seleccionados.
+            </Alert>
+            <Alert severity='info' className='mb-4'>
+              <strong>Evento Especial:</strong> Un evento especial ocurre en fechas y horarios específicos.
+            </Alert>
+            <Alert severity='info' className='mb-4'>
+              <strong>Capacidad:</strong> Indica si es necesario especificar la cantidad de personas para la cita.
+            </Alert>
+            <Alert severity='info' className='mb-4'>
+              <strong>Slots disponibles:</strong> Indica el número de citas disponibles en cada horario.
+            </Alert>
 
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Tipo de Agenda</InputLabel>
-                  <Select value={agendaType} onChange={(e) => setAgendaType(e.target.value)} label='Tipo de Agenda'>
-                    <MenuItem value='recurring'>Recurrente</MenuItem>
-                    <MenuItem value='special'>Evento Especial</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Typography variant='h5' gutterBottom>
+                    Crear Nueva Agenda
+                  </Typography>
+                </Grid>
 
-              <Grid item xs={12}>
-                <TextField fullWidth label='Descripción' multiline rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-              </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField fullWidth label='Nombre' value={name} onChange={(e) => setName(e.target.value)} required />
+                </Grid>
 
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth type='number' label='Duración (minutos)' value={duration} onChange={(e) => setDuration(Number(e.target.value))} required />
-              </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Tipo de Agenda</InputLabel>
+                    <Select value={agendaType} onChange={(e) => setAgendaType(e.target.value)} label='Tipo de Agenda'>
+                      <MenuItem value='recurring'>Recurrente</MenuItem>
+                      <MenuItem value='special'>Evento Especial</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth type='number' label='Slots disponibles' value={slots} onChange={(e) => setSlots(Number(e.target.value))} required />
-              </Grid>
+                <Grid item xs={12}>
+                  <TextField fullWidth label='Descripción' multiline rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+                </Grid>
 
-              <Grid item xs={12} md={6}>
-                <FormControlLabel
-                  control={<Checkbox checked={requiresCapacity} onChange={(e) => setRequiresCapacity(e.target.checked)} />}
-                  label='¿Requiere especificar cantidad de personas?'
-                />
-              </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type='number'
+                    label='Duración (minutos)'
+                    value={duration}
+                    onChange={(e) => setDuration(Number(e.target.value))}
+                    required
+                  />
+                </Grid>
 
-              {agendaType === "recurring" ? (
-                <>
-                  <Grid item xs={12}>
-                    <Typography variant='h6' gutterBottom>
-                      Días y Horarios Recurrentes
-                    </Typography>
-                  </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField fullWidth type='number' label='Slots disponibles' value={slots} onChange={(e) => setSlots(Number(e.target.value))} required />
+                </Grid>
 
-                  <Grid item xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel>Días de la Semana</InputLabel>
-                      <Select
-                        multiple
-                        value={selectedDays}
-                        onChange={(e) => setSelectedDays(e.target.value)}
-                        label='Días de la Semana'
-                        renderValue={(selected) => selected.map((day) => DAYS_OF_WEEK.find((d) => d.value === day)?.label).join(", ")}
-                      >
-                        {DAYS_OF_WEEK.map((day) => (
-                          <MenuItem key={day.value} value={day.value}>
-                            <Checkbox checked={selectedDays.indexOf(day.value) > -1} />
-                            {day.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControlLabel
+                    control={<Checkbox checked={requiresCapacity} onChange={(e) => setRequiresCapacity(e.target.checked)} />}
+                    label='¿Requiere especificar cantidad de personas?'
+                  />
+                </Grid>
 
-                  {timeSlots.map((slot, index) => (
-                    <Grid item xs={12} container spacing={2} key={index}>
-                      <Grid item xs={5}>
-                        <TimePicker
-                          label='Hora inicio'
-                          value={slot.start}
-                          onChange={(newValue) => {
-                            const newSlots = [...timeSlots];
-                            newSlots[index].start = newValue;
-                            setTimeSlots(newSlots);
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={5}>
-                        <TimePicker
-                          label='Hora fin'
-                          value={slot.end}
-                          onChange={(newValue) => {
-                            const newSlots = [...timeSlots];
-                            newSlots[index].end = newValue;
-                            setTimeSlots(newSlots);
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={2}>
-                        <IconButton color='error' onClick={() => removeTimeSlot(index)} disabled={timeSlots.length === 1}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Grid>
+                {agendaType === "recurring" ? (
+                  <>
+                    <Grid item xs={12}>
+                      <Typography variant='h6' gutterBottom>
+                        Días y Horarios Recurrentes
+                      </Typography>
                     </Grid>
-                  ))}
 
-                  <Grid item xs={12}>
-                    <Button startIcon={<AddIcon />} onClick={addTimeSlot} variant='outlined'>
-                      Agregar Horario
-                    </Button>
-                  </Grid>
-                </>
-              ) : (
-                <>
-                  {specialDates.map((specialDate, dateIndex) => (
-                    <Grid item xs={12} key={dateIndex}>
-                      <Card variant='outlined'>
-                        <CardContent>
-                          <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                              <Typography variant='subtitle1'>Fecha Especial {dateIndex + 1}</Typography>
-                            </Grid>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth>
+                        <InputLabel>Días de la Semana</InputLabel>
+                        <Select
+                          multiple
+                          value={selectedDays}
+                          onChange={(e) => setSelectedDays(e.target.value)}
+                          label='Días de la Semana'
+                          renderValue={(selected) => selected.map((day) => DAYS_OF_WEEK.find((d) => d.value === day)?.label).join(", ")}
+                        >
+                          {DAYS_OF_WEEK.map((day) => (
+                            <MenuItem key={day.value} value={day.value}>
+                              <Checkbox checked={selectedDays.indexOf(day.value) > -1} />
+                              {day.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
 
-                            {specialDate.timeSlots.map((slot, slotIndex) => (
-                              <Grid item xs={12} container spacing={2} key={slotIndex}>
-                                <Grid item xs={5}>
-                                  <TimePicker
-                                    label='Hora inicio'
-                                    value={slot.start}
-                                    onChange={(newValue) => {
-                                      const newDates = [...specialDates];
-                                      newDates[dateIndex].timeSlots[slotIndex].start = newValue;
-                                      setSpecialDates(newDates);
-                                    }}
-                                  />
-                                </Grid>
-                                <Grid item xs={5}>
-                                  <TimePicker
-                                    label='Hora fin'
-                                    value={slot.end}
-                                    onChange={(newValue) => {
-                                      const newDates = [...specialDates];
-                                      newDates[dateIndex].timeSlots[slotIndex].end = newValue;
-                                      setSpecialDates(newDates);
-                                    }}
-                                  />
-                                </Grid>
-                                <Grid item xs={2}>
-                                  <IconButton
-                                    color='error'
-                                    onClick={() => {
-                                      const newDates = [...specialDates];
-                                      newDates[dateIndex].timeSlots = newDates[dateIndex].timeSlots.filter((_, i) => i !== slotIndex);
-                                      setSpecialDates(newDates);
-                                    }}
-                                    disabled={specialDate.timeSlots.length === 1}
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                </Grid>
+                    {timeSlots.map((slot, index) => (
+                      <Grid item xs={12} container spacing={2} key={index}>
+                        <Grid item xs={5}>
+                          <TimePicker
+                            label='Hora inicio'
+                            value={slot.start}
+                            onChange={(newValue) => {
+                              const newSlots = [...timeSlots];
+                              newSlots[index].start = newValue;
+                              setTimeSlots(newSlots);
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={5}>
+                          <TimePicker
+                            label='Hora fin'
+                            value={slot.end}
+                            onChange={(newValue) => {
+                              const newSlots = [...timeSlots];
+                              newSlots[index].end = newValue;
+                              setTimeSlots(newSlots);
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={2}>
+                          <IconButton color='error' onClick={() => removeTimeSlot(index)} disabled={timeSlots.length === 1}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Grid>
+                      </Grid>
+                    ))}
+
+                    <Grid item xs={12}>
+                      <Button startIcon={<AddIcon />} onClick={addTimeSlot} variant='outlined'>
+                        Agregar Horario
+                      </Button>
+                    </Grid>
+                  </>
+                ) : (
+                  <>
+                    {specialDates.map((specialDate, dateIndex) => (
+                      <Grid item xs={12} key={dateIndex}>
+                        <Card variant='outlined'>
+                          <CardContent>
+                            <Grid container spacing={2}>
+                              <Grid item xs={12}>
+                                <Typography variant='subtitle1'>Fecha Especial {dateIndex + 1}</Typography>
                               </Grid>
-                            ))}
 
-                            <Grid item xs={12}>
-                              <Button
-                                startIcon={<AddIcon />}
-                                onClick={() => {
-                                  const newDates = [...specialDates];
-                                  const lastSlot = specialDate.timeSlots[specialDate.timeSlots.length - 1];
-                                  newDates[dateIndex].timeSlots.push({
-                                    start: lastSlot.end.clone(),
-                                    end: lastSlot.end.add(1, "hour"),
-                                  });
-                                  setSpecialDates(newDates);
-                                }}
-                                variant='outlined'
-                                size='small'
-                              >
-                                Agregar Horario
-                              </Button>
+                              {specialDate.timeSlots.map((slot, slotIndex) => (
+                                <Grid item xs={12} container spacing={2} key={slotIndex}>
+                                  <Grid item xs={5}>
+                                    <TimePicker
+                                      label='Hora inicio'
+                                      value={slot.start}
+                                      onChange={(newValue) => {
+                                        const newDates = [...specialDates];
+                                        newDates[dateIndex].timeSlots[slotIndex].start = newValue;
+                                        setSpecialDates(newDates);
+                                      }}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={5}>
+                                    <TimePicker
+                                      label='Hora fin'
+                                      value={slot.end}
+                                      onChange={(newValue) => {
+                                        const newDates = [...specialDates];
+                                        newDates[dateIndex].timeSlots[slotIndex].end = newValue;
+                                        setSpecialDates(newDates);
+                                      }}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={2}>
+                                    <IconButton
+                                      color='error'
+                                      onClick={() => {
+                                        const newDates = [...specialDates];
+                                        newDates[dateIndex].timeSlots = newDates[dateIndex].timeSlots.filter((_, i) => i !== slotIndex);
+                                        setSpecialDates(newDates);
+                                      }}
+                                      disabled={specialDate.timeSlots.length === 1}
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </Grid>
+                                </Grid>
+                              ))}
+
+                              <Grid item xs={12}>
+                                <Button
+                                  startIcon={<AddIcon />}
+                                  onClick={() => {
+                                    const newDates = [...specialDates];
+                                    const lastSlot = specialDate.timeSlots[specialDate.timeSlots.length - 1];
+                                    newDates[dateIndex].timeSlots.push({
+                                      start: lastSlot.end.clone(),
+                                      end: lastSlot.end.add(1, "hour"),
+                                    });
+                                    setSpecialDates(newDates);
+                                  }}
+                                  variant='outlined'
+                                  size='small'
+                                >
+                                  Agregar Horario
+                                </Button>
+                              </Grid>
                             </Grid>
-                          </Grid>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+
+                    <Grid item xs={12}>
+                      <Button startIcon={<AddIcon />} onClick={addSpecialDate} variant='outlined'>
+                        Agregar Fecha Especial
+                      </Button>
                     </Grid>
-                  ))}
+                  </>
+                )}
 
-                  <Grid item xs={12}>
-                    <Button startIcon={<AddIcon />} onClick={addSpecialDate} variant='outlined'>
-                      Agregar Fecha Especial
-                    </Button>
-                  </Grid>
-                </>
-              )}
-
-              <Grid item xs={12}>
-                <Button type='submit' variant='contained' color='primary' size='large' fullWidth>
-                  Crear Agenda
-                </Button>
+                <Grid item xs={12}>
+                  <Button type='submit' variant='contained' color='primary' size='large' fullWidth>
+                    Crear Agenda
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </CardContent>
+        </Card>
+      </Container>
     </LocalizationProvider>
   );
 };

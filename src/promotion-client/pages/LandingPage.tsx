@@ -24,6 +24,7 @@ import { Accordion, AccordionSummary, AccordionDetails, Typography, LinearProgre
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Helmet } from "react-helmet-async";
+import { Icon } from "@iconify/react";
 
 interface SocialMedia {
   instagram: string;
@@ -113,35 +114,41 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
       ) || [],
     [account?.landing?.menu?.categories]
   );
-  const filteredItems = useMemo(() => {
-    if (!debouncedSearch && !debouncedPriceFilter.min && !debouncedPriceFilter.max) return [];
+  const discountedItems = useMemo(() => {
+    console.log("Checking discounted items...");
+    const items = allItems.filter((item) => {
+      const category = account?.landing?.menu?.categories.find((c) => c.name === item.categoryName);
 
-    setIsLoading(true);
-    const results = allItems.filter((item) => {
-      const searchLower = (debouncedSearch || "").toLowerCase();
-      const itemName = (item.name || "").toLowerCase();
-      const itemDescription = (item.description || "").toLowerCase();
+      // Verificar descuento del producto
+      const hasProductDiscount = item.discount?.active && item.discount?.endDate && new Date(item.discount.endDate) > new Date();
 
-      const matchesSearch = !debouncedSearch || itemName.includes(searchLower) || itemDescription.includes(searchLower);
+      // Verificar descuento de categoría
+      const hasCategoryDiscount = category?.discount?.active && category?.discount?.endDate && new Date(category.discount.endDate) > new Date();
 
-      const itemPrice = Number(item.price) || 0;
-      const minPrice = Number(debouncedPriceFilter.min) || 0;
-      const maxPrice = Number(debouncedPriceFilter.max) || Infinity;
+      const hasDiscount = hasProductDiscount || hasCategoryDiscount;
 
-      const matchesPrice = (!debouncedPriceFilter.min || itemPrice >= minPrice) && (!debouncedPriceFilter.max || itemPrice <= maxPrice);
-
-      return matchesSearch && matchesPrice;
+      return hasDiscount;
     });
-    setIsLoading(false);
-    return results;
-  }, [allItems, debouncedSearch, debouncedPriceFilter]);
+
+    return items;
+  }, [allItems, account?.landing?.menu?.categories]);
   // Memoize current category items
   const categoryItems = useMemo(
     () => account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.items || [],
     [account?.landing?.menu?.categories, selectedCategory]
   );
 
-  const itemsToShow = debouncedSearch || debouncedPriceFilter.min || debouncedPriceFilter.max ? filteredItems : categoryItems;
+  const itemsToShow = useMemo(() => {
+    if (debouncedSearch || debouncedPriceFilter.min || debouncedPriceFilter.max) {
+      return discountedItems;
+    }
+
+    if (selectedCategory === "Ofertas") {
+      return discountedItems;
+    }
+
+    return categoryItems;
+  }, [selectedCategory, debouncedSearch, debouncedPriceFilter, discountedItems, categoryItems]);
 
   // Handle category change and scroll reset
   const handleCategoryChange = (categoryName) => {
@@ -157,6 +164,66 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
   // Custom debounce hook
 
   if (!isOpen) return null;
+
+  const calculateDiscountedPrice = (item, category) => {
+    if (!item) return { finalPrice: 0, discountInfo: null };
+
+    let finalPrice = item.price || 0;
+    let discountInfo = null;
+
+    try {
+      if (item.discount?.active && item.discount?.endDate && new Date(item.discount.endDate) > new Date()) {
+        if (item.discount.type === "percentage" && typeof item.discount.value === "number") {
+          finalPrice *= 1 - item.discount.value / 100;
+          discountInfo = {
+            type: "product",
+            value: item.discount.value,
+            isPercentage: true,
+            endDate: item.discount.endDate,
+          };
+        } else if (typeof item.discount.value === "number") {
+          finalPrice -= item.discount.value;
+          discountInfo = {
+            type: "product",
+            value: item.discount.value,
+            isPercentage: false,
+            endDate: item.discount.endDate,
+          };
+        }
+      }
+      // Verificar descuento de categoría si no hay descuento de producto
+      else if (category?.discount?.active && category?.discount?.endDate && new Date(category.discount.endDate) > new Date()) {
+        if (category.discount.type === "percentage" && typeof category.discount.value === "number") {
+          finalPrice *= 1 - category.discount.value / 100;
+          discountInfo = {
+            type: "category",
+            value: category.discount.value,
+            isPercentage: true,
+            endDate: category.discount.endDate,
+          };
+        } else if (typeof category.discount.value === "number") {
+          finalPrice -= category.discount.value;
+          discountInfo = {
+            type: "category",
+            value: category.discount.value,
+            isPercentage: false,
+            endDate: category.discount.endDate,
+          };
+        }
+      }
+
+      return {
+        finalPrice: Math.max(0, finalPrice),
+        discountInfo,
+      };
+    } catch (error) {
+      console.error("Error calculando descuento:", error);
+      return {
+        finalPrice: item.price || 0,
+        discountInfo: null,
+      };
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -235,6 +302,33 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
             {/* Categories */}
             <div className='px-4'>
               <div ref={categoryScrollRef} className='flex gap-3 overflow-x-auto pb-4 scrollbar-hide' style={{ scrollSnapType: "x mandatory" }}>
+                {/* Categoría de ofertas - solo se muestra si hay productos con descuento */}
+                {discountedItems.length > 0 && (
+                  <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    onClick={() => handleCategoryChange("Ofertas")}
+                    className={`
+                      flex-shrink-0 
+                      min-w-[100px]
+                      flex 
+                      flex-col 
+                      items-center 
+                      p-4 
+                      rounded-lg 
+                      transition-all
+                      scroll-snap-align-start
+                      ${selectedCategory === "Ofertas" ? palette.cardBackground : `${palette.background} hover:${palette.buttonHover}`} 
+                      ${palette.textPrimary}
+                    `}
+                  >
+                    <div className='text-2xl mb-2'>
+                      <Icon icon='mdi:sale' className='w-6 h-6' />
+                    </div>
+                    <span className='text-xs text-center font-medium'>Ofertas</span>
+                  </motion.button>
+                )}
                 {account?.landing?.menu?.categories.map((category, index) => (
                   <motion.button
                     key={category._id}
@@ -256,7 +350,7 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
                       ${palette.textPrimary}
                     `}
                   >
-                    <div className='text-2xl mb-2'>{category.icon}</div>
+                    <div className='text-2xl mb-2'>{category.icon && renderIcon(category.icon)}</div>
                     <span className='text-xs text-center font-medium'>{category.name}</span>
                   </motion.button>
                 ))}
@@ -274,7 +368,11 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
                   transition={{ duration: 0.3 }}
                   className={`text-xl font-semibold ${palette.textPrimary}`}
                 >
-                  {debouncedSearch || debouncedPriceFilter.min || debouncedPriceFilter.max ? "Resultados de búsqueda" : selectedCategory}
+                  {debouncedSearch || debouncedPriceFilter.min || debouncedPriceFilter.max
+                    ? "Resultados de búsqueda"
+                    : selectedCategory === "Ofertas"
+                    ? "Ofertas Especiales"
+                    : selectedCategory}
                 </motion.h2>
                 {!debouncedSearch && !debouncedPriceFilter.min && !debouncedPriceFilter.max && (
                   <motion.p
@@ -283,7 +381,9 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
                     transition={{ duration: 0.3, delay: 0.1 }}
                     className={`mt-2 ${palette.textSecondary}`}
                   >
-                    {account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.description}
+                    {selectedCategory === "Ofertas"
+                      ? "Productos con descuentos especiales disponibles"
+                      : account?.landing?.menu?.categories.find((c) => c.name === selectedCategory)?.description}
                   </motion.p>
                 )}
               </div>
@@ -295,37 +395,78 @@ const MenuDialog = ({ account, isOpen, onClose }) => {
               ) : (
                 <>
                   <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8'>
-                    {itemsToShow.map((item, index) => (
-                      <motion.div
-                        key={item._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden`}
-                      >
-                        {item.image && (
-                          <div className='relative h-48'>
-                            <img src={item.image} alt={item.name} className='w-full h-full object-cover' />
-                          </div>
-                        )}
-                        <div className='p-4'>
-                          <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{item.name}</h3>
-                          <p className={`text-sm mb-4 ${palette.textSecondary}`}>{item.description}</p>
-                          {account?.landing?.menu?.settings?.showPrices && (
-                            <p className={`text-lg font-bold ${palette.textPrimary}`}>
-                              {account?.landing?.menu?.settings?.currency}
-                              {item.price.toLocaleString()}
-                            </p>
+                    {itemsToShow.map((item, index) => {
+                      if (!item) return null;
+
+                      const category = account?.landing?.menu?.categories.find((c) => c.name === item.categoryName);
+                      const { finalPrice, discountInfo } = calculateDiscountedPrice(item, category);
+                      const hasDiscount = finalPrice < (item.price || 0);
+
+                      return (
+                        <motion.div
+                          key={item._id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                          className={`${palette.cardBackground} rounded-lg shadow-sm overflow-hidden relative`}
+                        >
+                          {/* Agregar indicador de descuento si existe */}
+                          {discountInfo && (
+                            <div
+                              className={`
+                              absolute top-2 right-2 
+                              bg-red-500 
+                              text-white 
+                              px-2 
+                              py-1 
+                              rounded-full 
+                              text-sm 
+                              font-bold 
+                              flex 
+                              items-center 
+                              gap-1
+                              z-10
+                            `}
+                            >
+                              <Bolt size={16} />
+                              {discountInfo.isPercentage ? `-${discountInfo.value}%` : `-${discountInfo.value}`}
+                            </div>
                           )}
-                          {!item.available && <span className='bg-red-500 text-white px-2 py-1 rounded mt-2 inline-block'>No disponible</span>}
-                        </div>
-                      </motion.div>
-                    ))}
+
+                          {item.image && (
+                            <div className='relative h-48'>
+                              <img src={item.image} alt={item.name} className='w-full h-full object-cover' />
+                            </div>
+                          )}
+                          <div className='p-4'>
+                            <h3 className={`font-semibold mb-2 ${palette.textPrimary}`}>{item.name}</h3>
+                            <p className={`text-sm mb-4 ${palette.textSecondary}`}>{item.description}</p>
+                            {account?.landing?.menu?.settings?.showPrices && (
+                              <div className='flex items-center gap-2'>
+                                {hasDiscount && (
+                                  <p className={`text-sm line-through ${palette.textSecondary}`}>
+                                    {account?.landing?.menu?.settings?.currency}
+                                    {item.price?.toLocaleString()}
+                                  </p>
+                                )}
+                                <p className={`text-lg font-bold ${hasDiscount ? "text-red-500" : palette.textPrimary}`}>
+                                  {account?.landing?.menu?.settings?.currency}
+                                  {finalPrice.toLocaleString()}
+                                </p>
+                              </div>
+                            )}
+                            {!item.available && <span className='bg-red-500 text-white px-2 py-1 rounded mt-2 inline-block'>No disponible</span>}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
 
                   {itemsToShow.length === 0 && (
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-center ${palette.textSecondary} py-8`}>
-                      No se encontraron productos que coincidan con tu búsqueda
+                      {selectedCategory === "Ofertas"
+                        ? "No hay productos con descuento disponibles en este momento"
+                        : `No hay productos disponibles en la categoría ${selectedCategory}`}
                     </motion.p>
                   )}
                 </>
@@ -449,8 +590,8 @@ const PromotionsDialog = ({
                                       {redeemingPromotion
                                         ? "Canjeando..."
                                         : totalPoints < reward.points
-                                          ? `Te faltan ${reward.points - totalPoints} punto(s)`
-                                          : `Canjear por ${reward.points} punto(s)`}
+                                        ? `Te faltan ${reward.points - totalPoints} punto(s)`
+                                        : `Canjear por ${reward.points} punto(s)`}
                                     </Button>
                                   </div>
                                 ))}
@@ -467,15 +608,16 @@ const PromotionsDialog = ({
                               }
                             }}
                             disabled={isLoggedIn ? isRedeemedToday || redeemingPromotion : false}
-                            className={`w-full mt-4 ${palette.buttonBackground} ${!isRedeemedToday && !redeemingPromotion ? palette.buttonHover : ""} ${isRedeemedToday ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
+                            className={`w-full mt-4 ${palette.buttonBackground} ${!isRedeemedToday && !redeemingPromotion ? palette.buttonHover : ""} ${
+                              isRedeemedToday ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                           >
                             {isLoggedIn
                               ? isRedeemedToday
                                 ? "Ya canjeaste hoy"
                                 : redeemingPromotion
-                                  ? "Canjeando..."
-                                  : "Canjear promoción"
+                                ? "Canjeando..."
+                                : "Canjear promoción"
                               : "Regístrate o inicia sesión para canjear"}
                           </Button>
                         )}
@@ -504,8 +646,9 @@ const StarRating = ({ totalStars = 5, onRating }) => {
         return (
           <Star
             key={index}
-            className={`cursor-pointer transition-all duration-200 hover:scale-110 ${ratingValue <= (hover || rating) ? "text-[#ff4dff] fill-[#ff4dff]" : "text-purple-300"
-              }`}
+            className={`cursor-pointer transition-all duration-200 hover:scale-110 ${
+              ratingValue <= (hover || rating) ? "text-[#ff4dff] fill-[#ff4dff]" : "text-purple-300"
+            }`}
             size={28}
             onClick={() => {
               setRating(ratingValue);
@@ -567,7 +710,7 @@ const WaiterRatingDialog = ({ isOpen, onClose, account, palette, onSubmit }) => 
 
                 <Select onValueChange={setSelectedWaiter} value={selectedWaiter}>
                   <SelectTrigger className={`col-span-3 ${palette.background} ${palette.textPrimary}`}>
-                    <SelectValue placeholder='Selecciona un mesero' />
+                    <SelectValue placeholder='Selecciona un personal' />
                   </SelectTrigger>
                   <SelectContent className={`${palette.background} ${palette.textPrimary}`}>
                     {account?.landing?.waiters?.map((waiter) => (
@@ -620,6 +763,34 @@ const WaiterRatingDialog = ({ isOpen, onClose, account, palette, onSubmit }) => 
       </DialogContent>
     </Dialog>
   );
+};
+
+// Función auxiliar para renderizar iconos
+const renderIcon = (iconName: string) => {
+  // Log para depuración
+  console.log("renderIcon recibió:", {
+    iconName,
+    type: typeof iconName,
+    length: iconName?.length,
+  });
+
+  // Si no hay iconName, usar un icono por defecto
+  if (!iconName) {
+    return <Notebook className='w-6 h-6' />;
+  }
+
+  // Si es un emoji (un solo carácter)
+  if (iconName.length === 1 || iconName.length === 2) {
+    return <span className='text-2xl'>{iconName}</span>;
+  }
+
+  // Si es un icono MDI o Material Symbols
+  if (iconName.startsWith("mdi:") || iconName.startsWith("material-symbols:")) {
+    return <Icon icon={iconName} className='w-6 h-6' />;
+  }
+
+  console.log("Tipo de icono no soportado:", iconName);
+  return null;
 };
 
 export function LandingPage() {
@@ -789,16 +960,6 @@ export function LandingPage() {
     return <LandingNotFound />;
   }
   const palette = generatePalette(account?.landing?.colorPalette);
-  const getClientData = async () => {
-    try {
-      const response = await api.get(`/api/landing/${slug}/fidelicard`, {
-        params: { email: clientId, accountId: account?._id },
-      });
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   // Agregar función para manejar el escaneo
   const handleScan = async (result) => {
@@ -834,8 +995,8 @@ export function LandingPage() {
         promotionId: hasPointPromotion._id,
         accountQr,
       });
-
-      const response = await api.post("/api/landing/redeem-points", {
+      // Registrar la visita
+      await api.post("/api/landing/redeem-points", {
         clientId: clientId,
         promotionId: hasPointPromotion._id,
         accountQr,
@@ -854,34 +1015,6 @@ export function LandingPage() {
     } finally {
       setProcessing(false);
       setShowScanner(false);
-    }
-  };
-
-  const handleRedeemPromotion = async (promotion) => {
-    if (redeemingPromotion) return;
-
-    try {
-      setRedeemingPromotion(true);
-      const clientId = getClientId(account?._id);
-
-      const response = await api.post(`/api/landing/${slug}/redeem-promotion`, {
-        clientId,
-        promotionId: promotion._id,
-      });
-
-      toast.success("¡Promoción canjeada con éxito! 🎉", {
-        position: "bottom-center",
-        autoClose: 3000,
-      });
-
-      await getAccInfo();
-    } catch (error) {
-      toast.error(error.response?.data?.error || "Error al canjear la promoción", {
-        position: "bottom-center",
-        autoClose: 3000,
-      });
-    } finally {
-      setRedeemingPromotion(false);
     }
   };
 
@@ -993,9 +1126,8 @@ export function LandingPage() {
   return (
     <>
       <Helmet>
-        <title>{account?.name ? `${account.name} | Landing de Fidelización` : 'Landing de Fidelización'}</title>
+        <title>{account?.name ? `${account.name} | Landing de Fidelización` : "Landing de Fidelización"}</title>
       </Helmet>
-
 
       <motion.div
         initial={{ opacity: 0, y: -50 }}
@@ -1020,11 +1152,10 @@ export function LandingPage() {
                 transition={{ duration: 0.5 }}
                 className={`text-center ${isLoggedInForAccount(account?._id || "") && "mt-12"} `}
               >
-                <h1 className={`text-5xl mb-2 font-bold ${palette.textPrimary}`}>{account?.name || "Restaurante"}</h1>
+                <h1 className={`text-5xl mb-2 font-bold ${palette.textPrimary}`}>{account?.landing?.name || "Mi negocio."}</h1>
                 <p className={`mt-2 text-xl font-bold w-full md:w-2/3 justify-center m-auto ${palette.textPrimary} font-poppins`}>
                   {account?.landing?.title || ""}
                 </p>
-                {/*  <p className={`mt-2 text-md w-full md:w-2/3 justify-center m-auto ${palette.textSecondary}`}>{account?.landing?.subtitle || ""}</p> */}
               </motion.div>
               {!isLoggedInForAccount(account?._id) && account && (
                 <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -1108,7 +1239,8 @@ export function LandingPage() {
                     color: palette?.textPrimary.split("[")[1].split("]")[0],
                   }}
                 >
-                  {account?.landing?.card.title || "Ver nuestra carta"} <Notebook />
+                  {account?.landing?.card.title || "Ver nuestra carta"}
+                  {renderIcon(account?.landing?.card.icon) || <Notebook />}
                 </Button>
                 {account?.landing?.googleBusiness && (
                   <Button

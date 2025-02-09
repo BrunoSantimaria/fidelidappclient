@@ -1,4 +1,4 @@
-import { Button, Input } from "@mui/material";
+import { Alert, Button, Input } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useSettings } from "../../../../hooks/useSettings";
 import { useAuthSlice } from "../../../../hooks/useAuthSlice";
@@ -62,17 +62,20 @@ export const Customization = () => {
         </span>
         <h2 className='text-lg text-gray-700'>Personalización</h2>
       </div>
-      <p className='text-sm text-gray-600 mb-6'>Personaliza la apariencia y la información de tu cuenta</p>
+      <Alert severity='info' className='text-sm text-gray-600 mb-6'>
+        Personaliza la apariencia y la información de tu cuenta. <br></br>Esta información se mostrara en el pie de pagina de las campañas de email y en el
+        landing page de tu negocio.
+      </Alert>
 
       {/* Logo de la cuenta - Modificado para incluir preview */}
       <div className='mb-6'>
         <label className='block text-sm font-medium mb-2'>Logo de la cuenta</label>
-        <div className='border border-dashed border-gray-300 rounded-lg p-8 text-center'>
+        <div className='border border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-400'>
           <div className='flex flex-col items-center justify-center'>
             {preview ? <img src={preview} alt='Logo preview' className='w-32 h-32 object-contain mb-4' /> : <Upload className='text-blue-600 mb-2' />}
-            <p className='text-sm text-gray-600 mb-2'>Arrastra tu logo aquí o</p>
+            <p className='text-sm text-gray-100 mb-2'>Arrastra tu logo aquí o</p>
             <label className='cursor-pointer'>
-              <span className='text-sm text-main'>Seleccionar archivo</span>
+              <span className='text-sm text-blue-700'>Seleccionar archivo</span>
               <input type='file' className='hidden' onChange={handleFileChange} accept='image/*' />
             </label>
           </div>

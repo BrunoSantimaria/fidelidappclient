@@ -22,8 +22,7 @@ import {
 } from "@mui/material";
 import { Delete, Share, CalendarMonth, CheckCircle, PendingActions, Analytics, FilterList, Phone, Mail } from "@mui/icons-material";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TableHeader } from "@/components/ui/table";
-import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Users, CheckCircle as LucideCheckCircle, Share2, Trash2 } from "lucide-react";
 
@@ -288,13 +287,13 @@ export const TableAgenda = () => {
                     </TableCell>
                     <TableCell>
                       <div className='flex gap-2'>
-                        {!isPast && appointment.status !== "confirmed" && (
-                          <Tooltip title='Confirmar cita'>
+                        {/* {!isPast && appointment.status !== "confirmed" && (
+                         <Tooltip title='Confirmar cita'>
                             <IconButton size='small' color='success' onClick={() => handleCompleteAppointment(appointment._id)}>
                               <LucideCheckCircle className='h-4 w-4' />
                             </IconButton>
                           </Tooltip>
-                        )}
+                        )}*/}
                         <Tooltip title='Eliminar cita'>
                           <IconButton size='small' color='error' onClick={() => handleDeleteAppointment(appointment._id)}>
                             <Trash2 className='h-4 w-4' />

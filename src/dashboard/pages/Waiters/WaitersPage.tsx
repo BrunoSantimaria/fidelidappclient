@@ -23,6 +23,7 @@ import {
   ButtonGroup,
   useMediaQuery,
   useTheme,
+  Alert,
 } from "@mui/material";
 import { Person as PersonIcon, Delete as DeleteIcon, Edit as EditIcon, Star as StarIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { createWaiter, deleteWaiter, getWaiters, updateWaiter } from "./waiterPetitions";
@@ -73,7 +74,7 @@ const WaitersPage = () => {
   const columns = [
     { id: "name" as keyof Waiter, label: "Nombre", sortable: true },
     { id: "active" as keyof Waiter, label: "Estado", sortable: true },
-    { id: "totalPoints" as keyof Waiter, label: "Puntos Totales", sortable: true },
+    { id: "totalPoints" as keyof Waiter, label: "Puntos", sortable: true },
     { id: "averageRating" as keyof Waiter, label: "Valoración Promedio", sortable: true },
 
     { id: "actions", label: "Acciones", sortable: false },
@@ -138,8 +139,7 @@ const WaitersPage = () => {
       const waitersList = await getWaiters(user?.accounts._id);
       setWaiters(waitersList);
     } catch (error) {
-      console.error("Error al obtener meseros:", error);
-      toast.error("Error al cargar los meseros");
+      toast.error("Error al cargar las evaluaciones");
     }
   };
 
@@ -158,7 +158,7 @@ const WaitersPage = () => {
       );
 
       if (existingWaiter) {
-        toast.error("Ya existe un mesero con este nombre");
+        toast.error("Ya existe personal con este nombre");
         return;
       }
 
@@ -170,7 +170,7 @@ const WaitersPage = () => {
       setIsModalVisible(false);
       setFormData({ name: "", active: true });
       setWaiters(await getWaiters(user?.accounts._id));
-      toast.success(selectedWaiter ? "Mesero actualizado con éxito" : "Mesero creado con éxito");
+      toast.success(selectedWaiter ? "Personal actualizado con éxito" : "Personal creado con éxito");
     } catch (error) {
       console.error("Error:", error);
       toast.error("Ocurrió un error al procesar la solicitud");
@@ -189,17 +189,17 @@ const WaitersPage = () => {
   const handleDelete = async (waiterId: string) => {
     toast.warning(
       <>
-        ¿Estás seguro de eliminar este mesero?
+        ¿Estás seguro de eliminar este personal?
         <div className='mt-2'>
           <Button
             onClick={async () => {
               try {
                 await deleteWaiter(user?.accounts._id, waiterId);
                 await fetchWaiters();
-                toast.success("Mesero eliminado con éxito");
+                toast.success("Personal eliminado con éxito");
               } catch (error) {
                 console.error("Error:", error);
-                toast.error("Error al eliminar el mesero");
+                toast.error("Error al eliminar el personal");
               }
             }}
             color='error'
@@ -257,7 +257,7 @@ const WaitersPage = () => {
     <div className='p-2 sm:p-4 md:p-6 w-full md:w-[95%] lg:w-[90%] mx-auto'>
       <Card>
         <CardHeader
-          title='Gestión de Meseros'
+          title='Evaluaciones'
           titleTypographyProps={{ className: "text-xl md:text-2xl" }}
           action={
             <div className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-2`}>
@@ -275,14 +275,28 @@ const WaitersPage = () => {
                 fullWidth={isMobile}
                 size={isMobile ? "small" : "medium"}
               >
-                Añadir Mesero
+                Añadir Personal
               </Button>
             </div>
           }
         />
         <CardContent>
+          <Alert severity='info' className='text-sm text-gray-500 mb-4'>
+            En esta sección puedes añadir personal, editarlo y eliminar. También puedes ver las valoraciones de los clientes en el icono de estrella .
+          </Alert>
+          <Alert severity='info' className='text-sm text-gray-500 mb-4'>
+            <strong>¿Como funciona?</strong>
+            <p>
+              El personal va a ser valorado una vez que el mismo haya atendido a un cliente y sumado un punto.<br></br> A su vez si la valoración es de{" "}
+              <strong>5 estrellas ⭐</strong> el cliente recibirá un correo para valorar el negocio en Google. <br></br>{" "}
+              <p className='text-normal italic font-bold'>
+                (Recuerda configurar tu link de negocio de Google en <a href='/dashboard/settings'>ajustes</a>)
+              </p>
+            </p>
+          </Alert>
           <div className='overflow-x-auto'>
             {renderFilterButtons()}
+
             {waiters.length > 0 ? (
               <TableContainer component={Paper}>
                 <Table size={isTablet ? "small" : "medium"}>
@@ -340,7 +354,7 @@ const WaitersPage = () => {
               </TableContainer>
             ) : (
               <div className='text-center py-4 sm:py-8'>
-                <p className='text-gray-600 mb-4'>No hay meseros registrados aún</p>
+                <p className='text-gray-600 mb-4'>No hay personal registrado aún</p>
                 <Button
                   variant='contained'
                   startIcon={<PersonIcon />}
@@ -351,7 +365,7 @@ const WaitersPage = () => {
                   }}
                   size={isMobile ? "small" : "medium"}
                 >
-                  Agregar primer mesero
+                  Agregar personal
                 </Button>
               </div>
             )}
@@ -360,7 +374,7 @@ const WaitersPage = () => {
       </Card>
 
       <Dialog open={isModalVisible} onClose={() => setIsModalVisible(false)} fullScreen={isMobile} maxWidth='sm' fullWidth>
-        <DialogTitle>{selectedWaiter ? "Editar Mesero" : "Nuevo Mesero"}</DialogTitle>
+        <DialogTitle>{selectedWaiter ? "Editar Personal" : "Nuevo Personal"}</DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <TextField

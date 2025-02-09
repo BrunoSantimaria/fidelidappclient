@@ -46,6 +46,7 @@ interface campaignsData {
   totalSent: number;
   totalOpens: number;
   totalClicks: number;
+  date: string;
 }
 
 interface contactMetrics {
@@ -90,17 +91,17 @@ const MetricCard = ({
     whileHover={{ scale: 1.02 }}
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className={`rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 ${title === "Índice Fidelidad" ? "bg-main" : "bg-white"}`}
+    className={`rounded-2xl p-6 shadow-md shadow-black/20 hover:shadow-lg transition-all duration-300 ${title === "Índice Fidelidad" ? "bg-main" : "bg-white"}`}
   >
     <div className='flex items-center justify-between'>
       <div className={`p-2 rounded-lg ${title === "Índice Fidelidad" ? "bg-main/20" : "bg-primary-50"}`}>
         {title === "Índice Fidelidad" ? <StarIcon sx={{ color: "#FFD700" }} /> : icon}
       </div>
-      {trend && (
+      {/*   {trend && (
         <span className={`text-sm font-medium ${trend.isPositive ? "text-green-600" : "text-red-600"}`}>
           {trend.isPositive ? "↑" : "↓"} {trend.value}%
         </span>
-      )}
+      )} */}
     </div>
     <h3 className={`mt-4 text-3xl font-bold ${title === "Índice Fidelidad" ? "text-white" : "text-gray-800"}`}>
       {value.toLocaleString()}
@@ -187,7 +188,7 @@ const FIndexCard = ({ title, value, icon }: { title: string; value: number; icon
 
 // Componente actualizado para las tablas de métricas
 const ClientMetricsTable = ({ title, subtitle, data, dataType }: { title: string; subtitle: string; data: ClientData[]; dataType: "visits" | "points" }) => (
-  <motion.div whileHover={{ scale: 1.01 }} className='bg-white p-6 rounded-2xl shadow-sm'>
+  <motion.div className='bg-white p-6 rounded-2xl shadow-md shadow-black/20 hover:shadow-lg transition-all duration-300'>
     <Typography variant='h6' gutterBottom>
       {title}
     </Typography>
@@ -365,6 +366,7 @@ const EmailCampaignsTable = ({ data }: { data: campaignsData[] }) => (
       <thead>
         <tr className='bg-gray-50'>
           <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Campaña</th>
+          <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Fecha</th>
           <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Estado</th>
           <th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>Métricas</th>
         </tr>
@@ -382,6 +384,9 @@ const EmailCampaignsTable = ({ data }: { data: campaignsData[] }) => (
               <div className='text-sm font-medium text-gray-900'>{campaign.name}</div>
             </td>
             <td className='px-6 py-4'>
+              <div className='text-sm font-medium text-gray-900'>{new Date(campaign.date).toLocaleDateString()}</div>
+            </td>
+            <td className='px-6 py-4'>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-medium ${
                   campaign.status === "completed"
@@ -394,6 +399,7 @@ const EmailCampaignsTable = ({ data }: { data: campaignsData[] }) => (
                 {campaign.status === "completed" ? "Completado" : campaign.status === "failed" ? "Fallido" : "Pendiente"}
               </span>
             </td>
+
             <td className='px-6 py-4'>
               <div className='flex justify-center space-x-4'>
                 <div className='text-center'>
@@ -505,7 +511,7 @@ export const Report = () => {
 
         {/* Gráficos */}
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-          <motion.div whileHover={{ scale: 1.01 }} className='bg-white p-6 rounded-2xl shadow-sm'>
+          <motion.div whileHover={{ scale: 1.01 }} className='bg-white p-6 rounded-2xl shadow-md shadow-black/20 hover:shadow-lg transition-all duration-300'>
             <h2 className='text-lg font-semibold mb-4'>Actividad de Clientes</h2>
             <LineChart
               categories={dailyLabels}
@@ -522,7 +528,7 @@ export const Report = () => {
             />
           </motion.div>
 
-          <motion.div whileHover={{ scale: 1.01 }} className='bg-white p-6 rounded-2xl shadow-sm'>
+          <motion.div whileHover={{ scale: 1.01 }} className='bg-white p-6 rounded-2xl shadow-md shadow-black/20 hover:shadow-lg transition-all duration-300'>
             <h2 className='text-lg font-semibold mb-4'>Métricas de Email</h2>
             <LineChart
               categories={dailyLabels}
@@ -557,10 +563,10 @@ export const Report = () => {
         </div>
 
         {/* Tabla de Campañas con scroll */}
-        <motion.div whileHover={{ scale: 1.01 }} className='bg-white p-6 rounded-2xl shadow-sm'>
+        <motion.div className='bg-white p-6 rounded-2xl shadow-md shadow-black/20 hover:shadow-lg transition-all duration-300'>
           <h2 className='text-lg font-semibold mb-4'>Campañas de Email Marketing</h2>
           <div className='overflow-x-auto max-h-[400px]'>
-            <EmailCampaignsTable data={data.campaigns} />
+            <EmailCampaignsTable data={data.campaigns.reverse()} />
           </div>
         </motion.div>
       </div>

@@ -11,15 +11,29 @@ const CampaignTable = ({ campaigns }) => {
         overflow: "auto", // Enable scrolling for overflowing content
       }}
     >
-      <Table stickyHeader> {/* Use stickyHeader for fixed headers during scroll */}
+      <Table stickyHeader>
+        {" "}
+        {/* Use stickyHeader for fixed headers during scroll */}
         <TableHead>
           <TableRow>
-            <TableCell><strong>Nombre Campaña</strong></TableCell>
-            <TableCell ><strong>Mensaje</strong></TableCell>
-            <TableCell><strong>Estado</strong></TableCell>
-            <TableCell><strong>Fecha</strong></TableCell>
-            <TableCell><strong>Enviados</strong></TableCell>
-            <TableCell><strong>Fallidos</strong></TableCell>
+            <TableCell>
+              <strong>Nombre Campaña</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Mensaje</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Estado</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Fecha</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Enviados</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Fallidos</strong>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -27,9 +41,7 @@ const CampaignTable = ({ campaigns }) => {
             campaigns.map((campaign) => (
               <TableRow key={campaign._id}>
                 <TableCell>{campaign.name}</TableCell>
-                <TableCell sx={{ maxWidth: '300px'}}>
-                  {campaign.message}
-                </TableCell>
+                <TableCell sx={{ maxWidth: "300px" }}>{campaign.message}</TableCell>
                 <TableCell>{campaign.status}</TableCell>
                 <TableCell>{campaign.createdAt.slice(0, 10)}</TableCell>
                 <TableCell>{campaign.metrics.sent}</TableCell>
@@ -38,8 +50,8 @@ const CampaignTable = ({ campaigns }) => {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={4} align="center">
-                <Typography>No campaigns found.</Typography>
+              <TableCell colSpan={6} align='center'>
+                <Typography>No se encontraron campañas.</Typography>
               </TableCell>
             </TableRow>
           )}
