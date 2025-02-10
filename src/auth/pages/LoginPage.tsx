@@ -263,6 +263,7 @@ export const LoginPage = ({ defaultTab = "register" }) => {
                     <TextField
                       fullWidth
                       label='Nombre'
+                      name='name'
                       placeholder='Ingresa tu nombre completo'
                       variant='outlined'
                       value={name}
@@ -297,6 +298,7 @@ export const LoginPage = ({ defaultTab = "register" }) => {
                       label='Correo Electrónico'
                       placeholder='ejemplo@correo.com'
                       variant='outlined'
+                      name='email'
                       type='email'
                       autoComplete='email'
                       value={email}
@@ -329,6 +331,7 @@ export const LoginPage = ({ defaultTab = "register" }) => {
                     <TextField
                       fullWidth
                       label='Contraseña'
+                      name='password'
                       placeholder='Mínimo 6 caracteres'
                       variant='outlined'
                       type={showPassword ? "text" : "password"}
@@ -380,6 +383,7 @@ export const LoginPage = ({ defaultTab = "register" }) => {
                       label='Número de Teléfono'
                       placeholder='+56912345678'
                       variant='outlined'
+                      name='phone'
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       error={!!errors.phone}
