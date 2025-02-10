@@ -1,6 +1,6 @@
 "use client";
 
-import { Visibility, VisibilityOff, Email, Lock, Person } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Email, Lock, Person, Phone } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import TextField from "@mui/material/TextField";
@@ -14,6 +14,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useAuthSlice } from "../../hooks/useAuthSlice";
 import { validateEmail, validatePassword, validateName } from "../../utils/validations";
 import { toast } from "react-toastify";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export const LoginPage = ({ defaultTab = "register" }) => {
   const [tabValue, setTabValue] = useState(() => {
@@ -27,7 +28,9 @@ export const LoginPage = ({ defaultTab = "register" }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "", name: "" });
+  const [phone, setPhone] = useState("");
+  const [errors, setErrors] = useState({ email: "", password: "", name: "", phone: "" });
+  const [recaptchaToken, setRecaptchaToken] = useState("");
 
   const { startLogin, startRegister, startGoogleSignIn } = useAuthSlice();
 
@@ -49,36 +52,54 @@ export const LoginPage = ({ defaultTab = "register" }) => {
     }
   }, [tabValue]);
 
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^\+?[1-9]\d{7,14}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleRecaptchaChange = (token: string | null) => {
+    if (token) {
+      setRecaptchaToken(token);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!recaptchaToken) {
+      toast.error("Por favor, completa el reCAPTCHA");
+      setIsLoading(false);
+      return;
+    }
+
     const emailError = validateEmail(email) ? "" : "Email no válido";
     const passwordError = validatePassword(password) ? "" : "La contraseña debe tener al menos 6 caracteres";
     const nameError = tabValue === 1 ? validateName(true, name) : "";
+    const phoneError = tabValue === 1 && !validatePhone(phone) ? "Número de teléfono inválido" : "";
 
-    setErrors({ email: emailError, password: passwordError, name: nameError });
+    setErrors({ email: emailError, password: passwordError, name: nameError, phone: phoneError });
 
-    if (!emailError && !passwordError && !nameError) {
+    if (!emailError && !passwordError && !nameError && !phoneError) {
       try {
-        const formData = { email, password, ...(tabValue === 1 && { name }) };
         if (tabValue === 1) {
+          const formData = { email, password, name, phone, recaptchaToken };
           const response = await startRegister(formData);
+
           if (response && response.success) {
-            toast.success("Registro exitoso");
+            setEmail("");
+            setPassword("");
+            setName("");
+            setPhone("");
+            setRecaptchaToken("");
+
             setTabValue(0);
           }
         } else {
-          await startLogin(formData);
+          await startLogin({ email, password });
         }
-      } catch (error: any) {
-        if (error?.response?.status === 409) {
-          toast.error(error.response.data.message || "Este email ya está registrado");
-          setIsLoading(false);
-          return;
-        } else {
-          toast.error("Error en la autenticación");
-        }
+      } catch (error) {
+        console.error("Error:", error);
       }
     }
     setIsLoading(false);
@@ -221,6 +242,10 @@ export const LoginPage = ({ defaultTab = "register" }) => {
                       }}
                     />
 
+                    <div className='flex justify-center mb-4'>
+                      <ReCAPTCHA sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY} onChange={handleRecaptchaChange} />
+                    </div>
+
                     <Button fullWidth variant='contained' type='submit' disabled={isLoading} className='bg-[#5b7898] hover:bg-[#4a6277] normal-case py-3'>
                       {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                     </Button>
@@ -349,6 +374,36 @@ export const LoginPage = ({ defaultTab = "register" }) => {
                         },
                       }}
                     />
+
+                    <TextField
+                      fullWidth
+                      label='Número de Teléfono'
+                      placeholder='+56912345678'
+                      variant='outlined'
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      error={!!errors.phone}
+                      helperText={errors.phone}
+                      required
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <Phone className='text-[#5b7898]' />
+                          </InputAdornment>
+                        ),
+                      }}
+                      className='bg-white'
+                      sx={{
+                        backgroundColor: "white",
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+
+                    <div className='flex justify-center mb-4'>
+                      <ReCAPTCHA sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY} onChange={handleRecaptchaChange} />
+                    </div>
 
                     <Button fullWidth variant='contained' type='submit' disabled={isLoading} className='bg-[#5b7898] hover:bg-[#4a6277] normal-case py-3 mt-6'>
                       {isLoading ? "Registrando..." : "Registrarse"}

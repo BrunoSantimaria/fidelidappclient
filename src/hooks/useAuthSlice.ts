@@ -5,6 +5,7 @@ import api from "../utils/api";
 import { useNavigateTo } from "./useNavigateTo";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 export const useAuthSlice = () => {
   const dispatch = useDispatch();
@@ -13,7 +14,6 @@ export const useAuthSlice = () => {
   const { user, status } = useSelector((state) => state.auth);
 
   const startLogin = async (formData) => {
-    let token;
     try {
       const modifiedFormData = {
         ...formData,
@@ -21,44 +21,41 @@ export const useAuthSlice = () => {
       };
 
       const response = await api.post("/auth/signin", modifiedFormData);
-      console.log(response);
-      token = response.data.token;
 
+      if (response.data.needsVerification) {
+        toast.error("Por favor verifica tu correo electrónico antes de iniciar sesión");
+        return;
+      }
+
+      const token = response.data.token;
       localStorage.setItem("token", token);
 
-      const user = decodeToken(token);
-      dispatch(onLogin(user));
+      // Obtener los datos del usuario actual incluyendo accounts y plan
+      const currentUserResponse = await api.get("/auth/current");
+      const { accounts, plan } = currentUserResponse.data;
 
+      localStorage.setItem("accounts", JSON.stringify(accounts));
+      localStorage.setItem("plan", JSON.stringify(plan));
+
+      const user = decodeToken(token);
+      const userWithAccountAndPlan = {
+        ...user,
+        accounts: accounts,
+        plan: plan,
+      };
+
+      dispatch(onLogin(userWithAccountAndPlan));
       handleNavigate("/dashboard");
       toast.success("Login exitoso, serás redireccionado al dashboard.");
     } catch (error) {
-      if (error.message === "Request failed with status code 401") {
-        console.log(error);
-        return toast.error("Credenciales inválidas.");
+      if (error.response?.status === 401) {
+        toast.error("Credenciales inválidas");
+      } else if (error.response?.status === 403) {
+        toast.error("Por favor verifica tu correo electrónico antes de iniciar sesión");
+      } else {
+        toast.error("Error al iniciar sesión");
       }
-      console.error("Error signing in:", error);
-      toast.error("No se ha podido iniciar sesión");
-    } finally {
-      try {
-        const currentUserResponse = await api.get("/auth/current");
-        console.log(currentUserResponse);
-        const { accounts, plan } = currentUserResponse.data;
-
-        localStorage.setItem("accounts", JSON.stringify(accounts));
-        localStorage.setItem("plan", JSON.stringify(plan));
-
-        const user = decodeToken(token);
-        console.log(plan);
-        const userWithAccountAndPlan = {
-          ...user,
-          accounts: accounts,
-          plan: plan,
-        };
-
-        dispatch(onLogin(userWithAccountAndPlan));
-      } catch (error) {
-        console.error("Error fetching current user details:", error);
-      }
+      throw error;
     }
   };
 
@@ -100,17 +97,31 @@ export const useAuthSlice = () => {
     }
   };
 
-  const startRegister = async (formData) => {
+  const startRegister = async ({ email, password, name, phone, recaptchaToken }) => {
     try {
-      const modifiedFormData = {
-        ...formData,
-        email: formData.email.toLowerCase(),
-      };
+      const { data } = await api.post("/auth/signup", {
+        email,
+        password,
+        name,
+        phone,
+        recaptchaToken,
+      });
 
-      const response = await api.post("/auth/signup", modifiedFormData);
-      return { success: true, data: response.data };
+      if (data.success) {
+        toast.success("Registro exitoso. Te hemos enviado un email de verificación.");
+        return data;
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error en registro:", error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          toast.error("Este email ya está registrado");
+        } else if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Error en el registro");
+        }
+      }
       throw error;
     }
   };
