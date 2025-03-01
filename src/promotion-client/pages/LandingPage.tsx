@@ -26,8 +26,8 @@ import { ClientChatbotInteraction } from "@/landing/components/ClientChatbot";
 import { ChatBubble, Send, ArrowDropUp, ArrowDropDown } from "@mui/icons-material";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { default_responses } from "@/chatbot_test/default_responses";
-import { ChatbotMessage } from "@/chatbot_test/interfacesChat" ;
-import ReactMarkdown  from "react-markdown";
+import { ChatbotMessage } from "@/chatbot_test/interfacesChat";
+import ReactMarkdown from "react-markdown";
 
 interface SocialMedia {
   instagram: string;
@@ -526,6 +526,9 @@ export function LandingPage() {
   const [message, setMessage] = useState<string>("");
   const [showOptions, setShowOptions] = useState(true);
   const [isResponding, setIsResponding] = useState(false);
+  const [chatbotInitialized, setChatbotInitialized] = useState(false);
+  const [notReadMessagesNum, setNotReadMessagesNum] = useState(0);
+  const [IDChat, setIDChat] = useState<string>("");
 
   // Cargar la información de la cuenta
   const getAccInfo = async () => {
@@ -850,36 +853,10 @@ export function LandingPage() {
 
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // Llama al scroll cada vez que los mensajes cambien
-  useEffect(() => {
-    scrollToBottom();
-  }, [chatbotMessage]);
-
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      const keys = Object.keys(default_responses).map(Number);
-      setIsChatbotDialogOpen(false);
-      setEnableInput(true);
-      setTypeQuestions([...keys]);
-      if (!isChatbotDialogOpen) setChatbotMessages([]);
-    };
-
-    fetchQuestions();
-
-    const updateChatbotPosition = () => {
-      const viewportHeight = window.innerHeight;
-      setIsChatbotAtTop(viewportHeight > 800);
-    };
-
-    updateChatbotPosition();
-    window.addEventListener("resize", updateChatbotPosition);
-
-    return () => {
-      window.removeEventListener("resize", updateChatbotPosition);
-    };
-  }, []);
-
   const handleChatbotButton = () => {
+    if (!isChatbotDialogOpen) {
+      setNotReadMessagesNum(0);
+    }
     setIsChatbotDialogOpen(!isChatbotDialogOpen);
   }
 
@@ -888,6 +865,12 @@ export function LandingPage() {
       ...prevMessages,
       { name: name, message: message },
     ]);
+    if (!isChatbotDialogOpen) {
+      toast.info(`${name}: ${message}`);
+      setNotReadMessagesNum(notReadMessagesNum + 1);
+    }else{
+      setNotReadMessagesNum(0);
+    }
   };
 
   const selectOption = async (questionIndex: number) => {
@@ -911,14 +894,15 @@ export function LandingPage() {
   const fetchCustomResponse = async (message: string, clientData: any): Promise<string> => {
     try {
       // Petición al endpoint del chatbot
-      const response = await api.post(`/api/chatbot`, {
-        client_data: clientData,
+      console.log("Fetching custom response with:", {
+        idChat: IDChat,
         message: message,
-        info: {menu: account?.landing?.menu,
-          promotions: account?.promotions,
-        }  ,
       });
-  
+      const response = await api.post(`/api/chatbot`, {
+        idChat: IDChat,
+        message: message,
+      });
+
       // Verificar si la respuesta del servidor es válida
       if (response?.data?.response) {
         return response.data.response; // Accede correctamente a la respuesta
@@ -931,12 +915,12 @@ export function LandingPage() {
       return "Ocurrió un error al intentar conectarse con el servidor.";
     }
   };
-  
+
   const sendMessage = async (message: string) => {
     if (!message) return; // Verificar que haya un mensaje válido
     if (isResponding) return; // Evita que se seleccione otra opción mientras el chatbot está respondiendo
     addMessage(message, "Usuario"); // Mostrar el mensaje del usuario en el chat
-    
+
     try {
       setMessage("");
       setIsResponding(true);
@@ -946,22 +930,99 @@ export function LandingPage() {
       const clientInfo = clientData || { name: "Usuario" }; // Usar "User" si no hay datos del cliente
       // Obtener respuesta personalizada del chatbot
       const response = await fetchCustomResponse(message, clientInfo);
-  
+
       // Agregar la respuesta del chatbot al chat
       addMessage(response, "Chatbot");
     } catch (error) {
       console.error("Error en sendMessage:", error);
-  
+
       // En caso de error, mostrar un mensaje genérico al usuario
       addMessage(
         "Lo siento, ocurrió un error al procesar tu mensaje. Por favor, inténtalo nuevamente más tarde.",
         "Chatbot"
       );
     } finally {
-    setIsResponding(false);
+      setIsResponding(false);
     }
   };
 
+  const initChatbot = async () => {
+    try {
+      const clientData = await getClientData();
+      console.log("Client Data:", clientData);
+      console.log("Menu", account?.landing?.menu);
+      console.log("Promotions", account?.promotions);
+      // repetir linea anterior pero asegurándoste que esperes que la data se guarde
+
+      // Petición al endpoint del chatbot
+      const response = await api.post(`/api/chatbot/init`, {
+        client_data: clientData,
+        info: {
+          menu: account?.landing?.menu,
+          promotions: account?.promotions,
+          minPointValue: account?.landing?.minPointValue,
+        }
+      });
+
+      // Verificar si la respuesta del servidor es válida
+      if (response?.data?.response) {
+        console.log("Response Init: ", response.data); // Accede correctamente a la respuesta
+        setIDChat(response.data.id_chat);
+
+        addMessage(response.data.response, "Chatbot");
+      } else {
+        console.error("Respuesta inválida:", response.data);
+      }
+    } catch (error) {
+      console.error("Error en fetchCustomResponse:", error);
+    }
+  }
+
+  // función para reiniciar chatbot
+  const handleRestartChatbot = () => {
+    setIsChatbotDialogOpen(false);
+    setChatbotMessages([]);
+    setNotReadMessagesNum(0);
+    initChatbot();
+  };
+
+  useEffect(() => {
+    if (account && account._id && !chatbotInitialized) { // 👈 Evita llamadas repetidas
+      console.log("✅ Ejecutando initChatbot...");
+      initChatbot();
+      setChatbotInitialized(true); // Marcamos que ya se ejecutó
+    }
+  }, [account]);
+
+
+  // Llama al scroll cada vez que los mensajes cambien
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatbotMessage]);
+
+  useEffect(() => {
+    setNotReadMessagesNum(0);
+    const fetchQuestions = async () => {
+      const keys = Object.keys(default_responses).map(Number);
+      setIsChatbotDialogOpen(false);
+      setEnableInput(true);
+      setTypeQuestions([...keys]);
+      if (!isChatbotDialogOpen) setChatbotMessages([]);
+    };
+    fetchQuestions();
+
+    const updateChatbotPosition = () => {
+      const viewportHeight = window.innerHeight;
+      setIsChatbotAtTop(viewportHeight > 800);
+    };
+
+    updateChatbotPosition();
+    window.addEventListener("resize", updateChatbotPosition);
+
+    return () => {
+      window.removeEventListener("resize", updateChatbotPosition);
+    };
+  }, []);
 
   useEffect(() => {
     if (showRedemptionDialog) {
@@ -1102,6 +1163,7 @@ export function LandingPage() {
                       logout(account?._id);
                       setTotalPoints;
                       handleNavigate(`/landing/${slug}`);
+                      handleRestartChatbot();
                     }}
                     whileHover='hover'
                     initial='rest'
@@ -1264,7 +1326,7 @@ export function LandingPage() {
                   <div className="flex flex-col flex-1 overflow-y-auto">
                     {/* Mensajes del chatbot */}
                     <div className="flex-1 overflow-y-auto p-4 max-h-[calc(50vh-64px)]" ref={messageContainerRef}>
-                      {chatbotMessage.map((message, i) => ( 
+                      {chatbotMessage.map((message, i) => (
                         <div key={i} className={`p-4 ${palette.textPrimary}`}>
                           <p className="text-m font-bold">{message.name}</p>
                           <ReactMarkdown className="text-sm" >{message.message}</ReactMarkdown>
@@ -1309,14 +1371,37 @@ export function LandingPage() {
               transition={{ duration: 0.5 }}
               className="fixed bottom-4 right-4 z-50"
             >
-              <button
-                onClick={handleChatbotButton}
-                className={`p-6 rounded-full ${palette.buttonBackground} ${palette.buttonHover}`}
-              >
-                <ChatBubble className={`${palette.textPrimary}`} />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={handleChatbotButton}
+                  className={`p-6 rounded-full ${palette.buttonBackground} ${palette.buttonHover} relative`}
+                >
+                  <ChatBubble className={`${palette.textPrimary}`} />
+                </button>
+
+                {/* Círculo rojo de notificación con animación */}
+                <AnimatePresence>
+                  {notReadMessagesNum > 0 && !isChatbotDialogOpen && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      }}
+                      className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                    >
+                      {notReadMessagesNum}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
           </AnimatePresence>
+
+
         </div>
 
       </div>
