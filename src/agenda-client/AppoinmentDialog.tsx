@@ -10,6 +10,8 @@ const AppointmentDialog = ({ open, handleClose, selectedSlot, selectedDate, agen
     clientPhone: "",
     notes: "",
     numberOfPeople: 1,
+    way: "",
+    virtualLink: "",
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});

@@ -36,7 +36,7 @@ const theme = createTheme({
 
 export const AvailableSlotsTable = ({ agendaId, name, description }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [availableDays, setAvailableDays] = useState([]);
@@ -80,15 +80,18 @@ export const AvailableSlotsTable = ({ agendaId, name, description }) => {
     let date = dayjs(startDate);
     let daysChecked = 0;
 
+    if (availableDays.includes(date.day())) {
+      return date;
+    }
+
     while (daysChecked < 14) {
-      // Límite de 2 semanas para evitar bucle infinito
+      date = date.add(1, "day");
       if (availableDays.includes(date.day())) {
         return date;
       }
-      date = date.add(1, "day");
       daysChecked++;
     }
-    return date; // Retorna la última fecha si no encuentra disponibilidad
+    return date;
   };
 
   useEffect(() => {
@@ -112,19 +115,16 @@ export const AvailableSlotsTable = ({ agendaId, name, description }) => {
           let currentTime = dayjs(`${formattedDate} ${timeSlot.start}`);
           const endTime = dayjs(`${formattedDate} ${timeSlot.end}`);
 
-          // Generar slots cada 'duration' minutos
           while (currentTime.add(duration, "minutes").isSameOrBefore(endTime)) {
             const slotStartTime = currentTime;
             const slotEndTime = currentTime.add(duration, "minutes");
 
-            // Verificar si hay citas existentes para este horario
             const conflictingAppointments = existingAppointments.filter((appointment) => {
               const appointmentStart = dayjs(appointment.startTime);
               const appointmentEnd = dayjs(appointment.endTime);
               return slotStartTime.isSameOrBefore(appointmentEnd) && slotEndTime.isSameOrAfter(appointmentStart);
             });
 
-            // Si no hay citas para este horario o hay capacidad disponible, agregar el slot
             if (conflictingAppointments.length < (timeSlot.capacity || 1)) {
               slots.push({
                 startTime: slotStartTime,
@@ -138,7 +138,7 @@ export const AvailableSlotsTable = ({ agendaId, name, description }) => {
           }
         }
 
-        console.log("Slots generados:", slots); // Para debugging
+        console.log("Slots generados:", slots);
         setAvailableSlots(slots);
       }
     } catch (error) {
@@ -189,14 +189,15 @@ export const AvailableSlotsTable = ({ agendaId, name, description }) => {
 
       const appointmentData = {
         agendaId,
-        startTime: selectedSlot.startTime.format(),
-        endTime: selectedSlot.endTime.format(),
+        startTime: selectedSlot?.startTime.format(),
+        endTime: selectedSlot?.endTime.format(),
         clientName,
         clientEmail,
         clientPhone,
         notes,
         numberOfPeople,
         way: appointmentWay,
+        virtualLink: agendaData?.virtualLink || "",
       };
       console.log(appointmentData);
       await api.post("/api/agenda/appointments", appointmentData);
