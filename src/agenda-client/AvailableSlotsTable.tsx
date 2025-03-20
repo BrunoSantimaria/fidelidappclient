@@ -34,7 +34,7 @@ const theme = createTheme({
   },
 });
 
-const AvailableSlotsTable = ({ agendaId, name, description }) => {
+export const AvailableSlotsTable = ({ agendaId, name, description }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -50,16 +50,23 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [appointmentWay, setAppointmentWay] = useState("presencial");
 
   useEffect(() => {
     const fetchAgendaData = async () => {
       try {
         const response = await api.get(`/api/agenda/by-link/${agendaId}`);
-
+        console.log(response.data);
         setAgendaData(response.data);
+
+        if (response.data.way !== "ambas") {
+          setAppointmentWay(response.data.way);
+        }
 
         if (response.data.type === "recurring") {
           setAvailableDays(response.data.recurringConfig.daysOfWeek || []);
+          const nextAvailableDay = findNextAvailableDay(dayjs());
+          setSelectedDate(nextAvailableDay);
         }
       } catch (error) {
         console.error("Error al cargar la agenda:", error);
@@ -83,13 +90,6 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
     }
     return date; // Retorna la última fecha si no encuentra disponibilidad
   };
-
-  useEffect(() => {
-    if (availableDays.length > 0 && !selectedDate) {
-      const nextAvailable = findNextAvailableDay(dayjs());
-      setSelectedDate(nextAvailable);
-    }
-  }, [availableDays]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -196,6 +196,7 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
         clientPhone,
         notes,
         numberOfPeople,
+        way: appointmentWay,
       };
       console.log(appointmentData);
       await api.post("/api/agenda/appointments", appointmentData);
@@ -350,11 +351,23 @@ const AvailableSlotsTable = ({ agendaId, name, description }) => {
               <Label htmlFor='phone'>Teléfono</Label>
               <Input id='phone' type='tel' value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
             </div>
+            <div>
+              <Label htmlFor='way'>Modalidad</Label>
+              <select
+                id='way'
+                value={appointmentWay}
+                onChange={(e) => setAppointmentWay(e.target.value)}
+                disabled={agendaData?.way !== "ambas"}
+                className={`w-full p-2 border rounded-md ${agendaData?.way !== "ambas" ? "bg-gray-100" : "bg-white"}`}
+              >
+                <option value='presencial'>Presencial</option>
+                <option value='virtual'>Virtual</option>
+              </select>
+            </div>
             {agendaData?.requiresCapacity && (
               <div>
-                <Label htmlFor='notes'>Numero de personas</Label>
-
-                <Input id='notes' type='number' value={numberOfPeople} onChange={(e) => setNumberOfPeople(e.target.value)} />
+                <Label htmlFor='numberOfPeople'>Número de personas</Label>
+                <Input id='numberOfPeople' type='number' value={numberOfPeople} onChange={(e) => setNumberOfPeople(parseInt(e.target.value))} />
               </div>
             )}
 
