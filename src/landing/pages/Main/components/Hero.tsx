@@ -1,21 +1,12 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Modal } from "@mui/material";
 import { useState, useEffect } from "react";
-
-import { handleScrollTo } from "@/utils/handleScrollTo";
 import { useNavigateTo } from "@/hooks/useNavigateTo";
 import { useLocation } from "react-router-dom";
-import { ModalLanding } from "@/landing/components/ModalLanding";
-import { WhatIsFidelidapp } from "./WhatIsFidelidapp";
 
 export const Hero = ({ refs }) => {
   const [open, setOpen] = useState(false);
-  console.log(refs);
   const { handleNavigate } = useNavigateTo();
   const location = useLocation();
-
-  const handleClick = () => {
-    handleNavigate("/auth/login", { state: { showRegister: true } });
-  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -31,7 +22,7 @@ export const Hero = ({ refs }) => {
     <Box
       sx={{
         position: "relative",
-        height: { xs: "100vh", md: "100vh" },
+        height: { xs: "85vh", md: "85vh" },
         maxWidth: "100%",
         display: "flex",
         alignItems: "center",
@@ -43,15 +34,16 @@ export const Hero = ({ refs }) => {
       {/* Contenido principal */}
       <Box
         sx={{
-          marginTop: { xs: 0, md: 0 },
           paddingX: { xs: 2, md: 6 },
           textAlign: "left",
           zIndex: 1,
           position: "relative",
         }}
       >
-        <h1 className='text-white mb-4 text-left w-full md:w-[60%] text-4xl md:text-5xl font-bold'>Aumenta tus ventas y fideliza a tus clientes</h1>
-        <h2 className='text-white text-left w-full md:w-[60%] text-lg md:text-xl'>
+        <h1 className="text-white mb-4 text-left w-full md:w-[60%] text-4xl md:text-5xl font-bold">
+          Aumenta tus ventas y fideliza a tus clientes
+        </h1>
+        <h2 className="text-white text-left w-full md:w-[60%] text-lg md:text-xl">
           Con Fidelidapp, impulsa la lealtad de tus clientes con promociones, tarjetas virtuales y campañas efectivas. ¡Todo en un solo lugar!
         </h2>
         <Box
@@ -62,48 +54,64 @@ export const Hero = ({ refs }) => {
             flexDirection: { xs: "column", md: "row" },
           }}
         >
+          {/* Botón 1 - Agendar Asesoría (Mismo color original) */}
           <span
-            onClick={handleClick}
-            className='bg-main/90 rounded-lg my-auto text-base p-4 duration-300 text-white cursor-pointer group hover:scale-105 text-center hover:bg-main'
+            onClick={() => window.open("https://www.fidelidapp.cl/agendas/67d99cf731d4bba56cbbd9c3", "_blank")}
+            className="bg-main/90 rounded-lg my-auto text-base p-4 duration-300 text-white cursor-pointer group hover:scale-105 text-center hover:bg-main"
           >
-            {" "}
-            Prueba Gratis Hoy
+            📅 Agendar una Asesoría
           </span>
 
+          {/* Botón 2 - Ver Demo (Mismo color original) */}
           <span
             onClick={handleOpen}
-            className='bg-transparent border border-main rounded-lg my-auto text-base p-4 duration-300 text-white cursor-pointer group hover:scale-105 text-center hover:bg-main'
+            className="bg-transparent border border-main rounded-lg my-auto text-base p-4 duration-300 text-white cursor-pointer group hover:scale-105 text-center hover:bg-main"
           >
-            Solicita una Demo
+            🎥 Ver Demo en 2 Minutos
           </span>
         </Box>
       </Box>
 
-      <ModalLanding open={open} handleClose={handleClose} />
+      {/* Modal para Video Demo */}
+      <Modal open={open} onClose={handleClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "90%",
+            maxWidth: "800px",
+            bgcolor: "black",
+            boxShadow: 24,
+            p: 2,
+            borderRadius: "10px",
+          }}
+        >
+          <iframe
+            width="100%"
+            height="400px"
+            src="https://www.youtube.com/embed/VgWG3kQIUHM"
+            title="Fidelidapp Demo"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          ></iframe>
+        </Box>
+      </Modal>
 
       {/* Imagen de fondo optimizada */}
       <Box
         sx={{
           position: "absolute",
           inset: 0,
-          backgroundImage: `url(${"https://res.cloudinary.com/di92lsbym/image/upload/f_auto,q_auto/v1733268677/FidelidApp/Assets/Cover3_sybmbq.jpg"})`,
+          backgroundImage: `url("https://res.cloudinary.com/di92lsbym/image/upload/f_auto,q_auto/v1733268677/FidelidApp/Assets/Cover3_sybmbq.jpg")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           filter: "brightness(25%)",
-
           zIndex: 0,
         }}
       ></Box>
-
-      <span
-        onClick={() => handleScrollTo(refs.WhatIsFidelidapp)}
-        aria-label='Scroll hacia abajo'
-        className='absolute bg-main rounded-md bottom-12 animate-pulse p-4 cursor-pointer group hover:bg-white'
-      >
-        <svg xmlns='http://www.w3.org/2000/svg' className='text-white group-hover:text-main' viewBox='0 0 24 24' fill='currentColor' width='18' height='18'>
-          <path d='M12 2L12 20M18 14L12 20L6 14' />
-        </svg>
-      </span>
     </Box>
   );
 };

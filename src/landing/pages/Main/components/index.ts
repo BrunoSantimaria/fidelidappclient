@@ -5,3 +5,6 @@ export * from "./AdditionalServices";
 export * from "./Testimonials";
 export * from "./WhyChooseFidelidapp";
 export * from "./ContactForm";
+export * from "./ClientsSection";
+export * from "./Plans"
+export * from "./BannerCTA"

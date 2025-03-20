@@ -3,17 +3,15 @@ import { Star, Quote } from "lucide-react";
 import { FadeIn } from "@/landing/components/animations/FadeIn";
 import { testimonials } from "@/data/testimonials";
 import { useNavigateTo } from "@/hooks/useNavigateTo";
-import Plans from "./Plans";
 
 export const Testimonials = ({ refs }) => {
-  const { handleNavigate } = useNavigateTo();
   return (
     <div className='py-24 bg-gray-50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <FadeIn>
           <div className='text-center'>
             <h2 className='text-base text-main font-semibold tracking-wide uppercase'>Testimonios</h2>
-            <p className='mt-2 text-4xl font-extrabold text-gray-900 sm:text-5xl'>Lo que dicen nuestros clientes</p>
+            <p className='mt-2 text-4xl font-extrabold text-main sm:text-5xl'>Lo que dicen nuestros clientes</p>
             <p className='mt-4 text-xl text-gray-500 max-w-3xl mx-auto'>Descubre cómo Fidelidapp está transformando negocios en diferentes industrias</p>
           </div>
         </FadeIn>
@@ -55,31 +53,7 @@ export const Testimonials = ({ refs }) => {
               </motion.div>
             </FadeIn>
           ))}
-        </div>
-
-        <FadeIn delay={0.5}>
-          <div className='mt-20'>
-            <div className='relative rounded-2xl overflow-hidden'>
-              <div className='relative bg-gradient-to-r from-main to-blue-900/90 px-8 py-16'>
-                <div className='max-w-3xl mx-auto text-center'>
-                  <h3 className='text-3xl font-bold text-white mb-4'>¿Listo para impulsar tu negocio?</h3>
-                  <p className='text-xl text-blue-100 mb-8'>Únete a los cientos de negocios que ya están creciendo con Fidelidapp</p>
-                  <motion.button
-                    onClick={() => {
-                      handleNavigate("/auth/login#register");
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className='inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition-colors duration-300'
-                  >
-                    Comienza tu prueba gratuita
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </FadeIn>
-        <Plans refs={refs} />
+        </div>        
       </div>
     </div>
   );

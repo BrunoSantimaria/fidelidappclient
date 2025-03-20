@@ -1,4 +1,4 @@
-import { Hero, WhatIsFidelidapp, Features, AdditionalServices, Testimonials, WhyChooseFidelidapp, ContactForm } from "./components";
+import { Hero, WhatIsFidelidapp, Features, AdditionalServices, Testimonials, WhyChooseFidelidapp, ContactForm, ClientsSection, Plans, BannerCTA } from "./components";
 import { useRef } from "react";
 
 const LandingMain = ({ refs }) => {
@@ -8,15 +8,25 @@ const LandingMain = ({ refs }) => {
   return (
     <div>
       <Hero refs={refs} />
-      <WhatIsFidelidapp refs={refs.WhatIsFidelidapp} />
-      <div ref={featuresRef}>
-        <Features />
-      </div>
+      <BannerCTA />
       <div ref={whyChooseFidelidappRef}>
         <WhyChooseFidelidapp />
       </div>
-      <AdditionalServices />
+
+      <div ref={featuresRef}>
+        <Features />
+      </div>
+
+      <ClientsSection />
+      
+      <WhatIsFidelidapp refs={refs.WhatIsFidelidapp} />
+      
+      <Plans refs={refs} />
+      
+      {/* <AdditionalServices /> */}
+
       <Testimonials refs={refs} />
+
 
       <ContactForm refs={refs} />
     </div>

@@ -2,45 +2,82 @@
 
 import { FadeIn } from "@/landing/components/animations/FadeIn";
 import { motion } from "framer-motion";
-import { Database, Mail, MessageSquare, BarChart2, Gift, ArrowRight, Check, Calendar } from "lucide-react";
+import { Database, Mail, Tag, MessageSquare, BarChart2, Gift, ArrowRight, Check, Calendar } from "lucide-react";
 
 const features = [
   {
-    name: "Base de Datos de Clientes",
-    description: "Gestiona y segmenta tu base de clientes de manera eficiente.",
-    icon: Database,
-    details: ["Segmentación avanzada", "Historial de compras", "Gestión de perfiles", "Importación/Exportación", "Etiquetado personalizado"],
+    name: "Gestión de Promociones",
+    description: "Aumenta tus ventas con descuentos y promociones personalizadas.",
+    icon: Tag,
+    details: [
+      "Cupones y códigos de descuento",
+      "Promociones por tiempo limitado",
+      "Ofertas personalizadas según historial de compra",
+      "Automatización de campañas promocionales",
+      "Seguimiento del rendimiento de cada promoción"
+    ],
   },
   {
-    name: "Email Marketing",
-    description: "Crea y envía campañas de email personalizadas a tus clientes.",
-    icon: Mail,
-    details: ["Plantillas personalizables", "Automatización de envíos", "Seguimiento en tiempo real", "A/B testing", "Reportes detallados"],
-  },
-  {
-    name: "SMS Marketing",
-    description: "Llega a tus clientes con mensajes directos y efectivos.",
-    icon: MessageSquare,
-    details: ["Envíos programados", "Personalización de mensajes", "Códigos promocionales", "Confirmaciones automáticas", "Análisis de entregas"],
-  },
-  {
-    name: "Informes y Métricas",
-    description: "Analiza el rendimiento de tus campañas y programas de fidelización.",
-    icon: BarChart2,
-    details: ["Dashboards en tiempo real", "Exportación de reportes", "Métricas personalizadas", "Análisis predictivo", "Seguimiento de KPIs"],
-  },
-  {
-    name: "Sistema de Puntos/Promociones",
-    description: "Implementa programas de recompensas para incentivar la lealtad.",
+    name: "Programas de Fidelización",
+    description: "Recompensa a tus clientes y fomenta su lealtad con incentivos atractivos.",
     icon: Gift,
-    details: ["Programa de puntos", "Cupones digitales", "Recompensas por niveles", "Promociones temporales", "Beneficios exclusivos"],
+    details: [
+      "Sistema de puntos por compras",
+      "Niveles de recompensas exclusivas",
+      "Bonos por referidos",
+      "Tarjetas de fidelidad digitales",
+      "Seguimiento del uso y efectividad del programa"
+    ],
   },
   {
-    name: "Agenda y Citas",
-    description: "Gestiona las citas y horarios de tu negocio de manera eficiente.",
-    icon: Calendar,
-    details: ["Calendario interactivo", "Reservas en línea", "Recordatorios automáticos", "Gestión de disponibilidad", "Historial de citas"],
+    name: "Campañas de Email Marketing",
+    description: "Conéctate con tus clientes a través de emails automatizados y personalizados.",
+    icon: Mail,
+    details: [
+      "Envío de campañas segmentadas",
+      "Plantillas de email personalizables",
+      "Automatización de correos por eventos",
+      "Análisis de aperturas y clics en tiempo real",
+      "A/B testing para optimización"
+    ],
   },
+  {
+    name: "Gestión de Agenda",
+    description: "Optimiza tu tiempo y el de tus clientes con un sistema de reservas eficiente.",
+    icon: Calendar,
+    details: [
+      "Calendario interactivo para citas",
+      "Reservas en línea 24/7",
+      "Recordatorios automáticos por email y SMS",
+      "Gestión de disponibilidad y horarios",
+      "Historial y seguimiento de citas"
+    ],
+  },
+  {
+    name: "Base de Datos de Clientes y Segmentación",
+    description: "Organiza y aprovecha los datos de tus clientes para personalizar su experiencia.",
+    icon: Database,
+    details: [
+      "Segmentación avanzada según comportamiento",
+      "Historial de compras y preferencias",
+      "Gestión de perfiles con información detallada",
+      "Importación y exportación de datos",
+      "Etiquetas y categorías personalizadas"
+    ],
+  },
+  {
+    name: "Informes en Tiempo Real",
+    description: "Toma decisiones basadas en datos con reportes detallados y métricas clave.",
+    icon: BarChart2,
+    details: [
+      "Panel de control con métricas en tiempo real",
+      "Análisis de tendencias y patrones de compra",
+      "Reportes exportables en distintos formatos",
+      "Seguimiento de campañas y promociones",
+      "KPIs personalizados para evaluar el rendimiento"
+    ],
+  },
+  
 ];
 
 export const Features = () => {

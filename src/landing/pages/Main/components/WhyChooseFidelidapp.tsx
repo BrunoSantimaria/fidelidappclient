@@ -39,7 +39,7 @@ const waveStyles = `
 
 export const WhyChooseFidelidapp = () => {
   return (
-    <div className='relative py-24 overflow-hidden bg-main'>
+    <div className='relative py-24 overflow-hidden bg-main mt-5 mb-5'>
       <style jsx>{waveStyles}</style>
 
       <div className='custom-shape-divider-top-1738010154'>
@@ -95,10 +95,10 @@ export const WhyChooseFidelidapp = () => {
         <div className='mt-10'>
           <div className='flex flex-col md:flex-row items-center justify-between'>
             <div className='md:w-1/2 mb-8 md:mb-0'>
-              <p className='text-lg text-blue-100'>
+              <p className='text-xl text-white'>
                 Fidelidapp ofrece una solución completa y fácil de usar para la fidelización de clientes. Con nuestra plataforma, podrás:
               </p>
-              <ul className='mt-6 list-disc list-inside text-blue-100'>
+              <ul className='text-lg mt-6 list-disc list-inside text-white'>
                 <li>Aumentar la retención de clientes hasta en un 25%</li>
                 <li>Incrementar el valor promedio de compra en un 20%</li>
                 <li>Mejorar la satisfacción del cliente en un 30%</li>
