@@ -155,6 +155,13 @@ export const AvailableSlotsTable = ({ agendaId, name, description }) => {
 
   const handleNextStep = () => {
     if (currentStep < steps.length - 1) {
+      if (currentStep === 2) {
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (!emailRegex.test(clientEmail)) {
+          toast.error("Por favor ingresa un correo electrónico válido");
+          return;
+        }
+      }
       setCurrentStep(currentStep + 1);
     } else {
       handleBookingConfirmation();
